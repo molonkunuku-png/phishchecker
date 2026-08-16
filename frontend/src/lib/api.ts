@@ -12,9 +12,7 @@ export async function fetchHistory(): Promise<HistoryResponse> {
 }
 
 export async function submitScan(url: string, mode = 'standard'): Promise<ScanResult> {
-  const { data } = await base.post('/scan', JSON.stringify({ url, mode }), {
-    headers: { 'Content-Type': 'application/json' },
-  });
+  const { data } = await base.post('/api/v2/scans', { url, mode });
   return data;
 }
 
