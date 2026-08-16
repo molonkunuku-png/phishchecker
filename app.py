@@ -16,6 +16,7 @@ from services.db import SessionFactory, init_db, get_engine
 from services.scan_service import ScanService
 from middleware.csrf import CsrfMiddleware
 from middleware.cors import CORSMiddleware
+from middleware.auth import require_api_key
 
 
 def create_app(config: dict | None = None) -> Flask:
@@ -52,6 +53,7 @@ def create_app(config: dict | None = None) -> Flask:
         return jsonify(result), 200
 
     @app.post("/api/v2/scans")
+    @require_api_key
     def api_scan_v2() -> Response:
         payload = request.get_json(force=True) or {}
         url = payload.get("url")
@@ -62,6 +64,7 @@ def create_app(config: dict | None = None) -> Flask:
         return jsonify(result), 202
 
     @app.post("/scan")
+    @require_api_key
     def api_scan_legacy() -> Response:
         payload = request.get_json(force=True) or {}
         url = payload.get("url")
@@ -71,6 +74,7 @@ def create_app(config: dict | None = None) -> Flask:
         return jsonify(result), 202
 
     @app.post("/api/v1/scan")
+    @require_api_key
     def api_scan() -> Response:
         payload = request.get_json(force=True) or {}
         url = payload.get("url")
@@ -80,6 +84,7 @@ def create_app(config: dict | None = None) -> Flask:
         return jsonify(result), 202
 
     @app.post("/scan/bulk")
+    @require_api_key
     def api_scan_bulk() -> Response:
         payload = request.get_json(force=True) or {}
         urls = payload.get("urls", [])
