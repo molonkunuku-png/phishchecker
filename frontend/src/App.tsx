@@ -19,7 +19,6 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [apiKey, setApiKey] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -53,8 +52,6 @@ export default function App() {
     }
     setLoading(true);
     try {
-      const headers: Record<string, string> = {};
-      if (apiKey.trim()) headers['X-Api-Key'] = apiKey.trim();
       const data = await submitScan(url.trim(), mode);
       setResult(data);
       setHistory(prev => [data as unknown as HistoryItem, ...prev].slice(0, 20));
@@ -104,15 +101,6 @@ export default function App() {
               >
                 {loading ? 'Scanning...' : 'Scan'}
               </button>
-            </div>
-            <div className="flex gap-2 items-center">
-              <input
-                value={apiKey}
-                onChange={e => setApiKey(e.target.value)}
-                placeholder="API key (optional)"
-                className="px-3 py-2 rounded bg-gray-900 border border-gray-700 focus:border-sky-500 outline-none text-sm"
-              />
-              <span className="text-xs text-gray-500">Leave blank for unauthenticated if allowed</span>
             </div>
             {error && <p className="text-red-400 text-sm">{error}</p>}
           </form>
