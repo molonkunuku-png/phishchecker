@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: Irene
+    env: python
+    buildCommand: cd frontend && npm install && npm run build && pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: PHISHCHECKER_ENV
+        value: production
+      - key: SECRET_KEY
+        value: ""
+      - key: PHISHCHECKER_SECRET
+        value: ""
