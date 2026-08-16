@@ -135,4 +135,5 @@ def create_app(config: dict | None = None) -> Flask:
     return app
 
 
+app = create_app()
 init_db()
