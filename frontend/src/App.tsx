@@ -25,6 +25,26 @@ function scoreColor(score?: number | null): string {
   return '#047857';
 }
 
+type Category = 'headers' | 'url' | 'tls' | 'reputation' | 'behavior' | 'other';
+
+function categoryOf(reason: string): Category {
+  const r = reason.toLowerCase();
+  if (/csp|x-frame|x-content-type|permissions-policy|referrer-policy|security header/.test(r)) return 'headers';
+  if (/url|domain|typo|homograph|punycode|subdomain|ip|tld|extension|path|query|@/.test(r)) return 'url';
+  if (/tls|ssl|certificate|https|lock/.test(r)) return 'tls';
+  if (/reputation|blacklist|feed|phish|abuse|vt|sandbox|known/.test(r)) return 'reputation';
+  if (/redirect|behavior|runtime|javascript|form|iframe|popup|autofocus/.test(r)) return 'behavior';
+  return 'other';
+}
+
+function categorize(reasons: string[]): Record<Category, string[]> {
+  const map: Record<Category, string[]> = { headers: [], url: [], tls: [], reputation: [], behavior: [], other: [] };
+  for (const r of reasons) {
+    map[categoryOf(r)].push(r);
+  }
+  return map;
+}
+
 export default function App() {
   const [theme, setTheme] = useState<Theme>(loadInitialTheme);
   const [url, setUrl] = useState('');
@@ -38,6 +58,7 @@ export default function App() {
   const [report, setReport] = useState<ScanResult | null>(null);
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [expandedFindings, setExpandedFindings] = useState(false);
+  const [activeCategories, setActiveCategories] = useState<Set<Category>>(new Set());
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -102,6 +123,16 @@ export default function App() {
     try {
       await navigator.clipboard.writeText(link);
     } catch { }
+  }
+
+  function toggleCategory(key: string) {
+    setActiveCategories(prev => {
+      const next = new Set(prev);
+      const cat = key as Category;
+      if (next.has(cat)) next.delete(cat);
+      else next.add(cat);
+      return next;
+    });
   }
 
   const historyStats = {
@@ -210,14 +241,40 @@ export default function App() {
 
                 {result.reasons && result.reasons.length > 0 && (
                   <div className="pc-divider" style={{ marginTop: '1.4em', paddingTop: '1.2em' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.6em' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.6em', flexWrap: 'wrap' }}>
                       <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>Findings</h3>
-                      <button onClick={() => setExpandedFindings(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.7em', padding: '0.4em 0.7em' }}>
-                        {expandedFindings ? 'Collapse' : 'Expand'}
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap' }}>
+                        {(() => {
+                          const cats = categorize(result.reasons);
+                          const active = activeCategories;
+                          return Object.entries(cats).map(([key, items]) => {
+                            const count = items.length;
+                            const cat = key as Category;
+                            const on = active.has(cat);
+                            const label = `${key} (${count})`;
+                            const bg = on ? 'var(--mapped-surface-default)' : 'transparent';
+                            const border = on ? 'var(--mapped-border-default)' : 'var(--mapped-border-default)';
+                            const color = on ? 'var(--mapped-text-body)' : 'var(--mapped-text-body)';
+                            return (
+                              <button key={key} type="button" onClick={() => toggleCategory(key)} style={{
+                                background: bg,
+                                border,
+                                color,
+                                padding: '0.35em 0.65em',
+                                fontSize: '0.7em',
+                                fontWeight: 500,
+                                letterSpacing: '0.06em',
+                                textTransform: 'uppercase',
+                                cursor: 'pointer',
+                                opacity: on ? 1 : 0.55
+                              }}>{label}</button>
+                            );
+                          });
+                        })()}
+                      </div>
                     </div>
                     <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.4em', fontSize: '0.9em', lineHeight: 1.5 }}>
-                      {result.reasons.map((r: string, i: number) => (
+                      {(activeCategories.size === 0 ? result.reasons : result.reasons.filter((r: string) => activeCategories.has(categoryOf(r)))).map((r: string, i: number) => (
                         <li key={i} style={{ paddingLeft: '0.3em' }}>{r}</li>
                       ))}
                     </ul>
