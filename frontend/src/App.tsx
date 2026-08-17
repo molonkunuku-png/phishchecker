@@ -81,6 +81,7 @@ export default function App() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [showAwareness, setShowAwareness] = useState(false);
+  const [showApi, setShowApi] = useState(false);
   const [reportId, setReportId] = useState<string | null>(null);
   const [report, setReport] = useState<ScanResult | null>(null);
   const [status, setStatus] = useState<StatusResponse | null>(null);
@@ -189,7 +190,8 @@ export default function App() {
           <a href="/" className="pc-nav-logo">PHISHCHECKER</a>
           <div className="pc-nav-items">
             <button onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }} className="pc-nav-item">History</button>
-            <button onClick={() => { setShowAwareness(v => !v); if (!showAwareness) getStatus().then(setStatus).catch(() => setStatus(null)); }} className="pc-nav-item">{showAwareness ? 'Scan' : 'Awareness'}</button>
+            <button onClick={() => { setShowAwareness(v => !v); }} className="pc-nav-item">{showAwareness ? 'Scan' : 'Awareness'}</button>
+            <button onClick={() => { setShowApi(v => !v); }} className="pc-nav-item">{showApi ? 'Scan' : 'API'}</button>
             <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className="pc-nav-item">{showStatus ? 'Scan' : 'Status'}</button>
             <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className="pc-nav-item">{theme === 'dark' ? 'Light' : 'Dark'}</button>
             {status && <span className="pc-chip" style={{ marginLeft: '0.5em' }}>v{status.version}</span>}
@@ -271,6 +273,48 @@ export default function App() {
                   <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
                     <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>Understanding risk</h3>
                     <p>High risk means multiple suspicious indicators were found. Suspicious means some signals warrant caution. Clean means no strong phishing indicators were detected in the checked URL.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {showApi && (
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)', marginBottom: '0.8em' }}>API reference</h2>
+                <div style={{ display: 'grid', gap: '1em', fontSize: '0.9em', lineHeight: 1.6 }}>
+                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6em', marginBottom: '0.4em', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>POST</span>
+                      <code style={{ background: 'var(--brand-grey-200)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/scans</code>
+                    </div>
+                    <p>Submit a URL for scanning. Requires CSRF token from <code>/api/csrf</code>.</p>
+                    <pre style={{ marginTop: '0.6em', whiteSpace: 'pre-wrap', wordBreak: 'break-word', padding: '1em', background: 'var(--mapped-surface-default)', fontSize: '0.8em', lineHeight: 1.6, border: '1px solid var(--mapped-border-default)' }}>{`{
+  "url": "https://example.com",
+  "mode": "standard"
+}`}</pre>
+                  </div>
+                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6em', marginBottom: '0.4em', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>GET</span>
+                      <code style={{ background: 'var(--brand-grey-200)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/scans/history</code>
+                    </div>
+                    <p>List recent scans. Supports <code>page</code> and <code>page_size</code> query params.</p>
+                  </div>
+                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6em', marginBottom: '0.4em', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>GET</span>
+                      <code style={{ background: 'var(--brand-grey-200)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/status</code>
+                    </div>
+                    <p>Service health, version, and feature flags.</p>
+                  </div>
+                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6em', marginBottom: '0.4em', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>GET</span>
+                      <code style={{ background: 'var(--brand-grey-200)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/scans/export</code>
+                    </div>
+                    <p>Export scan history. Use <code>?format=json</code> or <code>?format=csv</code>.</p>
                   </div>
                 </div>
               </div>
