@@ -381,12 +381,12 @@ export default function App() {
                     <div style={{ color: 'var(--mapped-text-headings)', fontWeight: 600 }}>{status.version || '—'}</div>
                   </div>
                   <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Public scanning</div>
-                    <div style={{ color: 'var(--mapped-text-headings)', fontWeight: 600 }}>{status.features?.publicScanning ? 'Enabled' : 'Disabled'}</div>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>API access</div>
+                    <div style={{ color: 'var(--mapped-text-headings)', fontWeight: 600 }}>{status.features?.publicScanning ? 'Open' : 'Restricted'}</div>
                   </div>
                 </div>
                 <div style={{ marginTop: '1.2em', padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', fontSize: '0.85em', color: 'var(--mapped-text-body)', lineHeight: 1.6 }}>
-                  This status view shows current service health and feature availability. For live scan results, use the scanner above.
+                  Scanner availability: use the form above for direct scans. This panel shows service health and access mode only.
                 </div>
               </div>
             </section>
