@@ -11,6 +11,20 @@ function loadInitialTheme(): Theme {
   return 'light';
 }
 
+function riskPercent(risk?: string): number {
+  if (risk === 'high') return 85;
+  if (risk === 'suspicious') return 55;
+  if (risk === 'low') return 20;
+  return 0;
+}
+
+function scoreColor(score?: number | null): string {
+  if (score == null) return 'var(--mapped-text-body)';
+  if (score >= 70) return '#b91c1c';
+  if (score >= 40) return '#b45309';
+  return '#047857';
+}
+
 export default function App() {
   const [theme, setTheme] = useState<Theme>(loadInitialTheme);
   const [url, setUrl] = useState('');
@@ -23,6 +37,7 @@ export default function App() {
   const [reportId, setReportId] = useState<string | null>(null);
   const [report, setReport] = useState<ScanResult | null>(null);
   const [status, setStatus] = useState<StatusResponse | null>(null);
+  const [expandedFindings, setExpandedFindings] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -64,6 +79,7 @@ export default function App() {
     e.preventDefault();
     setError(null);
     setResult(null);
+    setExpandedFindings(false);
     if (!url.trim()) {
       setError('Please enter a URL');
       return;
@@ -87,6 +103,17 @@ export default function App() {
       await navigator.clipboard.writeText(link);
     } catch { }
   }
+
+  const historyStats = {
+    total: history.length,
+    high: history.filter(h => h.risk === 'high').length,
+    suspicious: history.filter(h => h.risk === 'suspicious').length,
+    low: history.filter(h => h.risk === 'low').length,
+  };
+
+  const currentScore = result?.score ?? report?.score ?? null;
+  const currentRisk = result?.risk ?? report?.risk ?? undefined;
+  const riskPct = riskPercent(currentRisk);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
@@ -130,7 +157,7 @@ export default function App() {
             <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: '#fff' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '1.2em' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.8em' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.8em', flexWrap: 'wrap' }}>
                     <span className={`${result.risk === 'high' ? 'pc-risk-high' : result.risk === 'suspicious' ? 'pc-risk-suspicious' : 'pc-risk-low'}`}>{result.risk?.toUpperCase()}</span>
                     <span style={{ fontSize: '2.4rem', fontWeight: 600, letterSpacing: '-0.03em', lineHeight: 1, color: 'var(--mapped-text-headings)' }}>{result.score ?? '—'}</span>
                   </div>
@@ -140,7 +167,8 @@ export default function App() {
                     <button onClick={() => downloadExport('csv')} className="pc-btn-ghost">Export CSV</button>
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1.2em', fontSize: '0.9em', lineHeight: 1.5 }}>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1.2em', fontSize: '0.9em', lineHeight: 1.5, marginBottom: '1.4em' }}>
                   <div>
                     <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>URL</span>
                     <p style={{ wordBreak: 'break-all' }}>{result.url}</p>
@@ -158,14 +186,49 @@ export default function App() {
                     <p>{result.started_at ? new Date(result.started_at).toLocaleString() : '—'}</p>
                   </div>
                 </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1.2em', marginBottom: '1.4em' }}>
+                  <div style={{ background: 'var(--brand-grey-100)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6em' }}>
+                      <span style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>Risk level</span>
+                      <span style={{ fontSize: '0.7em', fontWeight: 600, color: scoreColor(currentScore) }}>{currentRisk || '—'}</span>
+                    </div>
+                    <div style={{ height: '6px', background: 'var(--brand-grey-200)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${riskPct}%`, background: scoreColor(currentScore), transition: 'width 420ms ease' }} />
+                    </div>
+                  </div>
+                  <div style={{ background: 'var(--brand-grey-100)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6em' }}>
+                      <span style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>Score</span>
+                      <span style={{ fontSize: '0.7em', fontWeight: 600, color: 'var(--mapped-text-headings)' }}>{currentScore ?? '—'}/100</span>
+                    </div>
+                    <div style={{ height: '6px', background: 'var(--brand-grey-200)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${Math.max(0, Math.min(100, currentScore ?? 0))}%`, background: 'var(--mapped-text-action)', transition: 'width 420ms ease' }} />
+                    </div>
+                  </div>
+                </div>
+
                 {result.reasons && result.reasons.length > 0 && (
                   <div className="pc-divider" style={{ marginTop: '1.4em', paddingTop: '1.2em' }}>
-                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.6em' }}>Findings</h3>
-                    <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.35em', fontSize: '0.9em', lineHeight: 1.5 }}>
-                      {result.reasons.map((r: string, i: number) => <li key={i}>{r}</li>)}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.6em' }}>
+                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>Findings</h3>
+                      <button onClick={() => setExpandedFindings(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.7em', padding: '0.4em 0.7em' }}>
+                        {expandedFindings ? 'Collapse' : 'Expand'}
+                      </button>
+                    </div>
+                    <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.4em', fontSize: '0.9em', lineHeight: 1.5 }}>
+                      {result.reasons.map((r: string, i: number) => (
+                        <li key={i} style={{ paddingLeft: '0.3em' }}>{r}</li>
+                      ))}
                     </ul>
+                    {expandedFindings && (
+                      <div style={{ marginTop: '1em', padding: '1em', background: 'var(--brand-grey-100)', border: '1px solid var(--mapped-border-default)', fontSize: '0.85em', lineHeight: 1.6, color: 'var(--mapped-text-body)' }}>
+                        These signals are based on URL structure, domain age, known patterns, and routing behavior. High risk means multiple suspicious indicators were found. Low risk means no strong phishing signals were detected.
+                      </div>
+                    )}
                   </div>
                 )}
+
                 {result.details && (
                   <details style={{ marginTop: '1.2em', fontSize: '0.9em' }}>
                     <summary style={{ cursor: 'pointer', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', fontSize: '0.8em' }}>Raw details</summary>
@@ -230,6 +293,28 @@ export default function App() {
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>Recent scans</h2>
                   <button onClick={loadHistory} className="pc-btn-ghost" style={{ color: 'var(--mapped-text-action)' }}>Refresh</button>
                 </div>
+
+                {history.length > 0 && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(12em, 1fr))', gap: '0.8em', marginBottom: '1.2em' }}>
+                    <div style={{ background: 'var(--brand-grey-100)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
+                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Total</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--mapped-text-headings)' }}>{historyStats.total}</div>
+                    </div>
+                    <div style={{ background: 'var(--brand-grey-100)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
+                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>High</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: '#b91c1c' }}>{historyStats.high}</div>
+                    </div>
+                    <div style={{ background: 'var(--brand-grey-100)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
+                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Suspicious</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: '#b45309' }}>{historyStats.suspicious}</div>
+                    </div>
+                    <div style={{ background: 'var(--brand-grey-100)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
+                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Low</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: '#047857' }}>{historyStats.low}</div>
+                    </div>
+                  </div>
+                )}
+
                 {history.length === 0 && <p style={{ color: 'var(--mapped-text-body)', fontSize: '0.9em' }}>No scans yet.</p>}
                 {history.length > 0 && (
                   <div style={{ overflowX: 'auto' }}>
@@ -260,6 +345,26 @@ export default function App() {
               </div>
             </section>
           )}
+
+          <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: '#fff' }}>
+            <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--mapped-text-headings)', marginBottom: '0.8em' }}>How it works</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5 }}>
+                <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--brand-grey-100)' }}>
+                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-action)', marginBottom: '0.4em' }}>01 — Paste</div>
+                  <p style={{ color: 'var(--mapped-text-body)' }}>Drop any link into the scanner. We do not require accounts or personal data.</p>
+                </div>
+                <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--brand-grey-100)' }}>
+                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-action)', marginBottom: '0.4em' }}>02 — Analyze</div>
+                  <p style={{ color: 'var(--mapped-text-body)' }}>Check domain signals, URL patterns, and routing behavior for phishing indicators.</p>
+                </div>
+                <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--brand-grey-100)' }}>
+                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-action)', marginBottom: '0.4em' }}>03 — Decide</div>
+                  <p style={{ color: 'var(--mapped-text-body)' }}>Get a risk score and clear findings. Export or share the result when needed.</p>
+                </div>
+              </div>
+            </div>
+          </section>
         </main>
 
         <footer style={{ borderTop: '1px solid var(--mapped-border-default)', background: '#fff', marginTop: '2em' }}>
