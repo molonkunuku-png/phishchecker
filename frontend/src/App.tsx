@@ -212,6 +212,22 @@ export default function App() {
             </div>
           </section>
 
+          {!result && !loading && !reportId && (
+            <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '1.6em 1.5em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em' }}>
+                {history.slice(0, 3).map((h) => (
+                  <div key={h.id} style={{ border: '1px solid var(--mapped-border-default)', padding: '1em', background: 'var(--mapped-surface-default)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5em', gap: '0.5em' }}>
+                      <span style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>{h.domain}</span>
+                      <span className={`${h.risk === 'high' ? 'pc-risk-high' : h.risk === 'suspicious' ? 'pc-risk-suspicious' : 'pc-risk-low'}`}>{h.risk}</span>
+                    </div>
+                    <div style={{ fontSize: '0.8em', color: 'var(--mapped-text-body)' }}>{h.score}/100</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {showStatus && status && (
             <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
