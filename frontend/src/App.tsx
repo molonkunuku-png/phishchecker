@@ -332,6 +332,7 @@ export default function App() {
                           const active = activeCategories;
                           return Object.entries(cats).map(([key, items]) => {
                             const count = items.length;
+                            if (count === 0) return null;
                             const cat = key as Category;
                             const on = active.has(cat);
                             const label = `${key} (${count})`;
@@ -356,7 +357,25 @@ export default function App() {
                         })()}
                       </div>
                     </div>
-                    <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.4em', fontSize: '0.9em', lineHeight: 1.5 }}>
+                    {(() => {
+                      const cats = categorize(result.reasons);
+                      const total = result.reasons.length;
+                      return Object.entries(cats).filter(([, items]) => items.length > 0).map(([key, items]) => {
+                        const pct = Math.round((items.length / Math.max(1, total)) * 100);
+                        return (
+                          <div key={key} style={{ marginBottom: '0.6em' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75em', color: 'var(--mapped-text-body)', marginBottom: '0.25em' }}>
+                              <span style={{ textTransform: 'capitalize' }}>{key}</span>
+                              <span>{pct}%</span>
+                            </div>
+                            <div style={{ height: '4px', background: 'var(--brand-grey-200)', overflow: 'hidden' }}>
+                              <div style={{ height: '100%', width: `${pct}%`, background: 'var(--mapped-text-action)', transition: 'width 420ms ease' }} />
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                    <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.4em', fontSize: '0.9em', lineHeight: 1.5, marginTop: '0.8em' }}>
                       {(activeCategories.size === 0 ? result.reasons : result.reasons.filter((r: string) => activeCategories.has(categoryOf(r)))).map((r: string, i: number) => (
                         <li key={i} style={{ paddingLeft: '0.3em' }}>{r}</li>
                       ))}
