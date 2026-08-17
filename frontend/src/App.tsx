@@ -85,9 +85,10 @@ function sslGrade(details?: Record<string, unknown>): { grade: string; color: st
   if (!ssl || !ssl.valid) return { grade: 'F', color: '#b91c1c' };
   const age = ssl.age_days as number | undefined;
   if (age == null) return { grade: 'A', color: '#047857' };
-  if (age > 365) return { grade: 'B', color: '#b45309' };
-  if (age > 180) return { grade: 'A', color: '#047857' };
-  return { grade: 'A+', color: '#047857' };
+  if (age < 30) return { grade: 'A+', color: '#047857' };
+  if (age < 180) return { grade: 'A', color: '#059669' };
+  if (age < 365) return { grade: 'B', color: '#b45309' };
+  return { grade: 'C', color: '#b91c1c' };
 }
 
 type Severity = 'high' | 'medium' | 'low';
@@ -96,6 +97,7 @@ function severityOf(reason: string): Severity {
   const r = reason.toLowerCase();
   if (/certificate|tls|ssl|https|lock/.test(r)) return 'high';
   if (/phish|blacklist|abuse|known|sandbox/.test(r)) return 'high';
+  if (/missing.*header|x-frame|x-content-type|referrer-policy|permissions-policy|strict-transport-security/.test(r)) return 'medium';
   if (/redirect|javascript|iframe|popup|form|behavior/.test(r)) return 'medium';
   return 'low';
 }
@@ -227,7 +229,7 @@ export default function App() {
             <button onClick={() => { setShowAwareness(v => !v); }} className={`pc-nav-item ${showAwareness ? 'pc-nav-item-active' : ''}`}>{showAwareness ? 'Scan' : 'Awareness'}</button>
             <button onClick={() => { setShowApi(v => !v); }} className={`pc-nav-item ${showApi ? 'pc-nav-item-active' : ''}`}>{showApi ? 'Scan' : 'API'}</button>
             <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className={`pc-nav-item ${showStatus ? 'pc-nav-item-active' : ''}`}>{showStatus ? 'Scan' : 'Status'}</button>
-            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className={`pc-nav-item ${theme === 'dark' ? 'pc-nav-item-active' : ''}`} aria-label="Toggle theme">{theme === 'dark' ? '☀ Light' : '☾ Dark'}</button>
+            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className={`pc-nav-item ${theme === 'dark' ? 'pc-nav-item-active' : ''}`} aria-label="Toggle theme">{theme === 'dark' ? 'Theme ☀' : 'Theme ☾'}</button>
           </div>
           <button onClick={() => { document.getElementById('scan')?.scrollIntoView({ behavior: 'smooth' }); }} className="pc-nav-cta" style={{ marginLeft: 'auto', flexShrink: 0 }}>Scan now</button>
         </nav>
@@ -519,8 +521,7 @@ export default function App() {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.6em', flexWrap: 'wrap' }}>
                       <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>Findings</h3>
                       <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap' }}>
-                        <button type="button" onClick={() => setExpandedFindings(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.7em' }}>{expandedFindings ? 'Hide explanations' : 'Show explanations'}</button>
-                        <button type="button" onClick={() => { const next = !expandedFindings; setExpandedFindings(next); }} className="pc-btn-ghost" style={{ fontSize: '0.7em' }}>{expandedFindings ? 'Collapse all' : 'Expand all'}</button>
+                        <button type="button" onClick={() => setExpandedFindings(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.7em' }}>{expandedFindings ? 'Hide methodology note' : 'Show methodology note'}</button>
                       </div>
                     </div>
                     <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.45em', fontSize: '0.9em', lineHeight: 1.5 }}>

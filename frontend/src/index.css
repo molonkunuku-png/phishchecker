@@ -564,6 +564,23 @@ body {
 .pc-history-wrap {
   overflow-x: auto;
 }
+details {
+  summary {
+    list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  summary::after {
+    content: '▶';
+    font-size: 0.65em;
+    display: inline-block;
+    transition: transform 120ms ease;
+  }
+  &[open] summary::after {
+    transform: rotate(90deg);
+  }
+}
 
 @keyframes shimmer {
   0% { opacity: .55; }
