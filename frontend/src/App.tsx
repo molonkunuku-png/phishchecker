@@ -46,8 +46,8 @@ function riskPercent(risk?: string): number {
 
 function scoreColor(score?: number | null): string {
   if (score == null) return 'var(--mapped-text-body)';
-  if (score >= 70) return '#b91c1c';
-  if (score >= 40) return '#b45309';
+  if (score < 40) return '#b91c1c';
+  if (score < 70) return '#b45309';
   return '#047857';
 }
 
