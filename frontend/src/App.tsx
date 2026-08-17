@@ -129,7 +129,6 @@ export default function App() {
   const [reportId, setReportId] = useState<string | null>(null);
   const [report, setReport] = useState<ScanResult | null>(null);
   const [status, setStatus] = useState<StatusResponse | null>(null);
-  const [expandedFindings, setExpandedFindings] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [showCompare, setShowCompare] = useState(false);
@@ -138,6 +137,8 @@ export default function App() {
   const [historyPageSize] = useState(10);
   const inputRef = useRef<HTMLInputElement>(null);
   const [navShadow, setNavShadow] = useState(false);
+  const [findingFilter, setFindingFilter] = useState<string>('all');
+  const [allExpanded, setAllExpanded] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.remove('dark', 'light');
@@ -183,18 +184,39 @@ export default function App() {
     getStatus().then(setStatus).catch(() => setStatus(null));
   }, []);
 
+  function validateUrl(u: string): { ok: boolean; msg?: string } {
+    const trimmed = u.trim();
+    if (!trimmed) return { ok: false, msg: 'Enter a URL' };
+    let host = '';
+    try {
+      const parsed = new URL(trimmed);
+      host = parsed.hostname;
+    } catch {
+      try {
+        host = new URL('https://' + trimmed).hostname;
+      } catch {
+        return { ok: false, msg: 'Enter a valid URL like https://example.com' };
+      }
+    }
+    if (!host.includes('.') || host.endsWith('.') || host.startsWith('.')) return { ok: false, msg: 'Domain looks incomplete' };
+    return { ok: true };
+  }
+
   async function handleScan(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setResult(null);
-    setExpandedFindings(false);
-    if (!url.trim()) {
-      setError('Please enter a URL');
+    setAllExpanded(false);
+    setFindingFilter('all');
+    const trimmed = url.trim();
+    const v = validateUrl(trimmed);
+    if (!v.ok) {
+      setError(v.msg || 'Please enter a valid URL');
       return;
     }
     setLoading(true);
     try {
-      const data = await submitScan(url.trim(), mode);
+      const data = await submitScan(trimmed, mode);
       setResult(data);
       setHistory(prev => [data as unknown as HistoryItem, ...prev].slice(0, 50));
     } catch (err: any) {
@@ -528,11 +550,16 @@ export default function App() {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.6em', flexWrap: 'wrap' }}>
                       <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>Findings</h3>
                       <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap' }}>
-                        <button type="button" onClick={() => setExpandedFindings(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.7em' }}>{expandedFindings ? 'Hide methodology note' : 'Show methodology note'}</button>
+                        <button type="button" onClick={() => setAllExpanded(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.7em' }}>{allExpanded ? 'Collapse all' : 'Expand all'}</button>
                       </div>
                     </div>
+                    <div style={{ display: 'flex', gap: '0.4em', marginBottom: '0.6em', flexWrap: 'wrap' }}>
+                      {['all', 'high', 'medium', 'low'].map(f => (
+                        <button key={f} onClick={() => setFindingFilter(f)} className="pc-btn-ghost" style={{ fontSize: '0.7em', textTransform: 'capitalize', background: findingFilter === f ? 'var(--mapped-surface-action)' : undefined, color: findingFilter === f ? 'var(--mapped-text-on-action)' : undefined }}>{f === 'all' ? 'All' : f}</button>
+                      ))}
+                    </div>
                     <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.45em', fontSize: '0.9em', lineHeight: 1.5 }}>
-                      {result.reasons.map((r: string, i: number) => {
+                      {result.reasons.filter((r: string) => { const sev = severityOf(r); return findingFilter === 'all' || sev === findingFilter; }).map((r: string, i: number) => {
                         const sev = severityOf(r);
                         const st = severityStyle(sev);
                         return (
@@ -545,7 +572,7 @@ export default function App() {
                         );
                       })}
                     </ul>
-                    {expandedFindings && (
+                    {allExpanded && (
                       <div style={{ marginTop: '1em', padding: '1em', background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', fontSize: '0.85em', lineHeight: 1.6, color: 'var(--mapped-text-body)' }}>
                         These signals are based on URL structure, domain age, known patterns, and routing behavior. High severity findings indicate stronger phishing indicators. Medium suggests caution. Low means weak or indirect signals.
                       </div>
