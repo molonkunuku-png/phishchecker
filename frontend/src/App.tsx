@@ -234,7 +234,8 @@ export default function App() {
                 Fast phishing-risk analysis with clear results. No accounts. No tracking. Just scan.
               </p>
               <form onSubmit={handleScan} id="scan" className="pc-scan-form" style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.5em', maxWidth: '42em' }}>
-                <input ref={inputRef} value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com" className="pc-input pc-placeholder" disabled={loading} aria-describedby="url-hint" />
+                <label htmlFor="url-input" style={{ position: 'absolute', overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', width: '1px', height: '1px' }}>URL to check</label>
+                <input ref={inputRef} id="url-input" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com" className="pc-input pc-placeholder" disabled={loading} aria-describedby="url-hint" />
                 <select value={mode} onChange={e => setMode(e.target.value)} className="pc-select" disabled={loading} aria-label="Scan mode">
                   <option value="quick">Quick — fast surface check</option>
                   <option value="standard">Standard — balanced depth</option>
