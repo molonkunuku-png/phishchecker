@@ -39,3 +39,19 @@ export async function fetchScanDetail(id: string): Promise<ScanResult> {
   });
   return data;
 }
+
+export async function downloadExport(fmt: 'json' | 'csv' = 'json'): Promise<void> {
+  const token = await getCsrf();
+  const res = await base.get(`/api/v2/scans/export?format=${encodeURIComponent(fmt)}`, {
+    headers: { 'X-CSRF-Token': token },
+    responseType: 'blob',
+  });
+  const url = window.URL.createObjectURL(new Blob([res.data]));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `phishchecker-export.${fmt}`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  a.remove();
+}

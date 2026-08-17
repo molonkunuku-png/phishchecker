@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ThemeContext, Theme } from './lib/ThemeContext';
-import { submitScan, fetchHistory } from './lib/api';
+import { submitScan, fetchHistory, downloadExport } from './lib/api';
 import type { ScanResult, HistoryItem } from './lib/types';
 
 function loadInitialTheme(): Theme {
@@ -140,6 +140,12 @@ export default function App() {
                 <div className="flex gap-2">
                   <button onClick={copyScanLink} className="text-xs px-2 py-1 rounded border border-gray-700 hover:border-gray-500">
                     Copy link
+                  </button>
+                  <button onClick={() => downloadExport('json')} className="text-xs px-2 py-1 rounded border border-gray-700 hover:border-gray-500">
+                    Export JSON
+                  </button>
+                  <button onClick={() => downloadExport('csv')} className="text-xs px-2 py-1 rounded border border-gray-700 hover:border-gray-500">
+                    Export CSV
                   </button>
                 </div>
               </div>
