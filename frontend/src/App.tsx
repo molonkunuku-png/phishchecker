@@ -86,6 +86,8 @@ export default function App() {
   const [expandedFindings, setExpandedFindings] = useState(false);
   const [activeCategories, setActiveCategories] = useState<Set<Category>>(new Set());
   const [showStatus, setShowStatus] = useState(false);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [showCompare, setShowCompare] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -458,6 +460,7 @@ export default function App() {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85em' }}>
                       <thead>
                         <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--mapped-border-default)', color: 'var(--mapped-text-body)' }}>
+                          <th style={{ padding: '0.6em 0.8em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', width: '2.5em' }}>Compare</th>
                           <th style={{ padding: '0.6em 0.8em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Time</th>
                           <th style={{ padding: '0.6em 0.8em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Domain</th>
                           <th style={{ padding: '0.6em 0.8em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Risk</th>
@@ -466,19 +469,74 @@ export default function App() {
                         </tr>
                       </thead>
                       <tbody>
-                        {history.map((h, i) => (
-                          <tr key={h.id || i} style={{ borderBottom: '1px solid var(--mapped-border-default)' }}>
-                            <td style={{ padding: '0.7em 0.8em', whiteSpace: 'nowrap', color: 'var(--mapped-text-body)', fontSize: '0.8em' }}>{h.started_at ? new Date(h.started_at).toLocaleString() : '—'}</td>
-                            <td style={{ padding: '0.7em 0.8em', wordBreak: 'break-all' }}>{h.domain}</td>
-                            <td style={{ padding: '0.7em 0.8em', textTransform: 'capitalize' }}>{h.risk}</td>
-                            <td style={{ padding: '0.7em 0.8em' }}>{h.score}</td>
-                            <td style={{ padding: '0.7em 0.8em', textTransform: 'capitalize' }}>{h.mode}</td>
-                          </tr>
-                        ))}
+                        {history.map((h, i) => {
+                          const checked = compareIds.includes(h.id || '');
+                          return (
+                            <tr key={h.id || i} style={{ borderBottom: '1px solid var(--mapped-border-default)', background: checked ? 'var(--mapped-surface-default)' : 'transparent' }}>
+                              <td style={{ padding: '0.7em 0.8em' }}>
+                                <input type="checkbox" checked={checked} onChange={() => {
+                                  setCompareIds(prev => prev.includes(h.id || '') ? prev.filter(x => x !== h.id) : [...prev, h.id || ''].slice(0, 2));
+                                }} />
+                              </td>
+                              <td style={{ padding: '0.7em 0.8em', whiteSpace: 'nowrap', color: 'var(--mapped-text-body)', fontSize: '0.8em' }}>{h.started_at ? new Date(h.started_at).toLocaleString() : '—'}</td>
+                              <td style={{ padding: '0.7em 0.8em', wordBreak: 'break-all' }}>{h.domain}</td>
+                              <td style={{ padding: '0.7em 0.8em', textTransform: 'capitalize' }}>{h.risk}</td>
+                              <td style={{ padding: '0.7em 0.8em' }}>{h.score}</td>
+                              <td style={{ padding: '0.7em 0.8em', textTransform: 'capitalize' }}>{h.mode}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
                 )}
+                {compareIds.length === 2 && (
+                  <div style={{ marginTop: '1.2em', display: 'flex', justifyContent: 'flex-end' }}>
+                    <button onClick={() => setShowCompare(true)} className="pc-btn-primary" style={{ padding: '0.7em 1em' }}>Compare selected</button>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {showCompare && (
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>Comparison</h2>
+                  <button onClick={() => setShowCompare(false)} className="pc-btn-ghost">Close</button>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1.2em' }}>
+                  {compareIds.map(id => {
+                    const item = history.find(h => h.id === id);
+                    if (!item) return null;
+                    const scoreColorVal = scoreColor(item.score);
+                    return (
+                      <div key={id} style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
+                        <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Domain</div>
+                        <div style={{ wordBreak: 'break-all', marginBottom: '1em' }}>{item.domain}</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6em', fontSize: '0.85em' }}>
+                          <div>
+                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Risk</div>
+                            <div style={{ color: scoreColorVal, fontWeight: 600 }}>{item.risk}</div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Score</div>
+                            <div style={{ fontWeight: 600 }}>{item.score}/100</div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Mode</div>
+                            <div style={{ textTransform: 'capitalize' }}>{item.mode}</div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Duration</div>
+                            <div>{item.duration_ms != null ? `${item.duration_ms} ms` : '—'}</div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </section>
           )}
