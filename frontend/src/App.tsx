@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ThemeContext, Theme } from './lib/ThemeContext';
-import { submitScan, fetchHistory, downloadExport, getStatus, fetchScanDetail } from './lib/api';
+import { submitScan, fetchHistory, downloadExport, getStatus, fetchScanDetail, submitBulk } from './lib/api';
 import type { ScanResult, HistoryItem, StatusResponse } from './lib/types';
 
 function downloadPDF(result: ScanResult) {
@@ -139,6 +139,11 @@ export default function App() {
   const [navShadow, setNavShadow] = useState(false);
   const [findingFilter, setFindingFilter] = useState<string>('all');
   const [allExpanded, setAllExpanded] = useState(false);
+  const [batchMode, setBatchMode] = useState(false);
+  const [batchInput, setBatchInput] = useState('');
+  const [batchResults, setBatchResults] = useState<ScanResult[] | null>(null);
+  const [batchRunning, setBatchRunning] = useState(false);
+  const [batchError, setBatchError] = useState<string | null>(null);
 
   useEffect(() => {
     document.documentElement.classList.remove('dark', 'light');
@@ -223,6 +228,31 @@ export default function App() {
       setError(err?.response?.data?.error || err.message || 'Scan failed');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleBatch(e: React.FormEvent) {
+    e.preventDefault();
+    setBatchError(null);
+    setBatchResults(null);
+    const raw = batchInput.split(/\n+/).map(s => s.trim()).filter(Boolean).slice(0, 20);
+    if (!raw.length) {
+      setBatchError('Enter at least one URL');
+      return;
+    }
+    const invalid = raw.find(u => !validateUrl(u).ok);
+    if (invalid) {
+      setBatchError(`Invalid URL: ${invalid}`);
+      return;
+    }
+    setBatchRunning(true);
+    try {
+      const data = await submitBulk(raw, 'quick');
+      setBatchResults(data.results || []);
+    } catch (err: any) {
+      setBatchError(err?.response?.data?.error || err.message || 'Batch scan failed');
+    } finally {
+      setBatchRunning(false);
     }
   }
 
@@ -311,6 +341,51 @@ export default function App() {
                   {error}
                   <button type="button" onClick={() => setError(null)} className="pc-btn-ghost" style={{ fontSize: '0.8em' }}>Retry</button>
                 </p>
+              )}
+            </div>
+          </section>
+
+          <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+            <div style={{ maxWidth: '56em', margin: '0 auto', padding: '1.6em 1.5em' }} className="pc-section">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.8em', flexWrap: 'wrap' }}>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--mapped-text-headings)' }}>Batch scan</h2>
+                <button type="button" onClick={() => { setBatchMode(v => !v); setBatchResults(null); setBatchError(null); }} className="pc-btn-ghost" style={{ fontSize: '0.7em' }}>{batchMode ? 'Close batch' : 'Open batch'}</button>
+              </div>
+              {batchMode && (
+                <form onSubmit={handleBatch} style={{ display: 'grid', gap: '0.6em', maxWidth: '42em' }}>
+                  <label htmlFor="batch-input" style={{ position: 'absolute', overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', width: '1px', height: '1px' }}>URLs</label>
+                  <textarea id="batch-input" value={batchInput} onChange={e => setBatchInput(e.target.value)} placeholder="One URL per line&#10;https://example.com&#10;https://example.org" className="pc-input pc-placeholder" disabled={batchRunning} rows={6} style={{ resize: 'vertical' }} />
+                  <div style={{ display: 'flex', gap: '0.5em', flexWrap: 'wrap' }}>
+                    <button type="submit" disabled={batchRunning} className="pc-btn-primary" style={{ whiteSpace: 'nowrap' }}>
+                      {batchRunning ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}><span className="pc-spinner" style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'pc-spin 0.8s linear infinite' }} />Scanning...</span>) : 'Scan batch'}
+                    </button>
+                    <span style={{ fontSize: '0.7em', color: 'var(--mapped-text-body)', alignSelf: 'center' }}>Max 20 URLs</span>
+                  </div>
+                  {batchError && (
+                    <p style={{ color: '#b91c1c', marginTop: '0.4em', fontSize: '0.85em', display: 'flex', alignItems: 'center', gap: '0.5em', flexWrap: 'wrap' }}>
+                      {batchError}
+                      <button type="button" onClick={() => setBatchError(null)} className="pc-btn-ghost" style={{ fontSize: '0.8em' }}>Retry</button>
+                    </p>
+                  )}
+                  {batchResults && (
+                    <div style={{ marginTop: '0.8em', display: 'grid', gap: '0.6em' }}>
+                      {batchResults.map(r => (
+                        <div key={r.id || r.url} style={{ border: '1px solid var(--mapped-border-default)', padding: '0.8em', background: 'var(--mapped-surface-default)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5em', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.75em', fontWeight: 600, color: 'var(--mapped-text-headings)', wordBreak: 'break-all' }}>{r.domain || r.url}</span>
+                            <span className={`${r.risk === 'high' ? 'pc-risk-high' : r.risk === 'suspicious' ? 'pc-risk-suspicious' : 'pc-risk-low'}`}>{r.risk}</span>
+                          </div>
+                          <div style={{ fontSize: '0.8em', color: 'var(--mapped-text-body)', marginTop: '0.3em' }}>{r.score}/100 · {modeLabel(r.mode)} · {r.duration_ms != null ? `${r.duration_ms} ms` : '—'}</div>
+                          {r.reasons?.length ? (
+                            <ul style={{ listStyle: 'disc', paddingLeft: '1.1em', marginTop: '0.4em', fontSize: '0.8em', color: 'var(--mapped-text-body)', display: 'grid', gap: '0.2em' }}>
+                              {r.reasons.map((x, i) => <li key={i}>{x}</li>)}
+                            </ul>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </form>
               )}
             </div>
           </section>
