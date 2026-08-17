@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { ThemeContext, Theme } from './lib/ThemeContext';
-import { submitScan, fetchHistory, downloadExport } from './lib/api';
-import type { ScanResult, HistoryItem } from './lib/types';
+import { submitScan, fetchHistory, downloadExport, getStatus, fetchScanDetail } from './lib/api';
+import type { ScanResult, HistoryItem, StatusResponse } from './lib/types';
 
 function loadInitialTheme(): Theme {
   try {
@@ -20,6 +20,9 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [reportId, setReportId] = useState<string | null>(null);
+  const [report, setReport] = useState<ScanResult | null>(null);
+  const [status, setStatus] = useState<StatusResponse | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -30,10 +33,24 @@ export default function App() {
 
   useEffect(() => {
     inputRef.current?.focus();
+    const onHash = () => {
+      const m = window.location.hash.match(/^#\/scan\/([^/]+)$/);
+      setReportId(m ? decodeURIComponent(m[1]) : null);
+    };
+    onHash();
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
   useEffect(() => {
+    if (!reportId) return;
+    setReport(null);
+    fetchScanDetail(reportId).then(setReport).catch(() => setReport(null));
+  }, [reportId]);
+
+  useEffect(() => {
     loadHistory();
+    getStatus().then(setStatus).catch(() => setStatus(null));
   }, []);
 
   async function loadHistory() {
@@ -65,7 +82,7 @@ export default function App() {
 
   async function copyScanLink() {
     if (!result?.id) return;
-    const link = `${window.location.origin}/#/scan/${result.id}`;
+    const link = `${window.location.origin}${window.location.pathname}#/scan/${result.id}`;
     try {
       await navigator.clipboard.writeText(link);
     } catch { }
@@ -91,6 +108,19 @@ export default function App() {
             </button>
           </div>
         </header>
+
+        {status && (
+          <div className="max-w-4xl mx-auto text-xs text-gray-400 flex flex-wrap gap-2">
+            <span className="px-2 py-1 rounded border border-gray-800 bg-gray-900">
+              {status.service} v{status.version}
+            </span>
+            {Object.entries(status.features).map(([k, v]) => (
+              <span key={k} className={`px-2 py-1 rounded border ${v ? 'border-gray-700 bg-gray-900 text-gray-300' : 'border-gray-800 bg-gray-950 text-gray-600 line-through'}`}>
+                {k}
+              </span>
+            ))}
+          </div>
+        )}
 
         <main className="max-w-4xl mx-auto space-y-6">
           <section className="rounded border border-gray-800 bg-gray-900 p-4">
@@ -124,7 +154,7 @@ export default function App() {
             </form>
           </section>
 
-          {result && (
+          {!reportId && result && (
             <section className="rounded border border-gray-800 bg-gray-900 p-4 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -223,9 +253,46 @@ export default function App() {
                   </table>
                 </div>
               )}
-            </section>
-          )}
-        </main>
+              </section>
+              )}
+
+              {reportId && report && (
+              <section className="rounded border border-gray-800 bg-gray-900 p-4 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-lg font-semibold">Scan report</h2>
+                  <button onClick={() => { setReportId(null); setReport(null); window.location.hash = ''; }} className="text-xs px-2 py-1 rounded border border-gray-700 hover:border-gray-500">
+                    Back
+                  </button>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className={`px-2 py-1 rounded text-xs font-bold ${
+                    report.risk === 'high' ? 'bg-red-900 text-red-200' :
+                    report.risk === 'suspicious' ? 'bg-yellow-900 text-yellow-200' :
+                    'bg-green-900 text-green-200'
+                  }`}>{report.risk?.toUpperCase()}</span>
+                  <span className="text-3xl font-bold">{report.score ?? '—'}</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                  <div><span className="text-gray-500">URL</span><p className="break-all">{report.url}</p></div>
+                  <div><span className="text-gray-500">Domain</span><p className="break-all">{report.domain}</p></div>
+                  <div><span className="text-gray-500">Mode</span><p className="capitalize">{report.mode}</p></div>
+                  <div><span className="text-gray-500">Started</span><p>{report.started_at ? new Date(report.started_at).toLocaleString() : '—'}</p></div>
+                </div>
+                {report.reasons && report.reasons.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-300 mb-1">Findings</h3>
+                    <ul className="list-disc pl-5 text-sm text-gray-300 space-y-1">
+                      {report.reasons.map((r, i) => <li key={i}>{r}</li>)}
+                    </ul>
+                  </div>
+                )}
+              </section>
+              )}
+
+              {reportId && !report && (
+              <section className="rounded border border-gray-800 bg-gray-900 p-4 text-sm text-gray-400">Loading scan report...</section>
+              )}
+              </main>
       </div>
     </ThemeContext.Provider>
   );

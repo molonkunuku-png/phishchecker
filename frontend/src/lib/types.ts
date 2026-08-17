@@ -36,3 +36,9 @@ export type HistoryResponse = {
 export type BulkResponse = {
   results: ScanResult[];
 };
+
+export type StatusResponse = {
+  service: string;
+  version: string;
+  features: Record<string, boolean>;
+};

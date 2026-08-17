@@ -1,10 +1,15 @@
 import axios from 'axios';
-import type { ScanResult, HistoryResponse, BulkResponse } from './types';
+import type { ScanResult, HistoryResponse, BulkResponse, StatusResponse } from './types';
 
 export const base = axios.create({
   baseURL: '',
   headers: { 'Content-Type': 'application/json' },
 });
+
+export async function getStatus(): Promise<StatusResponse> {
+  const { data } = await base.get('/api/v2/status');
+  return data;
+}
 
 export async function getCsrf(): Promise<string> {
   const { data } = await base.get('/api/csrf');
