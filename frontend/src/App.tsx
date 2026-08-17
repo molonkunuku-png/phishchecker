@@ -241,6 +241,10 @@ export default function App() {
                   Paste a URL above and press Scan to analyze phishing risk.
                 </div>
               )}
+              <div style={{ marginTop: '0.8em', display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', opacity: 0.85 }}>
+                <span aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3em' }}>🔒</span>
+                <span>No data stored</span>
+              </div>
               {error && <p style={{ color: '#b91c1c', marginTop: '0.75em', fontSize: '0.85em' }}>{error}</p>}
             </div>
           </section>
