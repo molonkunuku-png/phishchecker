@@ -80,6 +80,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [showAwareness, setShowAwareness] = useState(false);
   const [reportId, setReportId] = useState<string | null>(null);
   const [report, setReport] = useState<ScanResult | null>(null);
   const [status, setStatus] = useState<StatusResponse | null>(null);
@@ -188,6 +189,7 @@ export default function App() {
           <a href="/" className="pc-nav-logo">PHISHCHECKER</a>
           <div className="pc-nav-items">
             <button onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }} className="pc-nav-item">History</button>
+            <button onClick={() => { setShowAwareness(v => !v); if (!showAwareness) getStatus().then(setStatus).catch(() => setStatus(null)); }} className="pc-nav-item">{showAwareness ? 'Scan' : 'Awareness'}</button>
             <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className="pc-nav-item">{showStatus ? 'Scan' : 'Status'}</button>
             <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className="pc-nav-item">{theme === 'dark' ? 'Light' : 'Dark'}</button>
             {status && <span className="pc-chip" style={{ marginLeft: '0.5em' }}>v{status.version}</span>}
@@ -239,6 +241,38 @@ export default function App() {
                     <div style={{ fontSize: '0.8em', color: 'var(--mapped-text-body)' }}>{h.score}/100</div>
                   </div>
                 ))}
+              </div>
+            </section>
+          )}
+
+          {showAwareness && (
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)', marginBottom: '0.8em' }}>Phishing awareness</h2>
+                <div style={{ display: 'grid', gap: '1em', fontSize: '0.9em', lineHeight: 1.6 }}>
+                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>Red flags</h3>
+                    <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.35em' }}>
+                      <li>Unexpected links or attachments from unknown senders</li>
+                      <li>URLs that impersonate known brands with typos or extra words</li>
+                      <li>Requests for credentials, OTPs, or payments via email/SMS</li>
+                      <li>Shortened URLs that hide the real destination</li>
+                    </ul>
+                  </div>
+                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>How to check safely</h3>
+                    <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.35em' }}>
+                      <li>Hover to inspect the real link destination</li>
+                      <li>Use this scanner for fast risk analysis</li>
+                      <li>Check SSL/TLS and certificate age</li>
+                      <li>Prefer official apps over links when possible</li>
+                    </ul>
+                  </div>
+                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>Understanding risk</h3>
+                    <p>High risk means multiple suspicious indicators were found. Suspicious means some signals warrant caution. Clean means no strong phishing indicators were detected in the checked URL.</p>
+                  </div>
+                </div>
               </div>
             </section>
           )}
