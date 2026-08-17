@@ -321,7 +321,7 @@ export default function App() {
                 </button>
               </form>
               {loading && (
-                <div style={{ marginTop: '1.2em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em' }}>
+                <div aria-busy="true" style={{ marginTop: '1.2em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em' }}>
                   <div className="pc-skeleton" />
                   <div className="pc-skeleton" />
                   <div className="pc-skeleton" />
@@ -337,7 +337,7 @@ export default function App() {
                 <span>No data stored</span>
               </div>
               {error && (
-                <p style={{ color: '#b91c1c', marginTop: '0.75em', fontSize: '0.85em', display: 'flex', alignItems: 'center', gap: '0.5em', flexWrap: 'wrap' }}>
+                <p role="alert" aria-live="assertive" style={{ color: '#b91c1c', marginTop: '0.75em', fontSize: '0.85em', display: 'flex', alignItems: 'center', gap: '0.5em', flexWrap: 'wrap' }}>
                   {error}
                   <button type="button" onClick={() => setError(null)} className="pc-btn-ghost" style={{ fontSize: '0.8em' }}>Retry</button>
                 </p>
