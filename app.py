@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flask import Flask, jsonify, request, send_file, Response, render_template
+from flask import Flask, jsonify, request, send_file, Response, render_template, redirect
 from flask_cors import CORS
 from pathlib import Path
 import os
@@ -128,11 +128,7 @@ def create_app(config: dict | None = None) -> Flask:
 
     @app.get("/report/<scan_id>")
     def public_report(scan_id: str):
-        repo = ScanService()
-        result = repo.get_scan(scan_id)
-        if not result:
-            return send_file(_dist_dir / "index.html")
-        return render_template("report.html", result=result)
+        return redirect(f"/#/scan/{scan_id}", code=302)
 
     @app.get("/api/v2/status")
     def api_status() -> Response:
@@ -148,6 +144,14 @@ def create_app(config: dict | None = None) -> Flask:
         }), 200
 
     _dist_dir = Path(__file__).parent / "frontend" / "dist"
+
+    @app.get("/privacy")
+    def privacy():
+        return send_file(_dist_dir / "privacy.html")
+
+    @app.get("/terms")
+    def terms():
+        return send_file(_dist_dir / "terms.html")
 
     @app.get("/")
     def root() -> Response:

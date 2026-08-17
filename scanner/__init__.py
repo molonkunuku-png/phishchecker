@@ -82,35 +82,31 @@ def _validate(url: str) -> dict[str, Any] | None:
     return None
 
 
-def _check_headers(url: str) -> tuple[list[str], int]:
+def _check_headers(url: str, mode: str = "standard") -> tuple[list[str], int, list[str]]:
     reasons: list[str] = []
     penalty = 0
+    timeout = 5 if mode == "quick" else 8
     try:
-        resp = requests.get(url, timeout=8, allow_redirects=True, headers={"User-Agent": "PhishChecker/1.0"})
+        resp = requests.get(url, timeout=timeout, allow_redirects=True, headers={"User-Agent": "PhishChecker/1.0"})
         headers = {k.lower(): v for k, v in resp.headers.items()}
-        if "strict-transport-security" not in headers:
-            reasons.append("Missing HSTS")
-            penalty += 20
-        if "content-security-policy" not in headers:
-            reasons.append("Missing CSP")
-            penalty += 15
-        if "x-frame-options" not in headers:
-            reasons.append("Missing X-Frame-Options")
-            penalty += 10
-        if "x-content-type-options" not in headers:
-            reasons.append("Missing X-Content-Type-Options")
-            penalty += 10
-        if "referrer-policy" not in headers:
-            reasons.append("Missing Referrer-Policy")
-            penalty += 5
-        if "permissions-policy" not in headers:
-            reasons.append("Missing Permissions-Policy")
-            penalty += 5
+        required = ["strict-transport-security", "content-security-policy", "x-frame-options", "x-content-type-options", "referrer-policy", "permissions-policy"]
+        weights = {"strict-transport-security": 20, "content-security-policy": 15, "x-frame-options": 10, "x-content-type-options": 10, "referrer-policy": 5, "permissions-policy": 5}
+        if mode == "quick":
+            required = ["strict-transport-security", "content-security-policy", "x-frame-options"]
+            weights = {"strict-transport-security": 20, "content-security-policy": 15, "x-frame-options": 10}
+        elif mode == "it":
+            weights = {k: v * 2 for k, v in weights.items()}
+        for h in required:
+            label = h.replace("-", " ").title().replace(" ", "-")
+            if headers.get(h):
+                continue
+            reasons.append(f"Missing {label}")
+            penalty += weights.get(h, 5)
         chain = [h.url for h in resp.history] + [resp.url]
         return reasons, penalty, chain
     except requests.RequestException:
         reasons.append("Could not fetch URL")
-        return reasons, 15, []
+        return reasons, 15 if mode != "it" else 20, []
 
 
 def _check_ssl(url: str) -> tuple[dict[str, Any], int]:
@@ -171,20 +167,15 @@ def _threat_intel(domain: str) -> dict[str, Any]:
     }
 
 
-def _score(result: ScanResult) -> None:
-    penalty = 0
+def _score(result: ScanResult, penalty: int = 0) -> None:
     reasons = list(result.reasons)
-    # header penalties are already added
     penalty += sum(1 for r in reasons if r.startswith("Missing ")) * 10
-    # threat intel
     ti = result.threat_intel
     penalty += int(ti.get("penalty", 0))
-    # domain age proxy: if domain length < 20 chars and no TLD indicator, treat cautiously
     domain = result.domain
     if len(domain.split(".")) <= 2 and len(domain) < 25:
         penalty += 5
         reasons.append("Short or unusual domain shape")
-    # cap
     score = max(0, 100 - penalty)
     result.score = score
     if score <= 40:
@@ -223,7 +214,7 @@ def run_scan(url: str | None, mode: str = "standard") -> dict[str, Any]:
     details: dict[str, Any] = {}
     chain: list[str] = []
 
-    hdr_reasons, hdr_penalty, chain = _check_headers(url)
+    hdr_reasons, hdr_penalty, chain = _check_headers(url, mode)
     reasons.extend(hdr_reasons)
     details["redirect_chain"] = chain
     details["headers"] = {r.split("Missing ")[-1]: False for r in hdr_reasons if r.startswith("Missing ")}
@@ -248,5 +239,5 @@ def run_scan(url: str | None, mode: str = "standard") -> dict[str, Any]:
         duration_ms=int((datetime.now(timezone.utc) - started).total_seconds() * 1000),
         threat_intel=ti,
     )
-    _score(result)
+    _score(result, penalty=hdr_penalty + ssl_penalty)
     return result.to_dict()
