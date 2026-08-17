@@ -88,6 +88,7 @@ export default function App() {
   const [showStatus, setShowStatus] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [showCompare, setShowCompare] = useState(false);
+  const [historyFilter, setHistoryFilter] = useState<string>('all');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -457,6 +458,11 @@ export default function App() {
                 {history.length === 0 && <p style={{ color: 'var(--mapped-text-body)', fontSize: '0.9em' }}>No scans yet.</p>}
                 {history.length > 0 && (
                   <div style={{ overflowX: 'auto' }}>
+                    <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap', marginBottom: '0.8em' }}>
+                      {['all','high','suspicious','low'].map(f => (
+                        <button key={f} type="button" onClick={() => setHistoryFilter(f)} className="pc-btn-ghost" style={{ opacity: historyFilter === f ? 1 : 0.6 }}>{f === 'all' ? 'All' : f[0].toUpperCase() + f.slice(1)}</button>
+                      ))}
+                    </div>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85em' }}>
                       <thead>
                         <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--mapped-border-default)', color: 'var(--mapped-text-body)' }}>
@@ -469,7 +475,7 @@ export default function App() {
                         </tr>
                       </thead>
                       <tbody>
-                        {history.map((h, i) => {
+                        {history.filter(h => historyFilter === 'all' || h.risk === historyFilter).map((h, i) => {
                           const checked = compareIds.includes(h.id || '');
                           return (
                             <tr key={h.id || i} style={{ borderBottom: '1px solid var(--mapped-border-default)', background: checked ? 'var(--mapped-surface-default)' : 'transparent' }}>
