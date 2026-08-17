@@ -394,13 +394,21 @@ body {
 }
 
 .pc-panel {
-  background: #fff;
+  background: var(--mapped-surface-default);
   border: 1px solid var(--mapped-border-default);
   padding: 1.5em;
   transition: box-shadow 220ms ease;
 }
 .pc-panel:hover {
   box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+}
+
+.pc-placeholder::placeholder {
+  color: var(--mapped-text-body);
+  opacity: .85;
+}
+.dark .pc-placeholder::placeholder {
+  color: #9ca3af;
 }
 
 .pc-divider {

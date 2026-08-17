@@ -139,7 +139,7 @@ export default function App() {
                 Fast phishing-risk analysis with clear results. No accounts. No tracking. Just scan.
               </p>
               <form onSubmit={handleScan} id="scan" style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.5em', maxWidth: '42em' }}>
-                <input ref={inputRef} value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com" className="pc-input" />
+                <input ref={inputRef} value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com" className="pc-input pc-placeholder" />
                 <select value={mode} onChange={e => setMode(e.target.value)} className="pc-select">
                   <option value="quick">Quick</option>
                   <option value="standard">Standard</option>
@@ -154,7 +154,7 @@ export default function App() {
           </section>
 
           {!reportId && result && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: '#fff' }}>
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '1.2em' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.8em', flexWrap: 'wrap' }}>
@@ -188,7 +188,7 @@ export default function App() {
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1.2em', marginBottom: '1.4em' }}>
-                  <div style={{ background: 'var(--brand-grey-100)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
+                  <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6em' }}>
                       <span style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>Risk level</span>
                       <span style={{ fontSize: '0.7em', fontWeight: 600, color: scoreColor(currentScore) }}>{currentRisk || '—'}</span>
@@ -197,7 +197,7 @@ export default function App() {
                       <div style={{ height: '100%', width: `${riskPct}%`, background: scoreColor(currentScore), transition: 'width 420ms ease' }} />
                     </div>
                   </div>
-                  <div style={{ background: 'var(--brand-grey-100)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
+                  <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6em' }}>
                       <span style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>Score</span>
                       <span style={{ fontSize: '0.7em', fontWeight: 600, color: 'var(--mapped-text-headings)' }}>{currentScore ?? '—'}/100</span>
@@ -222,7 +222,7 @@ export default function App() {
                       ))}
                     </ul>
                     {expandedFindings && (
-                      <div style={{ marginTop: '1em', padding: '1em', background: 'var(--brand-grey-100)', border: '1px solid var(--mapped-border-default)', fontSize: '0.85em', lineHeight: 1.6, color: 'var(--mapped-text-body)' }}>
+                      <div style={{ marginTop: '1em', padding: '1em', background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', fontSize: '0.85em', lineHeight: 1.6, color: 'var(--mapped-text-body)' }}>
                         These signals are based on URL structure, domain age, known patterns, and routing behavior. High risk means multiple suspicious indicators were found. Low risk means no strong phishing signals were detected.
                       </div>
                     )}
@@ -232,7 +232,7 @@ export default function App() {
                 {result.details && (
                   <details style={{ marginTop: '1.2em', fontSize: '0.9em' }}>
                     <summary style={{ cursor: 'pointer', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', fontSize: '0.8em' }}>Raw details</summary>
-                    <pre style={{ marginTop: '0.8em', whiteSpace: 'pre-wrap', wordBreak: 'break-word', padding: '1em', background: 'var(--brand-grey-100)', fontSize: '0.8em', lineHeight: 1.6, border: '1px solid var(--mapped-border-default)' }}>{JSON.stringify(result.details, null, 2)}</pre>
+                    <pre style={{ marginTop: '0.8em', whiteSpace: 'pre-wrap', wordBreak: 'break-word', padding: '1em', background: 'var(--mapped-surface-default)', fontSize: '0.8em', lineHeight: 1.6, border: '1px solid var(--mapped-border-default)' }}>{JSON.stringify(result.details, null, 2)}</pre>
                   </details>
                 )}
               </div>
@@ -240,7 +240,7 @@ export default function App() {
           )}
 
           {reportId && report && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: '#fff' }}>
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>Scan report</h2>
@@ -281,13 +281,13 @@ export default function App() {
           )}
 
           {reportId && !report && (
-            <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: '#fff' }}>
+            <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em', color: 'var(--mapped-text-body)' }}>Loading scan report...</div>
             </section>
           )}
 
           {showHistory && (
-            <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: '#fff' }}>
+            <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>Recent scans</h2>
@@ -296,19 +296,19 @@ export default function App() {
 
                 {history.length > 0 && (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(12em, 1fr))', gap: '0.8em', marginBottom: '1.2em' }}>
-                    <div style={{ background: 'var(--brand-grey-100)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
+                    <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
                       <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Total</div>
                       <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--mapped-text-headings)' }}>{historyStats.total}</div>
                     </div>
-                    <div style={{ background: 'var(--brand-grey-100)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
+                    <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
                       <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>High</div>
                       <div style={{ fontSize: '1.4rem', fontWeight: 600, color: '#b91c1c' }}>{historyStats.high}</div>
                     </div>
-                    <div style={{ background: 'var(--brand-grey-100)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
+                    <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
                       <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Suspicious</div>
                       <div style={{ fontSize: '1.4rem', fontWeight: 600, color: '#b45309' }}>{historyStats.suspicious}</div>
                     </div>
-                    <div style={{ background: 'var(--brand-grey-100)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
+                    <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
                       <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Low</div>
                       <div style={{ fontSize: '1.4rem', fontWeight: 600, color: '#047857' }}>{historyStats.low}</div>
                     </div>
@@ -346,19 +346,19 @@ export default function App() {
             </section>
           )}
 
-          <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: '#fff' }}>
+          <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
             <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--mapped-text-headings)', marginBottom: '0.8em' }}>How it works</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5 }}>
-                <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--brand-grey-100)' }}>
+                <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
                   <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-action)', marginBottom: '0.4em' }}>01 — Paste</div>
                   <p style={{ color: 'var(--mapped-text-body)' }}>Drop any link into the scanner. We do not require accounts or personal data.</p>
                 </div>
-                <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--brand-grey-100)' }}>
+                <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
                   <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-action)', marginBottom: '0.4em' }}>02 — Analyze</div>
                   <p style={{ color: 'var(--mapped-text-body)' }}>Check domain signals, URL patterns, and routing behavior for phishing indicators.</p>
                 </div>
-                <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--brand-grey-100)' }}>
+                <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
                   <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-action)', marginBottom: '0.4em' }}>03 — Decide</div>
                   <p style={{ color: 'var(--mapped-text-body)' }}>Get a risk score and clear findings. Export or share the result when needed.</p>
                 </div>
@@ -367,7 +367,7 @@ export default function App() {
           </section>
         </main>
 
-        <footer style={{ borderTop: '1px solid var(--mapped-border-default)', background: '#fff', marginTop: '2em' }}>
+        <footer style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginTop: '2em' }}>
           <div style={{ maxWidth: '56em', margin: '0 auto', padding: '1.5em', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5em', fontSize: '0.75em', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>
             <span>PhishChecker</span>
             <span>Privacy-first scanning</span>
