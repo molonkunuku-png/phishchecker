@@ -188,13 +188,13 @@ export default function App() {
       <div className="min-h-screen" style={{ background: 'var(--mapped-surface-page)', color: 'var(--mapped-text-body)' }}>
         <nav className="pc-nav">
           <a href="/" className="pc-nav-logo">PHISHCHECKER</a>
-          <div className="pc-nav-items">
+          <button onClick={() => { const items = document.getElementById('pc-nav-items'); if (items) items.classList.toggle('pc-nav-open'); }} className="pc-nav-hamburger" aria-label="Toggle navigation" style={{ display: 'none', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 1em', fontSize: '1.2em', lineHeight: 1 }}>☰</button>
+          <div id="pc-nav-items" className="pc-nav-items">
             <button onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }} className="pc-nav-item">History</button>
             <button onClick={() => { setShowAwareness(v => !v); }} className="pc-nav-item">{showAwareness ? 'Scan' : 'Awareness'}</button>
             <button onClick={() => { setShowApi(v => !v); }} className="pc-nav-item">{showApi ? 'Scan' : 'API'}</button>
             <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className="pc-nav-item">{showStatus ? 'Scan' : 'Status'}</button>
-            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className="pc-nav-item">{theme === 'dark' ? 'Light' : 'Dark'}</button>
-            {status && <span className="pc-chip" style={{ marginLeft: '0.5em' }}>v{status.version}</span>}
+            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className="pc-nav-item" aria-label="Toggle theme">{theme === 'dark' ? 'Light' : 'Dark'}</button>
           </div>
           <button onClick={() => { document.getElementById('scan')?.scrollIntoView({ behavior: 'smooth' }); }} className="pc-nav-cta">Scan now</button>
         </nav>
@@ -225,6 +225,11 @@ export default function App() {
                   <div className="pc-skeleton" />
                   <div className="pc-skeleton" />
                   <div className="pc-skeleton" />
+                </div>
+              )}
+              {!loading && !result && !error && (
+                <div style={{ marginTop: '1.2em', padding: '1.2em', border: '1px dashed var(--mapped-border-default)', background: 'var(--mapped-surface-default)', color: 'var(--mapped-text-body)', fontSize: '0.9em', textAlign: 'center' }}>
+                  Paste a URL above and press Scan to analyze phishing risk.
                 </div>
               )}
               {error && <p style={{ color: '#b91c1c', marginTop: '0.75em', fontSize: '0.85em' }}>{error}</p>}
@@ -354,8 +359,17 @@ export default function App() {
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '1.2em' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.8em', flexWrap: 'wrap' }}>
-                    <span className={`${result.risk === 'high' ? 'pc-risk-high' : result.risk === 'suspicious' ? 'pc-risk-suspicious' : 'pc-risk-low'}`}>{result.risk?.toUpperCase()}</span>
-                    <span style={{ fontSize: '2.4rem', fontWeight: 600, letterSpacing: '-0.03em', lineHeight: 1, color: 'var(--mapped-text-headings)' }}>{result.score ?? '—'}</span>
+                    <div style={{ position: 'relative', width: '3.2em', height: '3.2em' }}>
+                      <svg viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
+                        <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--brand-grey-200)" strokeWidth="3" />
+                        <circle cx="18" cy="18" r="15.5" fill="none" stroke={scoreColor(currentScore)} strokeWidth="3" strokeDasharray={`${(riskPct / 100) * 97.39} 97.39`} strokeLinecap="round" style={{ transition: 'stroke-dasharray 420ms ease, stroke 420ms ease' }} />
+                      </svg>
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75em', fontWeight: 700, color: 'var(--mapped-text-headings)', transform: 'none' }}>{currentScore ?? '—'}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Risk score</div>
+                      <div style={{ fontSize: '0.85em', fontWeight: 600, color: scoreColor(currentScore) }}>{currentRisk ? currentRisk.toUpperCase() : '—'}</div>
+                    </div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap' }}>
                     <button onClick={copyScanLink} className="pc-btn-ghost">Copy link</button>
@@ -493,8 +507,17 @@ export default function App() {
                   <button onClick={() => { setReportId(null); setReport(null); window.location.hash = ''; }} className="pc-btn-ghost">Back</button>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8em', marginBottom: '1.2em', flexWrap: 'wrap' }}>
-                  <span className={`${report.risk === 'high' ? 'pc-risk-high' : report.risk === 'suspicious' ? 'pc-risk-suspicious' : 'pc-risk-low'}`}>{report.risk?.toUpperCase()}</span>
-                  <span style={{ fontSize: '2.4rem', fontWeight: 600, letterSpacing: '-0.03em', lineHeight: 1, color: 'var(--mapped-text-headings)' }}>{report.score ?? '—'}</span>
+                  <div style={{ position: 'relative', width: '3.2em', height: '3.2em' }}>
+                    <svg viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
+                      <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--brand-grey-200)" strokeWidth="3" />
+                      <circle cx="18" cy="18" r="15.5" fill="none" stroke={scoreColor(report.score)} strokeWidth="3" strokeDasharray={`${riskPercent(report.risk)} 100`} strokeLinecap="round" style={{ transition: 'stroke-dasharray 420ms ease, stroke 420ms ease' }} />
+                    </svg>
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75em', fontWeight: 700, color: 'var(--mapped-text-headings)', transform: 'none' }}>{report.score ?? '—'}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Risk score</div>
+                    <div style={{ fontSize: '0.85em', fontWeight: 600, color: scoreColor(report.score) }}>{report.risk ? report.risk.toUpperCase() : '—'}</div>
+                  </div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1.2em', fontSize: '0.9em', lineHeight: 1.5 }}>
                   <div>
@@ -689,6 +712,7 @@ export default function App() {
           <div style={{ maxWidth: '56em', margin: '0 auto', padding: '1.5em', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5em', fontSize: '0.75em', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>
             <span>PhishChecker</span>
             <span>Privacy-first scanning</span>
+            <span>{status?.version ? `v${status.version}` : ''}</span>
           </div>
         </footer>
       </div>
