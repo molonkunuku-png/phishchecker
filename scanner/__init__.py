@@ -177,15 +177,17 @@ def _score(result: ScanResult, penalty: int = 0) -> None:
         reasons.append("Short or unusual domain shape")
     score = max(0, 100 - penalty)
     result.score = score
-    if score <= 40:
+    if score < 50:
         result.risk = RiskLevel.high
-    elif score <= 70:
+    elif score < 80:
         result.risk = RiskLevel.suspicious
-    elif score <= 90:
-        result.risk = RiskLevel.clean
     else:
         result.risk = RiskLevel.clean
-        result.score = 95
+    if any("SSL validation issue" in r for r in reasons):
+        if result.risk == RiskLevel.clean:
+            result.risk = RiskLevel.suspicious
+        elif result.risk == RiskLevel.suspicious and score < 80:
+            result.risk = RiskLevel.high
     result.reasons = reasons
 
 

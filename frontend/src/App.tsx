@@ -66,18 +66,25 @@ function modeLabel(mode?: string): string {
   return mode.charAt(0).toUpperCase() + mode.slice(1);
 }
 
+function riskColor(risk?: string): string {
+  if (risk === 'high') return '#b91c1c';
+  if (risk === 'suspicious') return '#b45309';
+  if (risk === 'clean') return '#047857';
+  return 'var(--mapped-text-body)';
+}
+
 function scoreColor(score?: number | null): string {
   if (score == null) return 'var(--mapped-text-body)';
-  if (score < 40) return '#b91c1c';
-  if (score < 70) return '#b45309';
+  if (score < 50) return '#b91c1c';
+  if (score < 80) return '#b45309';
   return '#047857';
 }
 
 function confidenceMeta(score?: number | null): { label: string; color: string } | null {
   if (score == null) return null;
-  if (score < 40) return { label: 'High confidence', color: '#b91c1c' };
-  if (score < 70) return { label: 'Medium confidence', color: '#b45309' };
-  return { label: 'Low confidence', color: '#047857' };
+  if (score < 50) return { label: 'High risk', color: '#b91c1c' };
+  if (score < 80) return { label: 'Elevated risk', color: '#b45309' };
+  return { label: 'Low risk', color: '#047857' };
 }
 
 function sslGrade(details?: Record<string, unknown>): { grade: string; color: string } | null {
@@ -96,7 +103,7 @@ type Severity = 'high' | 'medium' | 'low';
 function severityOf(reason: string): Severity {
   const r = reason.toLowerCase();
   if (/certificate|tls|ssl|https|lock/.test(r)) return 'high';
-  if (/phish|blacklist|abuse|known|sandbox/.test(r)) return 'high';
+  if (/phish|blacklist|abuse|known|sandbox|could not fetch/.test(r)) return 'high';
   if (/missing.*header|x-frame|x-content-type|referrer-policy|permissions-policy|strict-transport-security/.test(r)) return 'medium';
   if (/redirect|javascript|iframe|popup|form|behavior/.test(r)) return 'medium';
   return 'low';
@@ -412,13 +419,13 @@ export default function App() {
                     <div style={{ position: 'relative', width: '3.2em', height: '3.2em' }}>
                       <svg viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
                         <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--brand-grey-200)" strokeWidth="3" />
-                        <circle cx="18" cy="18" r="15.5" fill="none" stroke={scoreColor(currentScore)} strokeWidth="3" strokeDasharray={`${(riskPct / 100) * 97.39} 97.39`} strokeLinecap="round" style={{ transition: 'stroke-dasharray 420ms ease, stroke 420ms ease' }} />
+                        <circle cx="18" cy="18" r="15.5" fill="none" stroke={riskColor(currentRisk)} strokeWidth="3" strokeDasharray={`${(riskPct / 100) * 97.39} 97.39`} strokeLinecap="round" style={{ transition: 'stroke-dasharray 420ms ease, stroke 420ms ease' }} />
                       </svg>
                       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75em', fontWeight: 700, color: 'var(--mapped-text-headings)', transform: 'none' }}>{currentScore ?? '—'}</div>
                     </div>
                     <div>
                       <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Risk score</div>
-                      <div style={{ fontSize: '0.85em', fontWeight: 600, color: scoreColor(currentScore) }}>{currentRisk ? currentRisk.toUpperCase() : '—'}</div>
+                      <div style={{ fontSize: '0.85em', fontWeight: 600, color: riskColor(currentRisk) }}>{currentRisk ? currentRisk.toUpperCase() : '—'}</div>
                       {confidence && (
                         <div style={{ fontSize: '0.65em', color: confidence.color, fontWeight: 600 }}>{confidence.label}</div>
                       )}
@@ -499,10 +506,10 @@ export default function App() {
                   <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6em' }}>
                       <span style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>Risk level</span>
-                      <span style={{ fontSize: '0.7em', fontWeight: 600, color: scoreColor(currentScore) }}>{currentRisk || '—'}</span>
+                      <span style={{ fontSize: '0.7em', fontWeight: 600, color: riskColor(currentRisk) }}>{currentRisk || '—'}</span>
                     </div>
                     <div style={{ height: '6px', background: 'var(--brand-grey-200)', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${riskPct}%`, background: scoreColor(currentScore), transition: 'width 420ms ease' }} />
+                      <div style={{ height: '100%', width: `${riskPct}%`, background: riskColor(currentRisk), transition: 'width 420ms ease' }} />
                     </div>
                   </div>
                   <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
@@ -567,13 +574,13 @@ export default function App() {
                   <div style={{ position: 'relative', width: '3.2em', height: '3.2em' }}>
                     <svg viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
                       <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--brand-grey-200)" strokeWidth="3" />
-                      <circle cx="18" cy="18" r="15.5" fill="none" stroke={scoreColor(report.score)} strokeWidth="3" strokeDasharray={`${riskPercent(report.risk) / 100 * 97.39} 97.39`} strokeLinecap="round" style={{ transition: 'stroke-dasharray 420ms ease, stroke 420ms ease' }} />
+                      <circle cx="18" cy="18" r="15.5" fill="none" stroke={riskColor(report.risk)} strokeWidth="3" strokeDasharray={`${riskPercent(report.risk) / 100 * 97.39} 97.39`} strokeLinecap="round" style={{ transition: 'stroke-dasharray 420ms ease, stroke 420ms ease' }} />
                     </svg>
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75em', fontWeight: 700, color: 'var(--mapped-text-headings)', transform: 'none' }}>{report.score ?? '—'}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Risk score</div>
-                    <div style={{ fontSize: '0.85em', fontWeight: 600, color: scoreColor(report.score) }}>{report.risk ? report.risk.toUpperCase() : '—'}</div>
+                    <div style={{ fontSize: '0.85em', fontWeight: 600, color: riskColor(report.risk) }}>{report.risk ? report.risk.toUpperCase() : '—'}</div>
                     {confidence && (
                       <div style={{ fontSize: '0.65em', color: confidence.color, fontWeight: 600 }}>{confidence.label}</div>
                     )}
@@ -725,7 +732,7 @@ export default function App() {
                   {compareIds.map(id => {
                     const item = history.find(h => h.id === id);
                     if (!item) return null;
-                    const scoreColorVal = scoreColor(item.score);
+                    const riskColorVal = riskColor(item.risk);
                     return (
                       <div key={id} style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
                         <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Domain</div>
@@ -733,7 +740,7 @@ export default function App() {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6em', fontSize: '0.85em' }}>
                           <div>
                             <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Risk</div>
-                            <div style={{ color: scoreColorVal, fontWeight: 600 }}>{item.risk}</div>
+                            <div style={{ color: riskColorVal, fontWeight: 600 }}>{item.risk}</div>
                           </div>
                           <div>
                             <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Score</div>
