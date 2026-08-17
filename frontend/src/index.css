@@ -253,6 +253,7 @@ body {
     flex-wrap: wrap;
     gap: 0.4em;
     padding: 0.5em;
+    position: relative;
   }
   .pc-nav-hamburger {
     display: inline-flex !important;
@@ -264,6 +265,12 @@ body {
     width: 100%;
     padding-top: 0.5em;
     border-top: 1px solid var(--brand-grey-700);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--brand-grey-900);
+    z-index: 98;
   }
   .pc-nav-items.pc-nav-open {
     display: flex;
