@@ -820,7 +820,19 @@ export default function App() {
           <div style={{ maxWidth: '56em', margin: '0 auto', padding: '0 1.5em 1.5em', display: 'flex', gap: '1em', flexWrap: 'wrap', fontSize: '0.7em', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>
             <a href="/privacy" style={{ color: 'var(--mapped-text-action)', textDecoration: 'none' }}>Privacy</a>
             <a href="/terms" style={{ color: 'var(--mapped-text-action)', textDecoration: 'none' }}>Terms</a>
+            <button type="button" onClick={() => document.getElementById('changelog')?.scrollIntoView({ behavior: 'smooth' })} style={{ background: 'none', border: 'none', color: 'var(--mapped-text-action)', cursor: 'pointer', padding: 0, font: 'inherit' }}>Changelog</button>
             <span>© {new Date().getFullYear()} PhishChecker</span>
+          </div>
+          <div id="changelog" style={{ maxWidth: '56em', margin: '0 auto', padding: '0 1.5em 1.5em', fontSize: '0.8em', color: 'var(--mapped-text-body)', lineHeight: 1.6 }}>
+            <details>
+              <summary style={{ cursor: 'pointer', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', fontSize: '0.75em' }}>Recent changes</summary>
+              <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', marginTop: '0.6em', display: 'grid', gap: '0.3em' }}>
+                <li>Score/risk alignment and live blocklist lookup</li>
+                <li>Findings filter chips and expand/collapse all</li>
+                <li>URL validation, mobile overlap fixes, and contrast improvements</li>
+                <li>Redirect chain visualization and score breakdown panels</li>
+              </ul>
+            </details>
           </div>
         </footer>
       </div>
