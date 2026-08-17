@@ -64,6 +64,16 @@ function scoreColor(score?: number | null): string {
   return '#047857';
 }
 
+function sslGrade(details?: Record<string, unknown>): { grade: string; color: string } | null {
+  const ssl = (details?.ssl || {}) as any;
+  if (!ssl || !ssl.valid) return { grade: 'F', color: '#b91c1c' };
+  const age = ssl.age_days as number | undefined;
+  if (age == null) return { grade: 'A', color: '#047857' };
+  if (age > 365) return { grade: 'B', color: '#b45309' };
+  if (age > 180) return { grade: 'A', color: '#047857' };
+  return { grade: 'A+', color: '#047857' };
+}
+
 type Severity = 'high' | 'medium' | 'low';
 
 function severityOf(reason: string): Severity {
@@ -371,6 +381,7 @@ export default function App() {
                     <button onClick={copyScanLink} className="pc-btn-ghost">Copy link</button>
                     <button onClick={() => downloadExport('json')} className="pc-btn-ghost">Export JSON</button>
                     <button onClick={() => downloadExport('csv')} className="pc-btn-ghost">Export CSV</button>
+                    <button onClick={() => window.print()} className="pc-btn-ghost">Print</button>
                     <button onClick={() => result && downloadPDF(result)} className="pc-btn-ghost">Export report</button>
                   </div>
                 </div>
@@ -393,8 +404,8 @@ export default function App() {
                     <p>{result.started_at ? new Date(result.started_at).toLocaleString() : '—'}</p>
                   </div>
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Cert age</span>
-                    <p>{(() => { const ssl = (result.details?.ssl || {}) as any; return ssl?.age_days != null ? `${ssl.age_days} days` : (ssl?.valid ? 'Valid' : '—'); })()}</p>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Certificate</span>
+                    <p>{(() => { const ssl = (result.details?.ssl || {}) as any; const grade = sslGrade(result.details); const issuer = ssl?.issuer || '—'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : (ssl?.valid ? 'Valid' : 'Invalid'); return `${grade ? `${grade.grade} ` : ''}${age} · ${issuer}`; })()}</p>
                   </div>
                 </div>
 
@@ -495,8 +506,8 @@ export default function App() {
                     <p>{report.started_at ? new Date(report.started_at).toLocaleString() : '—'}</p>
                   </div>
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Cert age</span>
-                    <p>{(() => { const ssl = (report.details?.ssl || {}) as any; return ssl?.age_days != null ? `${ssl.age_days} days` : (ssl?.valid ? 'Valid' : '—'); })()}</p>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Certificate</span>
+                    <p>{(() => { const ssl = (report.details?.ssl || {}) as any; const grade = sslGrade(report.details); const issuer = ssl?.issuer || '—'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : (ssl?.valid ? 'Valid' : 'Invalid'); return `${grade ? `${grade.grade} ` : ''}${age} · ${issuer}`; })()}</p>
                   </div>
                 </div>
 
