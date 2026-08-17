@@ -304,6 +304,10 @@ export default function App() {
                     <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Started</span>
                     <p>{result.started_at ? new Date(result.started_at).toLocaleString() : '—'}</p>
                   </div>
+                  <div>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Cert age</span>
+                    <p>{(() => { const ssl = (result.details?.ssl || {}) as any; return ssl?.age_days != null ? `${ssl.age_days} days` : (ssl?.valid ? 'Valid' : '—'); })()}</p>
+                  </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1.2em', marginBottom: '1.4em' }}>
@@ -430,6 +434,10 @@ export default function App() {
                   <div>
                     <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Started</span>
                     <p>{report.started_at ? new Date(report.started_at).toLocaleString() : '—'}</p>
+                  </div>
+                  <div>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Cert age</span>
+                    <p>{(() => { const ssl = (report.details?.ssl || {}) as any; return ssl?.age_days != null ? `${ssl.age_days} days` : (ssl?.valid ? 'Valid' : '—'); })()}</p>
                   </div>
                 </div>
                 {report.reasons && report.reasons.length > 0 && (

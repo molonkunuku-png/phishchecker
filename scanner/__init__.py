@@ -128,6 +128,18 @@ def _check_ssl(url: str) -> tuple[dict[str, Any], int]:
                 info["notBefore"] = cert.get("notBefore", "")
                 info["notAfter"] = cert.get("notAfter", "")
                 info["valid"] = True
+                from datetime import datetime
+                fmt = "%b %d %H:%M:%S %Y %Z"
+                try:
+                    start_raw = cert.get("notBefore") if isinstance(cert, dict) else None
+                    end_raw = cert.get("notAfter") if isinstance(cert, dict) else None
+                    start = datetime.strptime((start_raw or ""), fmt)
+                    end = datetime.strptime((end_raw or ""), fmt)
+                    age_days = max(0, (end - start).days)
+                    info["lifetime_days"] = age_days
+                    info["age_days"] = max(0, (datetime.now(timezone.utc).replace(tzinfo=None) - start).days)
+                except Exception:
+                    info["age_days"] = None
     except Exception:
         penalty = 10
         info["error"] = "SSL check failed"
