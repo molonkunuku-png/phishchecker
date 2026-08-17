@@ -3,6 +3,32 @@ import { ThemeContext, Theme } from './lib/ThemeContext';
 import { submitScan, fetchHistory, downloadExport, getStatus, fetchScanDetail } from './lib/api';
 import type { ScanResult, HistoryItem, StatusResponse } from './lib/types';
 
+function downloadPDF(result: ScanResult) {
+  const lines = [
+    'PhishChecker Report',
+    `URL: ${result.url}`,
+    `Domain: ${result.domain}`,
+    `Risk: ${result.risk}`,
+    `Score: ${result.score ?? '—'}/100`,
+    `Mode: ${result.mode}`,
+    `Started: ${result.started_at ? new Date(result.started_at).toLocaleString() : '—'}`,
+    '',
+    'Findings:'
+  ];
+  if (result.reasons?.length) {
+    for (const r of result.reasons) lines.push(`- ${r}`);
+  } else {
+    lines.push('- None');
+  }
+  const text = lines.join('\n');
+  const blob = new Blob([text], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `phishchecker-${result.domain || 'scan'}.txt`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 function loadInitialTheme(): Theme {
   try {
     const stored = localStorage.getItem('phishchecker-theme');
@@ -226,6 +252,7 @@ export default function App() {
                     <button onClick={copyScanLink} className="pc-btn-ghost">Copy link</button>
                     <button onClick={() => downloadExport('json')} className="pc-btn-ghost">Export JSON</button>
                     <button onClick={() => downloadExport('csv')} className="pc-btn-ghost">Export CSV</button>
+                    <button onClick={() => result && downloadPDF(result)} className="pc-btn-ghost">Export report</button>
                   </div>
                 </div>
 
