@@ -16,8 +16,8 @@ export async function getCsrf(): Promise<string> {
   return data?.csrf_token || '';
 }
 
-export async function fetchHistory(): Promise<HistoryResponse> {
-  const { data } = await base.get('/api/v2/scans/history');
+export async function fetchHistory(params?: { page?: number; page_size?: number }): Promise<HistoryResponse> {
+  const { data } = await base.get('/api/v2/scans/history', { params });
   return data;
 }
 

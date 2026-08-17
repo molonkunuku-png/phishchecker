@@ -89,6 +89,8 @@ export default function App() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [showCompare, setShowCompare] = useState(false);
   const [historyFilter, setHistoryFilter] = useState<string>('all');
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyPageSize] = useState(10);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -114,17 +116,20 @@ export default function App() {
     fetchScanDetail(reportId).then(setReport).catch(() => setReport(null));
   }, [reportId]);
 
-  useEffect(() => {
-    loadHistory();
-    getStatus().then(setStatus).catch(() => setStatus(null));
-  }, []);
-
-  async function loadHistory() {
+  async function loadHistory(page = historyPage, page_size = historyPageSize) {
     try {
-      const data = await fetchHistory();
+      const data = await fetchHistory({ page, page_size });
       setHistory(data.items || []);
     } catch { }
   }
+
+  useEffect(() => {
+    loadHistory(historyPage, historyPageSize);
+  }, [historyFilter, historyPage]);
+
+  useEffect(() => {
+    getStatus().then(setStatus).catch(() => setStatus(null));
+  }, []);
 
   async function handleScan(e: React.FormEvent) {
     e.preventDefault();
@@ -450,7 +455,7 @@ export default function App() {
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>Recent scans</h2>
-                  <button onClick={loadHistory} className="pc-btn-ghost" style={{ color: 'var(--mapped-text-action)' }}>Refresh</button>
+                  <button onClick={() => loadHistory()} className="pc-btn-ghost" style={{ color: 'var(--mapped-text-action)' }}>Refresh</button>
                 </div>
 
                 {history.length > 0 && (
@@ -479,7 +484,7 @@ export default function App() {
                   <div style={{ overflowX: 'auto' }}>
                     <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap', marginBottom: '0.8em' }}>
                       {['all','high','suspicious','low'].map(f => (
-                        <button key={f} type="button" onClick={() => setHistoryFilter(f)} className="pc-btn-ghost" style={{ opacity: historyFilter === f ? 1 : 0.6 }}>{f === 'all' ? 'All' : f[0].toUpperCase() + f.slice(1)}</button>
+                        <button key={f} type="button" onClick={() => { setHistoryFilter(f); setHistoryPage(1); }} className="pc-btn-ghost" style={{ opacity: historyFilter === f ? 1 : 0.6 }}>{f === 'all' ? 'All' : f[0].toUpperCase() + f.slice(1)}</button>
                       ))}
                     </div>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85em' }}>
@@ -513,6 +518,13 @@ export default function App() {
                         })}
                       </tbody>
                     </table>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.8em', fontSize: '0.8em', color: 'var(--mapped-text-body)' }}>
+                      <span>{history.length ? `Page ${historyPage}` : ''}</span>
+                      <div style={{ display: 'flex', gap: '0.4em' }}>
+                        <button disabled={historyPage <= 1} onClick={() => setHistoryPage(p => p - 1)} className="pc-btn-ghost">Prev</button>
+                        <button disabled={history.length < historyPageSize} onClick={() => setHistoryPage(p => p + 1)} className="pc-btn-ghost">Next</button>
+                      </div>
+                    </div>
                   </div>
                 )}
                 {compareIds.length === 2 && (
