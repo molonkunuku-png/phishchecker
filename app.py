@@ -27,7 +27,7 @@ def create_app(config: dict | None = None) -> Flask:
     app.config.setdefault("SQLALCHEMY_DATABASE_URI", os.getenv("DATABASE_URL", "sqlite:///phishchecker.db"))
     app.config.setdefault("SQLALCHEMY_TRACK_MODIFICATIONS", False)
     app.config.setdefault("ENFORCE_HTTPS", True)
-    app.config.setdefault("API_KEYS_ENABLED", os.getenv("PHISHCHECKER_API_KEYS_ENABLED", "true").lower() in ("1", "true", "yes"))
+    app.config.setdefault("API_KEYS_ENABLED", os.getenv("PHISHCHECKER_API_KEYS_ENABLED", "false").lower() in ("1", "true", "yes"))
 
     Base.metadata.bind = SessionFactory(app.config["SQLALCHEMY_DATABASE_URI"])
     Base.metadata.create_all(get_engine())
