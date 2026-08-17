@@ -220,11 +220,16 @@ export default function App() {
               </p>
               <form onSubmit={handleScan} id="scan" className="pc-scan-form" style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.5em', maxWidth: '42em' }}>
                 <input ref={inputRef} value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com" className="pc-input pc-placeholder" disabled={loading} />
-                <select value={mode} onChange={e => setMode(e.target.value)} className="pc-select" disabled={loading}>
-                  <option value="quick">Quick</option>
-                  <option value="standard">Standard</option>
-                  <option value="it">IT</option>
+                <select value={mode} onChange={e => setMode(e.target.value)} className="pc-select" disabled={loading} aria-label="Scan mode">
+                  <option value="quick">Quick — fast surface check</option>
+                  <option value="standard">Standard — balanced depth</option>
+                  <option value="it">IT — deep technical scan</option>
                 </select>
+                {mode && (
+                  <span style={{ fontSize: '0.7em', color: 'var(--mapped-text-body)', padding: '0.4em 0' }}>
+                    {mode === 'quick' ? 'Lightweight: headers, TLS, basic patterns.' : mode === 'standard' ? 'Balanced: headers, TLS, domain patterns, behavior.' : 'Deep: full header audit, TLS details, behavior, routing, extended intel.'}
+                  </span>
+                )}
                 <button type="submit" disabled={loading} className="pc-btn-primary" style={{ whiteSpace: 'nowrap' }}>
                   {loading ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}><span className="pc-spinner" style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'pc-spin 0.8s linear infinite' }} />Scanning...</span>) : 'Scan'}
                 </button>
