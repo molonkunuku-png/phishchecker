@@ -385,6 +385,10 @@ body {
   color: var(--mapped-text-on-action);
 }
 
+.pc-nav-shadow {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.35);
+}
+
 .pc-btn-primary {
   display: inline-flex;
   align-items: center;

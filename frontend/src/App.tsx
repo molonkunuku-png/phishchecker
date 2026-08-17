@@ -64,6 +64,13 @@ function scoreColor(score?: number | null): string {
   return '#047857';
 }
 
+function confidenceMeta(score?: number | null): { label: string; color: string } | null {
+  if (score == null) return null;
+  if (score < 40) return { label: 'High confidence', color: '#b91c1c' };
+  if (score < 70) return { label: 'Medium confidence', color: '#b45309' };
+  return { label: 'Low confidence', color: '#047857' };
+}
+
 function sslGrade(details?: Record<string, unknown>): { grade: string; color: string } | null {
   const ssl = (details?.ssl || {}) as any;
   if (!ssl || !ssl.valid) return { grade: 'F', color: '#b91c1c' };
@@ -112,6 +119,7 @@ export default function App() {
   const [historyPage, setHistoryPage] = useState(1);
   const [historyPageSize] = useState(10);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [navShadow, setNavShadow] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.remove('dark', 'light');
@@ -128,6 +136,12 @@ export default function App() {
     onHash();
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => setNavShadow(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
@@ -190,11 +204,12 @@ export default function App() {
   const currentScore = result?.score ?? report?.score ?? null;
   const currentRisk = result?.risk ?? report?.risk ?? undefined;
   const riskPct = riskPercent(currentRisk);
+  const confidence = confidenceMeta(currentScore);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
       <div className="min-h-screen" style={{ background: 'var(--mapped-surface-page)', color: 'var(--mapped-text-body)' }}>
-        <nav className="pc-nav">
+        <nav className={`pc-nav ${navShadow ? 'pc-nav-shadow' : ''}`}>
           <a href="#main" className="pc-skip-link">Skip to content</a>
           <a href="/" className="pc-nav-logo">PHISHCHECKER</a>
           <button onClick={() => { const items = document.getElementById('pc-nav-items'); if (items) items.classList.toggle('pc-nav-open'); }} className="pc-nav-hamburger" aria-label="Toggle navigation" style={{ display: 'none', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 1em', fontSize: '1.2em', lineHeight: 1 }}>☰</button>
@@ -219,14 +234,14 @@ export default function App() {
                 Fast phishing-risk analysis with clear results. No accounts. No tracking. Just scan.
               </p>
               <form onSubmit={handleScan} id="scan" className="pc-scan-form" style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.5em', maxWidth: '42em' }}>
-                <input ref={inputRef} value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com" className="pc-input pc-placeholder" disabled={loading} />
+                <input ref={inputRef} value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com" className="pc-input pc-placeholder" disabled={loading} aria-describedby="url-hint" />
                 <select value={mode} onChange={e => setMode(e.target.value)} className="pc-select" disabled={loading} aria-label="Scan mode">
                   <option value="quick">Quick — fast surface check</option>
                   <option value="standard">Standard — balanced depth</option>
                   <option value="it">IT — deep technical scan</option>
                 </select>
                 {mode && (
-                  <span style={{ fontSize: '0.7em', color: 'var(--mapped-text-body)', padding: '0.4em 0' }}>
+                  <span id="url-hint" style={{ fontSize: '0.7em', color: 'var(--mapped-text-body)', padding: '0.4em 0' }}>
                     {mode === 'quick' ? 'Lightweight: headers, TLS, basic patterns.' : mode === 'standard' ? 'Balanced: headers, TLS, domain patterns, behavior.' : 'Deep: full header audit, TLS details, behavior, routing, extended intel.'}
                   </span>
                 )}
@@ -318,7 +333,10 @@ export default function App() {
                       <code style={{ background: 'var(--brand-grey-200)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/scans</code>
                     </div>
                     <p>Submit a URL for scanning. Requires CSRF token from <code>/api/csrf</code>.</p>
-                    <pre style={{ marginTop: '0.6em', whiteSpace: 'pre-wrap', wordBreak: 'break-word', padding: '1em', background: 'var(--mapped-surface-default)', fontSize: '0.8em', lineHeight: 1.6, border: '1px solid var(--mapped-border-default)' }}>{`{\n  "url": "https://example.com",\n  "mode": "standard"\n}`}</pre>
+                    <pre style={{ marginTop: '0.6em', whiteSpace: 'pre-wrap', wordBreak: 'break-word', padding: '1em', background: 'var(--mapped-surface-default)', fontSize: '0.8em', lineHeight: 1.6, border: '1px solid var(--mapped-border-default)' }}>{`{
+  "url": "https://example.com",
+  "mode": "standard"
+}`}</pre>
                   </div>
                   <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6em', marginBottom: '0.4em', flexWrap: 'wrap' }}>
@@ -389,6 +407,9 @@ export default function App() {
                     <div>
                       <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Risk score</div>
                       <div style={{ fontSize: '0.85em', fontWeight: 600, color: scoreColor(currentScore) }}>{currentRisk ? currentRisk.toUpperCase() : '—'}</div>
+                      {confidence && (
+                        <div style={{ fontSize: '0.65em', color: confidence.color, fontWeight: 600 }}>{confidence.label}</div>
+                      )}
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap' }}>
@@ -456,7 +477,10 @@ export default function App() {
                   <div className="pc-divider" style={{ marginTop: '1.4em', paddingTop: '1.2em' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.6em', flexWrap: 'wrap' }}>
                       <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>Findings</h3>
-                      <button type="button" onClick={() => setExpandedFindings(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.7em' }}>{expandedFindings ? 'Hide explanations' : 'Show explanations'}</button>
+                      <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap' }}>
+                        <button type="button" onClick={() => setExpandedFindings(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.7em' }}>{expandedFindings ? 'Hide explanations' : 'Show explanations'}</button>
+                        <button type="button" onClick={() => { const next = !expandedFindings; setExpandedFindings(next); }} className="pc-btn-ghost" style={{ fontSize: '0.7em' }}>{expandedFindings ? 'Collapse all' : 'Expand all'}</button>
+                      </div>
                     </div>
                     <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.45em', fontSize: '0.9em', lineHeight: 1.5 }}>
                       {result.reasons.map((r: string, i: number) => {
@@ -508,6 +532,9 @@ export default function App() {
                   <div>
                     <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Risk score</div>
                     <div style={{ fontSize: '0.85em', fontWeight: 600, color: scoreColor(report.score) }}>{report.risk ? report.risk.toUpperCase() : '—'}</div>
+                    {confidence && (
+                      <div style={{ fontSize: '0.65em', color: confidence.color, fontWeight: 600 }}>{confidence.label}</div>
+                    )}
                   </div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1.2em', fontSize: '0.9em', lineHeight: 1.5 }}>
@@ -528,8 +555,16 @@ export default function App() {
                     <p>{report.started_at ? new Date(report.started_at).toLocaleString() : '—'}</p>
                   </div>
                   <div>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Domain age</span>
+                    <p>{(() => { const ssl = (report.details?.ssl || {}) as any; const start = ssl?.notBefore; if (!start) return '—'; const d = new Date(start); const days = Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000)); const yrs = (days / 365).toFixed(1); return `${days} days (${yrs} yrs)`; })()}</p>
+                  </div>
+                  <div>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Duration</span>
+                    <p>{report.duration_ms != null ? `${report.duration_ms} ms` : '—'}</p>
+                  </div>
+                  <div>
                     <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Certificate</span>
-                    <p>{(() => { const ssl = (report.details?.ssl || {}) as any; const grade = sslGrade(report.details); const issuer = ssl?.issuer || '—'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : (ssl?.valid ? 'Valid' : 'Invalid'); return `${grade ? `${grade.grade} ` : ''}${age} · ${issuer}`; })()}</p>
+                    <p>{(() => { const ssl = (report.details?.ssl || {}) as any; const grade = sslGrade(report.details); const issuer = ssl?.issuer || '—'; const valid = ssl?.valid ? 'Valid' : 'Invalid'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : ''; return `${grade ? grade.grade + ' ' : ''}${valid}${age ? ' · ' + age : ''} · ${issuer}`; })()}</p>
                   </div>
                 </div>
 
@@ -682,7 +717,7 @@ export default function App() {
           <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
             <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--mapped-text-headings)', marginBottom: '0.8em' }}>How it works</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5 }} className="pc-section">
                 <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
                   <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-action)', marginBottom: '0.4em' }}>01 — Paste</div>
                   <p style={{ color: 'var(--mapped-text-body)' }}>Drop any link into the scanner. We do not require accounts or personal data.</p>
