@@ -209,7 +209,7 @@ export default function App() {
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
       <div className="min-h-screen" style={{ background: 'var(--mapped-surface-page)', color: 'var(--mapped-text-body)' }}>
-        <nav className={`pc-nav ${navShadow ? 'pc-nav-shadow' : ''}`}>
+        <nav className={`pc-nav ${navShadow ? 'pc-nav-shadow' : ''}`} style={{ overflow: 'visible' }}>
           <a href="#main" className="pc-skip-link">Skip to content</a>
           <a href="/" className="pc-nav-logo">PHISHCHECKER</a>
           <button onClick={() => { const items = document.getElementById('pc-nav-items'); if (items) items.classList.toggle('pc-nav-open'); }} className="pc-nav-hamburger" aria-label="Toggle navigation" style={{ display: 'none', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 1em', fontSize: '1.2em', lineHeight: 1 }}>☰</button>
@@ -218,9 +218,9 @@ export default function App() {
             <button onClick={() => { setShowAwareness(v => !v); }} className={`pc-nav-item ${showAwareness ? 'pc-nav-item-active' : ''}`}>{showAwareness ? 'Scan' : 'Awareness'}</button>
             <button onClick={() => { setShowApi(v => !v); }} className={`pc-nav-item ${showApi ? 'pc-nav-item-active' : ''}`}>{showApi ? 'Scan' : 'API'}</button>
             <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className={`pc-nav-item ${showStatus ? 'pc-nav-item-active' : ''}`}>{showStatus ? 'Scan' : 'Status'}</button>
-            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className="pc-nav-item" aria-label="Toggle theme">{theme === 'dark' ? '☀ Light' : '☾ Dark'}</button>
+            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className={`pc-nav-item ${theme === 'dark' ? 'pc-nav-item-active' : ''}`} aria-label="Toggle theme">{theme === 'dark' ? '☀ Light' : '☾ Dark'}</button>
           </div>
-          <button onClick={() => { document.getElementById('scan')?.scrollIntoView({ behavior: 'smooth' }); }} className="pc-nav-cta">Scan now</button>
+          <button onClick={() => { document.getElementById('scan')?.scrollIntoView({ behavior: 'smooth' }); }} className="pc-nav-cta" style={{ marginLeft: 'auto', flexShrink: 0 }}>Scan now</button>
         </nav>
 
         <main id="main" style={{ paddingTop: '4.2em' }}>
