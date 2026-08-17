@@ -203,7 +203,7 @@ export default function App() {
             <button onClick={() => { setShowAwareness(v => !v); }} className={`pc-nav-item ${showAwareness ? 'pc-nav-item-active' : ''}`}>{showAwareness ? 'Scan' : 'Awareness'}</button>
             <button onClick={() => { setShowApi(v => !v); }} className={`pc-nav-item ${showApi ? 'pc-nav-item-active' : ''}`}>{showApi ? 'Scan' : 'API'}</button>
             <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className={`pc-nav-item ${showStatus ? 'pc-nav-item-active' : ''}`}>{showStatus ? 'Scan' : 'Status'}</button>
-            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className="pc-nav-item" aria-label="Toggle theme">{theme === 'dark' ? 'Light' : 'Dark'}</button>
+            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className="pc-nav-item" aria-label="Toggle theme">{theme === 'dark' ? '☀ Light' : '☾ Dark'}</button>
           </div>
           <button onClick={() => { document.getElementById('scan')?.scrollIntoView({ behavior: 'smooth' }); }} className="pc-nav-cta">Scan now</button>
         </nav>
