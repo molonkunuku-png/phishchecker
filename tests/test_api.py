@@ -15,7 +15,7 @@ os.environ.setdefault("PHISHCHECKER_API_KEYS", TEST_API_KEY)
 def app():
     init_db("sqlite://")
     Base.metadata.create_all(get_engine())
-    app = create_app({"TESTING": True, "WTF_CSRF_ENABLED": False, "SQLALCHEMY_DATABASE_URI": "sqlite://"})
+    app = create_app({"TESTING": True, "WTF_CSRF_ENABLED": False, "SQLALCHEMY_DATABASE_URI": "sqlite://", "API_KEYS_ENABLED": False})
     return app
 
 
