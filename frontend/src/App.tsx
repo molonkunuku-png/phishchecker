@@ -131,7 +131,7 @@ export default function App() {
         <main style={{ paddingTop: '4.2em' }}>
           <section className="pc-panel" style={{ borderTop: 'none', borderRadius: 0, borderLeft: 'none', borderRight: 'none' }}>
             <div style={{ maxWidth: '56em', margin: '0 auto', padding: '3em 1.5em' }}>
-              <p className="pc-chip" style={{ marginBottom: '1em' }}>PRIVACY-FIRST SCANNING</p>
+              <p className="pc-chip" style={{ marginBottom: '1em', background: 'var(--mapped-surface-default)', borderColor: 'var(--mapped-border-default)', color: 'var(--mapped-text-action)' }}>PRIVACY-FIRST SCANNING</p>
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.2rem, 5vw, 3.6rem)', lineHeight: 0.95, letterSpacing: '-0.03em', color: 'var(--mapped-text-headings)', marginBottom: '0.7em' }}>
                 Check links before<br />you trust them.
               </h1>
