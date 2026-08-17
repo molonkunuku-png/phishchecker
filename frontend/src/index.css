@@ -402,6 +402,7 @@ body {
   justify-content: center;
   gap: 0.5em;
   padding: 0.85em 1.4em;
+  min-height: 44px;
   background: var(--mapped-surface-action);
   color: var(--mapped-text-on-action);
   letter-spacing: 0.06em;
@@ -429,6 +430,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 0.7em 1em;
+  min-height: 44px;
   background: transparent;
   color: var(--mapped-text-body);
   border: 1px solid var(--mapped-border-default);

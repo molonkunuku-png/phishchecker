@@ -775,7 +775,7 @@ export default function App() {
                           </div>
                           <div>
                             <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Mode</div>
-                            <div style={{ textTransform: 'capitalize' }}>{item.mode}</div>
+                            <div style={{ textTransform: 'capitalize' }}>{modeLabel(item.mode)}</div>
                           </div>
                           <div>
                             <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Duration</div>
