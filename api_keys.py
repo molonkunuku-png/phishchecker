@@ -7,7 +7,7 @@ import time
 from threading import Lock
 from typing import Any
 
-from flask import request, jsonify
+from flask import request, jsonify, current_app
 
 _KEYS: list[str] = []
 _LOCK = Lock()
@@ -35,16 +35,19 @@ def _check_rate(key: str) -> bool:
         return len(timestamps) > _RATE_LIMIT
 
 
-def require_api_key_or_rate_limit(fn: Any) -> Any:
+def require_api_key(fn: Any) -> Any:
     from functools import wraps
 
     @wraps(fn)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
+        if not current_app.config.get("API_KEYS_ENABLED"):
+            return fn(*args, **kwargs)
         key = request.headers.get("X-Api-Key") or request.args.get("api_key") or ""
         keys = _load_keys()
-        if keys:
-            if not key or key not in keys:
-                return jsonify({"error": "invalid or missing API key"}), 401
+        if not keys:
+            return fn(*args, **kwargs)
+        if not key or key not in keys:
+            return jsonify({"error": "invalid or missing API key"}), 401
         rate_key = key or (request.remote_addr or "unknown")
         if _check_rate(rate_key):
             return jsonify({"error": "rate limit exceeded"}), 429
