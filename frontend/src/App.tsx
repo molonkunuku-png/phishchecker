@@ -201,7 +201,7 @@ export default function App() {
 
         <main style={{ paddingTop: '4.2em' }}>
           <section className="pc-panel" style={{ borderTop: 'none', borderRadius: 0, borderLeft: 'none', borderRight: 'none' }}>
-            <div style={{ maxWidth: '56em', margin: '0 auto', padding: '3em 1.5em' }}>
+            <div style={{ maxWidth: '56em', margin: '0 auto', padding: '3em 1.5em' }} className="pc-section">
               <p className="pc-chip" style={{ marginBottom: '1em', background: 'var(--mapped-surface-default)', borderColor: 'var(--mapped-border-default)', color: 'var(--mapped-text-action)' }}>PRIVACY-FIRST SCANNING</p>
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.2rem, 5vw, 3.6rem)', lineHeight: 0.95, letterSpacing: '-0.03em', color: 'var(--mapped-text-headings)', marginBottom: '0.7em' }}>
                 Check links before<br />you trust them.
@@ -209,7 +209,7 @@ export default function App() {
               <p style={{ fontSize: '1.05em', lineHeight: 1.4, maxWidth: '26em', color: 'var(--mapped-text-body)', marginBottom: '1.8em' }}>
                 Fast phishing-risk analysis with clear results. No accounts. No tracking. Just scan.
               </p>
-              <form onSubmit={handleScan} id="scan" style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.5em', maxWidth: '42em' }}>
+              <form onSubmit={handleScan} id="scan" className="pc-scan-form" style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.5em', maxWidth: '42em' }}>
                 <input ref={inputRef} value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com" className="pc-input pc-placeholder" disabled={loading} />
                 <select value={mode} onChange={e => setMode(e.target.value)} className="pc-select" disabled={loading}>
                   <option value="quick">Quick</option>
@@ -233,7 +233,7 @@ export default function App() {
 
           {!result && !loading && !reportId && (
             <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '1.6em 1.5em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em' }}>
+              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '1.6em 1.5em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em' }} className="pc-section">
                 {history.slice(0, 3).map((h) => (
                   <div key={h.id} style={{ border: '1px solid var(--mapped-border-default)', padding: '1em', background: 'var(--mapped-surface-default)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5em', gap: '0.5em' }}>
@@ -365,7 +365,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1.2em', fontSize: '0.9em', lineHeight: 1.5, marginBottom: '1.4em' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1.2em', fontSize: '0.9em', lineHeight: 1.5, marginBottom: '1.4em' }} className="pc-mobile-stack">
                   <div>
                     <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>URL</span>
                     <p style={{ wordBreak: 'break-all' }}>{result.url}</p>

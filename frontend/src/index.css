@@ -223,6 +223,39 @@ body {
   box-shadow: 0 4px 20px rgba(0,0,0,0.35);
 }
 
+/* Mobile polish */
+@media (max-width: 640px) {
+  .pc-nav {
+    height: auto;
+    flex-wrap: wrap;
+    gap: 0.4em;
+    padding: 0.5em;
+  }
+  .pc-nav-items {
+    flex-wrap: wrap;
+    gap: 0.25em;
+    overflow-x: auto;
+  }
+  .pc-nav-item {
+    white-space: nowrap;
+  }
+  .pc-nav-cta {
+    border-left: none;
+    width: 100%;
+    justify-content: center;
+  }
+  .pc-scan-form {
+    grid-template-columns: 1fr !important;
+  }
+  .pc-section {
+    padding-left: 1em !important;
+    padding-right: 1em !important;
+  }
+  .pc-mobile-stack {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* Tables in dark */
 .light table, .dark table {
   border-collapse: collapse;
