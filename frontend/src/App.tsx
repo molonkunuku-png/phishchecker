@@ -64,24 +64,20 @@ function scoreColor(score?: number | null): string {
   return '#047857';
 }
 
-type Category = 'headers' | 'url' | 'tls' | 'reputation' | 'behavior' | 'other';
+type Severity = 'high' | 'medium' | 'low';
 
-function categoryOf(reason: string): Category {
+function severityOf(reason: string): Severity {
   const r = reason.toLowerCase();
-  if (/csp|x-frame|x-content-type|permissions-policy|referrer-policy|security header/.test(r)) return 'headers';
-  if (/url|domain|typo|homograph|punycode|subdomain|ip|tld|extension|path|query|@/.test(r)) return 'url';
-  if (/tls|ssl|certificate|https|lock/.test(r)) return 'tls';
-  if (/reputation|blacklist|feed|phish|abuse|vt|sandbox|known/.test(r)) return 'reputation';
-  if (/redirect|behavior|runtime|javascript|form|iframe|popup|autofocus/.test(r)) return 'behavior';
-  return 'other';
+  if (/certificate|tls|ssl|https|lock/.test(r)) return 'high';
+  if (/phish|blacklist|abuse|known|sandbox/.test(r)) return 'high';
+  if (/redirect|javascript|iframe|popup|form|behavior/.test(r)) return 'medium';
+  return 'low';
 }
 
-function categorize(reasons: string[]): Record<Category, string[]> {
-  const map: Record<Category, string[]> = { headers: [], url: [], tls: [], reputation: [], behavior: [], other: [] };
-  for (const r of reasons) {
-    map[categoryOf(r)].push(r);
-  }
-  return map;
+function severityStyle(s: Severity): { bg: string; text: string } {
+  if (s === 'high') return { bg: '#b91c1c', text: '#fff' };
+  if (s === 'medium') return { bg: '#b45309', text: '#fff' };
+  return { bg: '#047857', text: '#fff' };
 }
 
 export default function App() {
@@ -99,7 +95,6 @@ export default function App() {
   const [report, setReport] = useState<ScanResult | null>(null);
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [expandedFindings, setExpandedFindings] = useState(false);
-  const [activeCategories, setActiveCategories] = useState<Set<Category>>(new Set());
   const [showStatus, setShowStatus] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [showCompare, setShowCompare] = useState(false);
@@ -175,16 +170,6 @@ export default function App() {
     } catch { }
   }
 
-  function toggleCategory(key: string) {
-    setActiveCategories(prev => {
-      const next = new Set(prev);
-      const cat = key as Category;
-      if (next.has(cat)) next.delete(cat);
-      else next.add(cat);
-      return next;
-    });
-  }
-
   const historyStats = {
     total: history.length,
     high: history.filter(h => h.risk === 'high').length,
@@ -200,19 +185,20 @@ export default function App() {
     <ThemeContext.Provider value={{ theme, setTheme }}>
       <div className="min-h-screen" style={{ background: 'var(--mapped-surface-page)', color: 'var(--mapped-text-body)' }}>
         <nav className="pc-nav">
+          <a href="#main" className="pc-skip-link">Skip to content</a>
           <a href="/" className="pc-nav-logo">PHISHCHECKER</a>
           <button onClick={() => { const items = document.getElementById('pc-nav-items'); if (items) items.classList.toggle('pc-nav-open'); }} className="pc-nav-hamburger" aria-label="Toggle navigation" style={{ display: 'none', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 1em', fontSize: '1.2em', lineHeight: 1 }}>☰</button>
           <div id="pc-nav-items" className="pc-nav-items">
-            <button onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }} className="pc-nav-item">History</button>
-            <button onClick={() => { setShowAwareness(v => !v); }} className="pc-nav-item">{showAwareness ? 'Scan' : 'Awareness'}</button>
-            <button onClick={() => { setShowApi(v => !v); }} className="pc-nav-item">{showApi ? 'Scan' : 'API'}</button>
-            <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className="pc-nav-item">{showStatus ? 'Scan' : 'Status'}</button>
+            <button onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }} className={`pc-nav-item ${showHistory ? 'pc-nav-item-active' : ''}`}>History</button>
+            <button onClick={() => { setShowAwareness(v => !v); }} className={`pc-nav-item ${showAwareness ? 'pc-nav-item-active' : ''}`}>{showAwareness ? 'Scan' : 'Awareness'}</button>
+            <button onClick={() => { setShowApi(v => !v); }} className={`pc-nav-item ${showApi ? 'pc-nav-item-active' : ''}`}>{showApi ? 'Scan' : 'API'}</button>
+            <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className={`pc-nav-item ${showStatus ? 'pc-nav-item-active' : ''}`}>{showStatus ? 'Scan' : 'Status'}</button>
             <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className="pc-nav-item" aria-label="Toggle theme">{theme === 'dark' ? 'Light' : 'Dark'}</button>
           </div>
           <button onClick={() => { document.getElementById('scan')?.scrollIntoView({ behavior: 'smooth' }); }} className="pc-nav-cta">Scan now</button>
         </nav>
 
-        <main style={{ paddingTop: '4.2em' }}>
+        <main id="main" style={{ paddingTop: '4.2em' }}>
           <section className="pc-panel" style={{ borderTop: 'none', borderRadius: 0, borderLeft: 'none', borderRight: 'none' }}>
             <div style={{ maxWidth: '56em', margin: '0 auto', padding: '3em 1.5em' }} className="pc-section">
               <p className="pc-chip" style={{ marginBottom: '1em', background: 'var(--mapped-surface-default)', borderColor: 'var(--mapped-border-default)', color: 'var(--mapped-text-action)' }}>PRIVACY-FIRST SCANNING</p>
@@ -308,10 +294,7 @@ export default function App() {
                       <code style={{ background: 'var(--brand-grey-200)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/scans</code>
                     </div>
                     <p>Submit a URL for scanning. Requires CSRF token from <code>/api/csrf</code>.</p>
-                    <pre style={{ marginTop: '0.6em', whiteSpace: 'pre-wrap', wordBreak: 'break-word', padding: '1em', background: 'var(--mapped-surface-default)', fontSize: '0.8em', lineHeight: 1.6, border: '1px solid var(--mapped-border-default)' }}>{`{
-  "url": "https://example.com",
-  "mode": "standard"
-}`}</pre>
+                    <pre style={{ marginTop: '0.6em', whiteSpace: 'pre-wrap', wordBreak: 'break-word', padding: '1em', background: 'var(--mapped-surface-default)', fontSize: '0.8em', lineHeight: 1.6, border: '1px solid var(--mapped-border-default)' }}>{`{\n  "url": "https://example.com",\n  "mode": "standard"\n}`}</pre>
                   </div>
                   <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6em', marginBottom: '0.4em', flexWrap: 'wrap' }}>
@@ -440,63 +423,25 @@ export default function App() {
                   <div className="pc-divider" style={{ marginTop: '1.4em', paddingTop: '1.2em' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.6em', flexWrap: 'wrap' }}>
                       <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>Findings</h3>
-                      <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap' }}>
-                        {(() => {
-                          const cats = categorize(result.reasons);
-                          const active = activeCategories;
-                          return Object.entries(cats).map(([key, items]) => {
-                            const count = items.length;
-                            if (count === 0) return null;
-                            const cat = key as Category;
-                            const on = active.has(cat);
-                            const label = `${key} (${count})`;
-                            const bg = on ? 'var(--mapped-surface-default)' : 'transparent';
-                            const border = on ? 'var(--mapped-border-default)' : 'var(--mapped-border-default)';
-                            const color = on ? 'var(--mapped-text-body)' : 'var(--mapped-text-body)';
-                            return (
-                              <button key={key} type="button" onClick={() => toggleCategory(key)} style={{
-                                background: bg,
-                                border,
-                                color,
-                                padding: '0.35em 0.65em',
-                                fontSize: '0.7em',
-                                fontWeight: 500,
-                                letterSpacing: '0.06em',
-                                textTransform: 'uppercase',
-                                cursor: 'pointer',
-                                opacity: on ? 1 : 0.55
-                              }}>{label}</button>
-                            );
-                          });
-                        })()}
-                      </div>
+                      <button type="button" onClick={() => setExpandedFindings(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.7em' }}>{expandedFindings ? 'Hide explanations' : 'Show explanations'}</button>
                     </div>
-                    {(() => {
-                      const cats = categorize(result.reasons);
-                      const total = result.reasons.length;
-                      return Object.entries(cats).filter(([, items]) => items.length > 0).map(([key, items]) => {
-                        const pct = Math.round((items.length / Math.max(1, total)) * 100);
+                    <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.45em', fontSize: '0.9em', lineHeight: 1.5 }}>
+                      {result.reasons.map((r: string, i: number) => {
+                        const sev = severityOf(r);
+                        const st = severityStyle(sev);
                         return (
-                          <div key={key} style={{ marginBottom: '0.6em' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75em', color: 'var(--mapped-text-body)', marginBottom: '0.25em' }}>
-                              <span style={{ textTransform: 'capitalize' }}>{key}</span>
-                              <span>{pct}%</span>
-                            </div>
-                            <div style={{ height: '4px', background: 'var(--brand-grey-200)', overflow: 'hidden' }}>
-                              <div style={{ height: '100%', width: `${pct}%`, background: 'var(--mapped-text-action)', transition: 'width 420ms ease' }} />
-                            </div>
-                          </div>
+                          <li key={i} style={{ paddingLeft: '0.3em' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '0.65em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', background: st.bg, color: st.text, padding: '0.2em 0.45em', borderRadius: '0.25em' }}>{sev}</span>
+                              <span>{r}</span>
+                            </span>
+                          </li>
                         );
-                      });
-                    })()}
-                    <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.4em', fontSize: '0.9em', lineHeight: 1.5, marginTop: '0.8em' }}>
-                      {(activeCategories.size === 0 ? result.reasons : result.reasons.filter((r: string) => activeCategories.has(categoryOf(r)))).map((r: string, i: number) => (
-                        <li key={i} style={{ paddingLeft: '0.3em' }}>{r}</li>
-                      ))}
+                      })}
                     </ul>
                     {expandedFindings && (
                       <div style={{ marginTop: '1em', padding: '1em', background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', fontSize: '0.85em', lineHeight: 1.6, color: 'var(--mapped-text-body)' }}>
-                        These signals are based on URL structure, domain age, known patterns, and routing behavior. High risk means multiple suspicious indicators were found. Low risk means no strong phishing signals were detected.
+                        These signals are based on URL structure, domain age, known patterns, and routing behavior. High severity findings indicate stronger phishing indicators. Medium suggests caution. Low means weak or indirect signals.
                       </div>
                     )}
                   </div>
@@ -523,7 +468,7 @@ export default function App() {
                   <div style={{ position: 'relative', width: '3.2em', height: '3.2em' }}>
                     <svg viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
                       <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--brand-grey-200)" strokeWidth="3" />
-                      <circle cx="18" cy="18" r="15.5" fill="none" stroke={scoreColor(report.score)} strokeWidth="3" strokeDasharray={`${riskPercent(report.risk)} 100`} strokeLinecap="round" style={{ transition: 'stroke-dasharray 420ms ease, stroke 420ms ease' }} />
+                      <circle cx="18" cy="18" r="15.5" fill="none" stroke={scoreColor(report.score)} strokeWidth="3" strokeDasharray={`${riskPercent(report.risk) / 100 * 97.39} 97.39`} strokeLinecap="round" style={{ transition: 'stroke-dasharray 420ms ease, stroke 420ms ease' }} />
                     </svg>
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75em', fontWeight: 700, color: 'var(--mapped-text-headings)', transform: 'none' }}>{report.score ?? '—'}</div>
                   </div>
@@ -554,6 +499,7 @@ export default function App() {
                     <p>{(() => { const ssl = (report.details?.ssl || {}) as any; return ssl?.age_days != null ? `${ssl.age_days} days` : (ssl?.valid ? 'Valid' : '—'); })()}</p>
                   </div>
                 </div>
+
                 {report.reasons && report.reasons.length > 0 && (
                   <div className="pc-divider" style={{ marginTop: '1.4em', paddingTop: '1.2em' }}>
                     <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.6em' }}>Findings</h3>
