@@ -90,209 +90,212 @@ export default function App() {
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
-      <div className="min-h-screen bg-gray-950 text-gray-100 p-4">
-        <header className="max-w-4xl mx-auto flex items-center justify-between py-6">
-          <h1 className="text-2xl font-bold tracking-tight">PhishChecker</h1>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }}
-              className="px-3 py-1.5 rounded border border-gray-700 hover:border-gray-500 text-sm"
-            >
-              {showHistory ? 'Hide history' : 'History'}
-            </button>
-            <button
-              onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
-              className="px-3 py-1.5 rounded border border-gray-700 hover:border-gray-500 text-sm"
-            >
-              {theme === 'dark' ? 'Light' : 'Dark'}
-            </button>
-          </div>
-        </header>
+      <div className="min-h-screen bg-[#F5F5F0] text-neutral-900 dark:bg-[#0a0a0a] dark:text-neutral-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+          <header className="flex items-center justify-between mb-10">
+            <h1 className="text-xl font-semibold tracking-tight">PhishChecker</h1>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }}
+                className="hx-btn-ghost px-3 py-1.5 rounded-lg text-xs font-medium"
+              >
+                {showHistory ? 'Hide history' : 'History'}
+              </button>
+              <button
+                onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+                className="hx-btn-ghost px-3 py-1.5 rounded-lg text-xs font-medium"
+              >
+                {theme === 'dark' ? 'Light' : 'Dark'}
+              </button>
+            </div>
+          </header>
 
-        {status && (
-          <div className="max-w-4xl mx-auto text-xs text-gray-400 flex flex-wrap gap-2">
-            <span className="px-2 py-1 rounded border border-gray-800 bg-gray-900">
-              {status.service} v{status.version}
-            </span>
-            {Object.entries(status.features).map(([k, v]) => (
-              <span key={k} className={`px-2 py-1 rounded border ${v ? 'border-gray-700 bg-gray-900 text-gray-300' : 'border-gray-800 bg-gray-950 text-gray-600 line-through'}`}>
-                {k}
-              </span>
-            ))}
-          </div>
-        )}
-
-        <main className="max-w-4xl mx-auto space-y-6">
-          <section className="rounded border border-gray-800 bg-gray-900 p-4">
-            <form onSubmit={handleScan} className="space-y-3">
-              <div className="flex gap-2">
-                <input
-                  ref={inputRef}
-                  value={url}
-                  onChange={e => setUrl(e.target.value)}
-                  placeholder="https://example.com"
-                  className="flex-1 px-4 py-2 rounded bg-gray-950 border border-gray-700 focus:border-sky-500 outline-none"
-                />
-                <select
-                  value={mode}
-                  onChange={e => setMode(e.target.value)}
-                  className="px-3 py-2 rounded bg-gray-950 border border-gray-700"
-                >
-                  <option value="quick">Quick</option>
-                  <option value="standard">Standard</option>
-                  <option value="it">IT</option>
-                </select>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-6 py-2 rounded bg-sky-600 hover:bg-sky-500 disabled:opacity-50 font-medium"
-                >
-                  {loading ? 'Scanning...' : 'Scan'}
-                </button>
-              </div>
-              {error && <p className="text-red-400 text-sm">{error}</p>}
-            </form>
-          </section>
-
-          {!reportId && result && (
-            <section className="rounded border border-gray-800 bg-gray-900 p-4 space-y-3">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className={`px-2 py-1 rounded text-xs font-bold ${
-                    result.risk === 'high' ? 'bg-red-900 text-red-200' :
-                    result.risk === 'suspicious' ? 'bg-yellow-900 text-yellow-200' :
-                    'bg-green-900 text-green-200'
-                  }`}>
-                    {result.risk?.toUpperCase()}
-                  </span>
-                  <span className="text-3xl font-bold">{result.score ?? '—'}</span>
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={copyScanLink} className="text-xs px-2 py-1 rounded border border-gray-700 hover:border-gray-500">
-                    Copy link
-                  </button>
-                  <button onClick={() => downloadExport('json')} className="text-xs px-2 py-1 rounded border border-gray-700 hover:border-gray-500">
-                    Export JSON
-                  </button>
-                  <button onClick={() => downloadExport('csv')} className="text-xs px-2 py-1 rounded border border-gray-700 hover:border-gray-500">
-                    Export CSV
-                  </button>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="text-gray-500">URL</span>
-                  <p className="break-all">{result.url}</p>
-                </div>
-                <div>
-                  <span className="text-gray-500">Domain</span>
-                  <p className="break-all">{result.domain}</p>
-                </div>
-                <div>
-                  <span className="text-gray-500">Mode</span>
-                  <p className="capitalize">{result.mode}</p>
-                </div>
-                <div>
-                  <span className="text-gray-500">Started</span>
-                  <p>{result.started_at ? new Date(result.started_at).toLocaleString() : '—'}</p>
-                </div>
-              </div>
-              {result.reasons && result.reasons.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-300 mb-1">Findings</h3>
-                  <ul className="list-disc pl-5 text-sm text-gray-300 space-y-1">
-                    {result.reasons.map((r: string, i: number) => <li key={i}>{r}</li>)}
-                  </ul>
-                </div>
-              )}
-              {result.details && (
-                <details className="text-sm text-gray-300">
-                  <summary className="cursor-pointer select-none text-gray-400">Raw details</summary>
-                  <pre className="mt-2 whitespace-pre-wrap break-words bg-gray-950 p-3 rounded border border-gray-800">
-                    {JSON.stringify(result.details, null, 2)}
-                  </pre>
-                </details>
-              )}
-            </section>
+          {status && (
+            <div className="mb-6 flex flex-wrap items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+              <span className="hx-chip px-2 py-1 rounded-lg">{status.service} v{status.version}</span>
+              {Object.entries(status.features).map(([k, v]) => (
+                <span key={k} className={`hx-chip px-2 py-1 rounded-lg ${v ? '' : 'opacity-50 line-through'}`}>
+                  {k}
+                </span>
+              ))}
+            </div>
           )}
 
-          {showHistory && (
-            <section className="rounded border border-gray-800 bg-gray-900 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-semibold">Recent scans</h2>
+          <main className="space-y-6">
+            <section className="hx-panel rounded-xl p-5">
+              <form onSubmit={handleScan} className="space-y-4">
                 <div className="flex gap-2">
-                  <button onClick={loadHistory} className="text-xs text-sky-400 hover:text-sky-300">Refresh</button>
+                  <input
+                    ref={inputRef}
+                    value={url}
+                    onChange={e => setUrl(e.target.value)}
+                    placeholder="https://example.com"
+                    className="hx-input flex-1 px-3.5 py-2 rounded-lg text-sm"
+                  />
+                  <select
+                    value={mode}
+                    onChange={e => setMode(e.target.value)}
+                    className="hx-input px-3 py-2 rounded-lg text-sm"
+                  >
+                    <option value="quick">Quick</option>
+                    <option value="standard">Standard</option>
+                    <option value="it">IT</option>
+                  </select>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="hx-btn-primary px-5 py-2 rounded-lg text-sm font-medium disabled:opacity-60"
+                  >
+                    {loading ? 'Scanning...' : 'Scan'}
+                  </button>
                 </div>
-              </div>
-              {history.length === 0 && <p className="text-sm text-gray-500">No scans yet.</p>}
-              {history.length > 0 && (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-left text-gray-400 border-b border-gray-800">
-                        <th className="py-2">Time</th>
-                        <th>Domain</th>
-                        <th>Risk</th>
-                        <th>Score</th>
-                        <th>Mode</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {history.map((h, i) => (
-                        <tr key={h.id || i} className="border-b border-gray-800/50">
-                          <td className="py-2 text-xs text-gray-400 whitespace-nowrap">
-                            {h.started_at ? new Date(h.started_at).toLocaleString() : '—'}
-                          </td>
-                          <td className="py-2 break-all">{h.domain}</td>
-                          <td className="py-2 capitalize">{h.risk}</td>
-                          <td className="py-2">{h.score}</td>
-                          <td className="py-2">{h.mode}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-              </section>
-              )}
+                {error && <p className="text-red-500 text-xs">{error}</p>}
+              </form>
+            </section>
 
-              {reportId && report && (
-              <section className="rounded border border-gray-800 bg-gray-900 p-4 space-y-3">
+            {!reportId && result && (
+              <section className="hx-panel rounded-xl p-5 space-y-4 hx-animate-in">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <h2 className="text-lg font-semibold">Scan report</h2>
-                  <button onClick={() => { setReportId(null); setReport(null); window.location.hash = ''; }} className="text-xs px-2 py-1 rounded border border-gray-700 hover:border-gray-500">
+                  <div className="flex items-center gap-3">
+                    <span className={`hx-risk-${result.risk === 'high' ? 'high' : result.risk === 'suspicious' ? 'suspicious' : 'low'} px-2 py-1 rounded-md text-xs font-semibold`}>
+                      {result.risk?.toUpperCase()}
+                    </span>
+                    <span className="text-4xl font-semibold">{result.score ?? '—'}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={copyScanLink} className="hx-btn-ghost px-3 py-1.5 rounded-lg text-xs font-medium">Copy link</button>
+                    <button onClick={() => downloadExport('json')} className="hx-btn-ghost px-3 py-1.5 rounded-lg text-xs font-medium">Export JSON</button>
+                    <button onClick={() => downloadExport('csv')} className="hx-btn-ghost px-3 py-1.5 rounded-lg text-xs font-medium">Export CSV</button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">URL</span>
+                    <p className="break-all leading-relaxed">{result.url}</p>
+                  </div>
+                  <div>
+                    <span className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Domain</span>
+                    <p className="break-all leading-relaxed">{result.domain}</p>
+                  </div>
+                  <div>
+                    <span className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Mode</span>
+                    <p className="capitalize">{result.mode}</p>
+                  </div>
+                  <div>
+                    <span className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Started</span>
+                    <p>{result.started_at ? new Date(result.started_at).toLocaleString() : '—'}</p>
+                  </div>
+                </div>
+
+                {result.reasons && result.reasons.length > 0 && (
+                  <div className="hx-divider pt-3">
+                    <h3 className="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-2">Findings</h3>
+                    <ul className="list-disc pl-5 text-sm space-y-1">
+                      {result.reasons.map((r: string, i: number) => <li key={i}>{r}</li>)}
+                    </ul>
+                  </div>
+                )}
+
+                {result.details && (
+                  <details className="text-sm">
+                    <summary className="cursor-pointer select-none text-neutral-500 dark:text-neutral-400 text-xs">Raw details</summary>
+                    <pre className="mt-2 whitespace-pre-wrap break-words bg-black/5 dark:bg-white/5 p-3 rounded-lg text-xs leading-relaxed">
+                      {JSON.stringify(result.details, null, 2)}
+                    </pre>
+                  </details>
+                )}
+              </section>
+            )}
+
+            {reportId && report && (
+              <section className="hx-panel rounded-xl p-5 space-y-4 hx-animate-in">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-base font-semibold">Scan report</h2>
+                  <button onClick={() => { setReportId(null); setReport(null); window.location.hash = ''; }} className="hx-btn-ghost px-3 py-1.5 rounded-lg text-xs font-medium">
                     Back
                   </button>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className={`px-2 py-1 rounded text-xs font-bold ${
-                    report.risk === 'high' ? 'bg-red-900 text-red-200' :
-                    report.risk === 'suspicious' ? 'bg-yellow-900 text-yellow-200' :
-                    'bg-green-900 text-green-200'
-                  }`}>{report.risk?.toUpperCase()}</span>
-                  <span className="text-3xl font-bold">{report.score ?? '—'}</span>
+                  <span className={`hx-risk-${report.risk === 'high' ? 'high' : report.risk === 'suspicious' ? 'suspicious' : 'low'} px-2 py-1 rounded-md text-xs font-semibold`}>{report.risk?.toUpperCase()}</span>
+                  <span className="text-4xl font-semibold">{report.score ?? '—'}</span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                  <div><span className="text-gray-500">URL</span><p className="break-all">{report.url}</p></div>
-                  <div><span className="text-gray-500">Domain</span><p className="break-all">{report.domain}</p></div>
-                  <div><span className="text-gray-500">Mode</span><p className="capitalize">{report.mode}</p></div>
-                  <div><span className="text-gray-500">Started</span><p>{report.started_at ? new Date(report.started_at).toLocaleString() : '—'}</p></div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">URL</span>
+                    <p className="break-all leading-relaxed">{report.url}</p>
+                  </div>
+                  <div>
+                    <span className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Domain</span>
+                    <p className="break-all leading-relaxed">{report.domain}</p>
+                  </div>
+                  <div>
+                    <span className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Mode</span>
+                    <p className="capitalize">{report.mode}</p>
+                  </div>
+                  <div>
+                    <span className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Started</span>
+                    <p>{report.started_at ? new Date(report.started_at).toLocaleString() : '—'}</p>
+                  </div>
                 </div>
                 {report.reasons && report.reasons.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-300 mb-1">Findings</h3>
-                    <ul className="list-disc pl-5 text-sm text-gray-300 space-y-1">
+                  <div className="hx-divider pt-3">
+                    <h3 className="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-2">Findings</h3>
+                    <ul className="list-disc pl-5 text-sm space-y-1">
                       {report.reasons.map((r, i) => <li key={i}>{r}</li>)}
                     </ul>
                   </div>
                 )}
               </section>
-              )}
+            )}
 
-              {reportId && !report && (
-              <section className="rounded border border-gray-800 bg-gray-900 p-4 text-sm text-gray-400">Loading scan report...</section>
-              )}
-              </main>
+            {reportId && !report && (
+              <section className="hx-panel rounded-xl p-5 text-sm text-neutral-500 dark:text-neutral-400">Loading scan report...</section>
+            )}
+
+            {showHistory && (
+              <section className="hx-panel rounded-xl p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-base font-semibold">Recent scans</h2>
+                  <button onClick={loadHistory} className="text-xs text-sky-500 hover:text-sky-400">Refresh</button>
+                </div>
+                {history.length === 0 && <p className="text-sm text-neutral-500 dark:text-neutral-400">No scans yet.</p>}
+                {history.length > 0 && (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-left text-xs text-neutral-500 dark:text-neutral-400 border-b border-black/5 dark:border-white/10">
+                          <th className="py-2 pr-4 font-medium">Time</th>
+                          <th className="py-2 pr-4 font-medium">Domain</th>
+                          <th className="py-2 pr-4 font-medium">Risk</th>
+                          <th className="py-2 pr-4 font-medium">Score</th>
+                          <th className="py-2 font-medium">Mode</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {history.map((h, i) => (
+                          <tr key={h.id || i} className="border-b border-black/5 dark:border-white/10 last:border-0">
+                            <td className="py-2.5 pr-4 text-xs text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
+                              {h.started_at ? new Date(h.started_at).toLocaleString() : '—'}
+                            </td>
+                            <td className="py-2.5 pr-4 break-all leading-relaxed">{h.domain}</td>
+                            <td className="py-2.5 pr-4 capitalize">{h.risk}</td>
+                            <td className="py-2.5 pr-4">{h.score}</td>
+                            <td className="py-2.5 capitalize">{h.mode}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+            )}
+          </main>
+
+          <footer className="mt-16 mb-8 text-center text-xs text-neutral-400 dark:text-neutral-600">
+            PhishChecker · privacy-first scanning
+          </footer>
+        </div>
       </div>
     </ThemeContext.Provider>
   );
