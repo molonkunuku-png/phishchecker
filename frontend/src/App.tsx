@@ -198,8 +198,8 @@ export default function App() {
                 Fast phishing-risk analysis with clear results. No accounts. No tracking. Just scan.
               </p>
               <form onSubmit={handleScan} id="scan" style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.5em', maxWidth: '42em' }}>
-                <input ref={inputRef} value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com" className="pc-input pc-placeholder" />
-                <select value={mode} onChange={e => setMode(e.target.value)} className="pc-select">
+                <input ref={inputRef} value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com" className="pc-input pc-placeholder" disabled={loading} />
+                <select value={mode} onChange={e => setMode(e.target.value)} className="pc-select" disabled={loading}>
                   <option value="quick">Quick</option>
                   <option value="standard">Standard</option>
                   <option value="it">IT</option>
@@ -208,6 +208,13 @@ export default function App() {
                   {loading ? 'Scanning...' : 'Scan'}
                 </button>
               </form>
+              {loading && (
+                <div style={{ marginTop: '1.2em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em' }}>
+                  <div className="pc-skeleton" />
+                  <div className="pc-skeleton" />
+                  <div className="pc-skeleton" />
+                </div>
+              )}
               {error && <p style={{ color: '#b91c1c', marginTop: '0.75em', fontSize: '0.85em' }}>{error}</p>}
             </div>
           </section>

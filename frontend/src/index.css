@@ -467,6 +467,21 @@ body {
   animation: fadeIn 280ms ease-out both;
 }
 
+@keyframes shimmer {
+  0% { opacity: .55; }
+  50% { opacity: 1; }
+  100% { opacity: .55; }
+}
+.pc-skeleton {
+  background: var(--brand-grey-200);
+  border-radius: 0.35em;
+  animation: shimmer 1.2s infinite;
+  height: 6.5em;
+}
+.dark .pc-skeleton {
+  background: #26272a;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pc-animate-in {
     animation: none;
