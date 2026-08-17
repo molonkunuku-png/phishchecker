@@ -44,6 +44,19 @@ function riskPercent(risk?: string): number {
   return 0;
 }
 
+function relativeTime(iso?: string | null): string {
+  if (!iso) return '—';
+  const diff = Date.now() - new Date(iso).getTime();
+  const sec = Math.floor(diff / 1000);
+  if (sec < 60) return 'Just now';
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min} min ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr} hr ago`;
+  const day = Math.floor(hr / 24);
+  return `${day} day${day === 1 ? '' : 's'} ago`;
+}
+
 function scoreColor(score?: number | null): string {
   if (score == null) return 'var(--mapped-text-body)';
   if (score < 40) return '#b91c1c';
@@ -217,7 +230,7 @@ export default function App() {
                   <option value="it">IT</option>
                 </select>
                 <button type="submit" disabled={loading} className="pc-btn-primary" style={{ whiteSpace: 'nowrap' }}>
-                  {loading ? 'Scanning...' : 'Scan'}
+                  {loading ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}><span className="pc-spinner" style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'pc-spin 0.8s linear infinite' }} />Scanning...</span>) : 'Scan'}
                 </button>
               </form>
               {loading && (
@@ -588,9 +601,9 @@ export default function App() {
                   </div>
                 )}
 
-                {history.length === 0 && <p style={{ color: 'var(--mapped-text-body)', fontSize: '0.9em' }}>No scans yet.</p>}
+                {history.length === 0 && <div className="pc-history-empty">No scans yet.</div>}
                 {history.length > 0 && (
-                  <div style={{ overflowX: 'auto' }}>
+                  <div className="pc-history-wrap">
                     <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap', marginBottom: '0.8em' }}>
                       {['all','high','suspicious','low'].map(f => (
                         <button key={f} type="button" onClick={() => { setHistoryFilter(f); setHistoryPage(1); }} className="pc-btn-ghost" style={{ opacity: historyFilter === f ? 1 : 0.6 }}>{f === 'all' ? 'All' : f[0].toUpperCase() + f.slice(1)}</button>
@@ -617,7 +630,7 @@ export default function App() {
                                   setCompareIds(prev => prev.includes(h.id || '') ? prev.filter(x => x !== h.id) : [...prev, h.id || ''].slice(0, 2));
                                 }} />
                               </td>
-                              <td style={{ padding: '0.7em 0.8em', whiteSpace: 'nowrap', color: 'var(--mapped-text-body)', fontSize: '0.8em' }}>{h.started_at ? new Date(h.started_at).toLocaleString() : '—'}</td>
+                              <td style={{ padding: '0.7em 0.8em', whiteSpace: 'nowrap', color: 'var(--mapped-text-body)', fontSize: '0.8em' }}>{relativeTime(h.started_at)}</td>
                               <td style={{ padding: '0.7em 0.8em', wordBreak: 'break-all' }}>{h.domain}</td>
                               <td style={{ padding: '0.7em 0.8em', textTransform: 'capitalize' }}>{h.risk}</td>
                               <td style={{ padding: '0.7em 0.8em' }}>{h.score}</td>
@@ -713,6 +726,11 @@ export default function App() {
             <span>PhishChecker</span>
             <span>Privacy-first scanning</span>
             <span>{status?.version ? `v${status.version}` : ''}</span>
+          </div>
+          <div style={{ maxWidth: '56em', margin: '0 auto', padding: '0 1.5em 1.5em', display: 'flex', gap: '1em', flexWrap: 'wrap', fontSize: '0.7em', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>
+            <a href="/privacy" style={{ color: 'var(--mapped-text-action)', textDecoration: 'none' }}>Privacy</a>
+            <a href="/terms" style={{ color: 'var(--mapped-text-action)', textDecoration: 'none' }}>Terms</a>
+            <span>© {new Date().getFullYear()} PhishChecker</span>
           </div>
         </footer>
       </div>

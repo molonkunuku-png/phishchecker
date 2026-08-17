@@ -500,6 +500,24 @@ body {
   animation: fadeIn 280ms ease-out both;
 }
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.pc-spinner {
+  display: inline-block;
+}
+.pc-history-empty {
+  padding: 1.2em;
+  border: 1px dashed var(--mapped-border-default);
+  background: var(--mapped-surface-default);
+  color: var(--mapped-text-body);
+  font-size: 0.9em;
+  text-align: center;
+}
+.pc-history-wrap {
+  overflow-x: auto;
+}
+
 @keyframes shimmer {
   0% { opacity: .55; }
   50% { opacity: 1; }
