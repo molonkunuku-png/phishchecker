@@ -8,7 +8,7 @@ function loadInitialTheme(): Theme {
     const stored = localStorage.getItem('phishchecker-theme');
     if (stored === 'dark' || stored === 'light') return stored;
   } catch { }
-  return 'dark';
+  return 'light';
 }
 
 export default function App() {
@@ -90,39 +90,35 @@ export default function App() {
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
-      <div className="min-h-screen bg-[#F5F5F0] text-neutral-900 dark:bg-[#0a0a0a] dark:text-neutral-100 hx-texture">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
-          <header className="flex items-center justify-between mb-10">
-            <h1 className="text-xl font-semibold tracking-tight">PhishChecker</h1>
+      <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-foreground)]">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+          <header className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <h1 className="text-lg font-semibold tracking-tight">PhishChecker</h1>
+              {status && (
+                <span className="pc-chip px-2 py-1 rounded-md hidden sm:inline">
+                  v{status.version}
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }}
-                className="hx-btn-ghost px-3 py-1.5 rounded-lg text-xs font-medium"
+                className="pc-btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium"
               >
                 {showHistory ? 'Hide history' : 'History'}
               </button>
               <button
                 onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
-                className="hx-btn-ghost px-3 py-1.5 rounded-lg text-xs font-medium"
+                className="pc-btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium"
               >
                 {theme === 'dark' ? 'Light' : 'Dark'}
               </button>
             </div>
           </header>
 
-          {status && (
-            <div className="mb-6 flex flex-wrap items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
-              <span className="hx-chip px-2 py-1 rounded-lg">{status.service} v{status.version}</span>
-              {Object.entries(status.features).map(([k, v]) => (
-                <span key={k} className={`hx-chip px-2 py-1 rounded-lg ${v ? '' : 'opacity-50 line-through'}`}>
-                  {k}
-                </span>
-              ))}
-            </div>
-          )}
-
-          <main className="space-y-6">
-            <section className="hx-panel rounded-xl p-5">
+          <main className="space-y-5">
+            <section className="pc-panel rounded-xl p-5">
               <form onSubmit={handleScan} className="space-y-4">
                 <div className="flex gap-2">
                   <input
@@ -130,12 +126,12 @@ export default function App() {
                     value={url}
                     onChange={e => setUrl(e.target.value)}
                     placeholder="https://example.com"
-                    className="hx-input flex-1 px-3.5 py-2 rounded-lg text-sm"
+                    className="pc-input flex-1 px-3.5 py-2 rounded-lg text-sm"
                   />
                   <select
                     value={mode}
                     onChange={e => setMode(e.target.value)}
-                    className="hx-input px-3 py-2 rounded-lg text-sm"
+                    className="pc-input px-3 py-2 rounded-lg text-sm"
                   >
                     <option value="quick">Quick</option>
                     <option value="standard">Standard</option>
@@ -144,54 +140,58 @@ export default function App() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="hx-btn-primary px-5 py-2 rounded-lg text-sm font-medium disabled:opacity-60"
+                    className="pc-btn-primary px-5 py-2 rounded-lg text-sm font-medium disabled:opacity-60"
                   >
                     {loading ? 'Scanning...' : 'Scan'}
                   </button>
                 </div>
-                {error && <p className="text-red-500 text-xs">{error}</p>}
+                {error && <p className="text-sm" style={{ color: 'var(--color-destructive)' }}>{error}</p>}
               </form>
             </section>
 
             {!reportId && result && (
-              <section className="hx-panel rounded-xl p-5 space-y-4 hx-animate-in">
+              <section className="pc-panel rounded-xl p-5 space-y-4 pc-animate-in">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <span className={`hx-risk-${result.risk === 'high' ? 'high' : result.risk === 'suspicious' ? 'suspicious' : 'low'} px-2 py-1 rounded-md text-xs font-semibold`}>
+                    <span className={`px-2.5 py-1 rounded-md text-xs font-semibold ${
+                      result.risk === 'high' ? 'pc-risk-high' :
+                      result.risk === 'suspicious' ? 'pc-risk-suspicious' :
+                      'pc-risk-low'
+                    }`}>
                       {result.risk?.toUpperCase()}
                     </span>
-                    <span className="text-4xl font-semibold">{result.score ?? '—'}</span>
+                    <span className="text-3xl font-semibold tracking-tight">{result.score ?? '—'}</span>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={copyScanLink} className="hx-btn-ghost px-3 py-1.5 rounded-lg text-xs font-medium">Copy link</button>
-                    <button onClick={() => downloadExport('json')} className="hx-btn-ghost px-3 py-1.5 rounded-lg text-xs font-medium">Export JSON</button>
-                    <button onClick={() => downloadExport('csv')} className="hx-btn-ghost px-3 py-1.5 rounded-lg text-xs font-medium">Export CSV</button>
+                    <button onClick={copyScanLink} className="pc-btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium">Copy link</button>
+                    <button onClick={() => downloadExport('json')} className="pc-btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium">Export JSON</button>
+                    <button onClick={() => downloadExport('csv')} className="pc-btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium">Export CSV</button>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">URL</span>
+                    <span className="block text-xs font-medium mb-1" style={{ color: 'var(--color-muted-foreground)' }}>URL</span>
                     <p className="break-all leading-relaxed">{result.url}</p>
                   </div>
                   <div>
-                    <span className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Domain</span>
+                    <span className="block text-xs font-medium mb-1" style={{ color: 'var(--color-muted-foreground)' }}>Domain</span>
                     <p className="break-all leading-relaxed">{result.domain}</p>
                   </div>
                   <div>
-                    <span className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Mode</span>
+                    <span className="block text-xs font-medium mb-1" style={{ color: 'var(--color-muted-foreground)' }}>Mode</span>
                     <p className="capitalize">{result.mode}</p>
                   </div>
                   <div>
-                    <span className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Started</span>
+                    <span className="block text-xs font-medium mb-1" style={{ color: 'var(--color-muted-foreground)' }}>Started</span>
                     <p>{result.started_at ? new Date(result.started_at).toLocaleString() : '—'}</p>
                   </div>
                 </div>
 
                 {result.reasons && result.reasons.length > 0 && (
-                  <div className="hx-divider pt-3">
-                    <h3 className="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-2">Findings</h3>
-                    <ul className="list-disc pl-5 text-sm space-y-1">
+                  <div className="pc-divider pt-3">
+                    <h3 className="text-xs font-semibold mb-2" style={{ color: 'var(--color-muted-foreground)' }}>Findings</h3>
+                    <ul className="list-disc pl-5 text-sm space-y-1 leading-relaxed">
                       {result.reasons.map((r: string, i: number) => <li key={i}>{r}</li>)}
                     </ul>
                   </div>
@@ -199,8 +199,8 @@ export default function App() {
 
                 {result.details && (
                   <details className="text-sm">
-                    <summary className="cursor-pointer select-none text-neutral-500 dark:text-neutral-400 text-xs">Raw details</summary>
-                    <pre className="mt-2 whitespace-pre-wrap break-words bg-black/5 dark:bg-white/5 p-3 rounded-lg text-xs leading-relaxed">
+                    <summary className="cursor-pointer select-none text-sm font-medium" style={{ color: 'var(--color-muted-foreground)' }}>Raw details</summary>
+                    <pre className="mt-2 whitespace-pre-wrap break-words p-3 rounded-lg text-xs leading-relaxed" style={{ background: 'var(--color-muted)' }}>
                       {JSON.stringify(result.details, null, 2)}
                     </pre>
                   </details>
@@ -209,39 +209,43 @@ export default function App() {
             )}
 
             {reportId && report && (
-              <section className="hx-panel rounded-xl p-5 space-y-4 hx-animate-in">
+              <section className="pc-panel rounded-xl p-5 space-y-4 pc-animate-in">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h2 className="text-base font-semibold">Scan report</h2>
-                  <button onClick={() => { setReportId(null); setReport(null); window.location.hash = ''; }} className="hx-btn-ghost px-3 py-1.5 rounded-lg text-xs font-medium">
+                  <button onClick={() => { setReportId(null); setReport(null); window.location.hash = ''; }} className="pc-btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium">
                     Back
                   </button>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className={`hx-risk-${report.risk === 'high' ? 'high' : report.risk === 'suspicious' ? 'suspicious' : 'low'} px-2 py-1 rounded-md text-xs font-semibold`}>{report.risk?.toUpperCase()}</span>
-                  <span className="text-4xl font-semibold">{report.score ?? '—'}</span>
+                  <span className={`px-2.5 py-1 rounded-md text-xs font-semibold ${
+                    report.risk === 'high' ? 'pc-risk-high' :
+                    report.risk === 'suspicious' ? 'pc-risk-suspicious' :
+                    'pc-risk-low'
+                  }`}>{report.risk?.toUpperCase()}</span>
+                  <span className="text-3xl font-semibold tracking-tight">{report.score ?? '—'}</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">URL</span>
+                    <span className="block text-xs font-medium mb-1" style={{ color: 'var(--color-muted-foreground)' }}>URL</span>
                     <p className="break-all leading-relaxed">{report.url}</p>
                   </div>
                   <div>
-                    <span className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Domain</span>
+                    <span className="block text-xs font-medium mb-1" style={{ color: 'var(--color-muted-foreground)' }}>Domain</span>
                     <p className="break-all leading-relaxed">{report.domain}</p>
                   </div>
                   <div>
-                    <span className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Mode</span>
+                    <span className="block text-xs font-medium mb-1" style={{ color: 'var(--color-muted-foreground)' }}>Mode</span>
                     <p className="capitalize">{report.mode}</p>
                   </div>
                   <div>
-                    <span className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Started</span>
+                    <span className="block text-xs font-medium mb-1" style={{ color: 'var(--color-muted-foreground)' }}>Started</span>
                     <p>{report.started_at ? new Date(report.started_at).toLocaleString() : '—'}</p>
                   </div>
                 </div>
                 {report.reasons && report.reasons.length > 0 && (
-                  <div className="hx-divider pt-3">
-                    <h3 className="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-2">Findings</h3>
-                    <ul className="list-disc pl-5 text-sm space-y-1">
+                  <div className="pc-divider pt-3">
+                    <h3 className="text-xs font-semibold mb-2" style={{ color: 'var(--color-muted-foreground)' }}>Findings</h3>
+                    <ul className="list-disc pl-5 text-sm space-y-1 leading-relaxed">
                       {report.reasons.map((r, i) => <li key={i}>{r}</li>)}
                     </ul>
                   </div>
@@ -250,32 +254,32 @@ export default function App() {
             )}
 
             {reportId && !report && (
-              <section className="hx-panel rounded-xl p-5 text-sm text-neutral-500 dark:text-neutral-400">Loading scan report...</section>
+              <section className="pc-panel rounded-xl p-5 text-sm" style={{ color: 'var(--color-muted-foreground)' }}>Loading scan report...</section>
             )}
 
             {showHistory && (
-              <section className="hx-panel rounded-xl p-5">
+              <section className="pc-panel rounded-xl p-5">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-base font-semibold">Recent scans</h2>
-                  <button onClick={loadHistory} className="text-xs text-sky-500 hover:text-sky-400">Refresh</button>
+                  <button onClick={loadHistory} className="text-sm font-medium" style={{ color: 'var(--color-secondary)' }}>Refresh</button>
                 </div>
-                {history.length === 0 && <p className="text-sm text-neutral-500 dark:text-neutral-400">No scans yet.</p>}
+                {history.length === 0 && <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>No scans yet.</p>}
                 {history.length > 0 && (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="text-left text-xs text-neutral-500 dark:text-neutral-400 border-b border-black/5 dark:border-white/10">
-                          <th className="py-2 pr-4 font-medium">Time</th>
-                          <th className="py-2 pr-4 font-medium">Domain</th>
-                          <th className="py-2 pr-4 font-medium">Risk</th>
-                          <th className="py-2 pr-4 font-medium">Score</th>
-                          <th className="py-2 font-medium">Mode</th>
+                        <tr className="text-left text-xs font-medium" style={{ color: 'var(--color-muted-foreground)', borderBottom: '1px solid var(--color-border)' }}>
+                          <th className="py-2 pr-4">Time</th>
+                          <th className="py-2 pr-4">Domain</th>
+                          <th className="py-2 pr-4">Risk</th>
+                          <th className="py-2 pr-4">Score</th>
+                          <th className="py-2">Mode</th>
                         </tr>
                       </thead>
                       <tbody>
                         {history.map((h, i) => (
-                          <tr key={h.id || i} className="border-b border-black/5 dark:border-white/10 last:border-0">
-                            <td className="py-2.5 pr-4 text-xs text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
+                          <tr key={h.id || i} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                            <td className="py-2.5 pr-4 text-xs whitespace-nowrap" style={{ color: 'var(--color-muted-foreground)' }}>
                               {h.started_at ? new Date(h.started_at).toLocaleString() : '—'}
                             </td>
                             <td className="py-2.5 pr-4 break-all leading-relaxed">{h.domain}</td>
@@ -292,7 +296,7 @@ export default function App() {
             )}
           </main>
 
-          <footer className="mt-16 mb-8 text-center text-xs text-neutral-400 dark:text-neutral-600">
+          <footer className="mt-16 mb-8 text-center text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
             PhishChecker · privacy-first scanning
           </footer>
         </div>
