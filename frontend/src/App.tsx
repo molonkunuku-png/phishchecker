@@ -10,7 +10,7 @@ function downloadPDF(result: ScanResult) {
     `Domain: ${result.domain}`,
     `Risk: ${result.risk}`,
     `Score: ${result.score ?? '—'}/100`,
-    `Mode: ${result.mode}`,
+    `Mode: ${modeLabel(result.mode)}`,
     `Started: ${result.started_at ? new Date(result.started_at).toLocaleString() : '—'}`,
     '',
     'Findings:'
@@ -55,6 +55,15 @@ function relativeTime(iso?: string | null): string {
   if (hr < 24) return `${hr} hr ago`;
   const day = Math.floor(hr / 24);
   return `${day} day${day === 1 ? '' : 's'} ago`;
+}
+
+function modeLabel(mode?: string): string {
+  if (!mode) return '—';
+  const m = mode.toLowerCase();
+  if (m === 'it') return 'IT';
+  if (m === 'quick') return 'Quick';
+  if (m === 'standard') return 'Standard';
+  return mode.charAt(0).toUpperCase() + mode.slice(1);
 }
 
 function scoreColor(score?: number | null): string {
@@ -433,7 +442,7 @@ export default function App() {
                   </div>
                   <div>
                     <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Mode</span>
-                    <p style={{ textTransform: 'capitalize' }}>{result.mode}</p>
+                    <p>{modeLabel(result.mode)}</p>
                   </div>
                   <div>
                     <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Started</span>
@@ -452,6 +461,37 @@ export default function App() {
                     <p>{(() => { const ssl = (result.details?.ssl || {}) as any; const grade = sslGrade(result.details); const issuer = ssl?.issuer || '—'; const valid = ssl?.valid ? 'Valid' : 'Invalid'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : ''; return `${grade ? grade.grade + ' ' : ''}${valid}${age ? ' · ' + age : ''} · ${issuer}`; })()}</p>
                   </div>
                 </div>
+
+                {((result.details || {}) as any).score_math && (
+                  <details style={{ marginTop: '1.2em', fontSize: '0.9em' }}>
+                    <summary style={{ cursor: 'pointer', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', fontSize: '0.8em' }}>Score breakdown</summary>
+                    <div style={{ marginTop: '0.8em', padding: '1em', background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', fontSize: '0.85em', lineHeight: 1.6, color: 'var(--mapped-text-body)' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.4em 1em', alignItems: 'center' }}>
+                        <span>Base score</span><span style={{ fontWeight: 600 }}>100</span>
+                        <span>Headers</span><span style={{ color: '#b91c1c' }}>-{((result.details as any)?.score_math as any)?.header_penalty}</span>
+                        <span>SSL/TLS</span><span style={{ color: '#b91c1c' }}>-{((result.details as any)?.score_math as any)?.ssl_penalty}</span>
+                        <span>Threat intel</span><span style={{ color: '#b91c1c' }}>-{((result.details as any)?.score_math as any)?.threat_intel_penalty}</span>
+                        <span>Domain shape</span><span style={{ color: '#b91c1c' }}>-{((result.details as any)?.score_math as any)?.domain_penalty}</span>
+                        <span style={{ fontWeight: 600, borderTop: '1px solid var(--mapped-border-default)', paddingTop: '0.4em' }}>Final score</span><span style={{ fontWeight: 700, color: scoreColor(currentScore) }}>{((result.details as any)?.score_math as any)?.final_score}</span>
+                      </div>
+                    </div>
+                  </details>
+                )}
+
+                {(((result.details || {}) as any).redirect_chain?.length || 0) > 1 && (
+                  <div style={{ marginTop: '1.2em', fontSize: '0.9em' }}>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>Redirect chain</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.4em', color: 'var(--mapped-text-body)', lineHeight: 1.6, wordBreak: 'break-all' }}>
+                      {(((result.details || {}) as any).redirect_chain as string[]).map((u: string, i: number, arr: string[]) => (
+                        <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em' }}>
+                          <span style={{ fontSize: '0.8em', fontWeight: 600, color: 'var(--mapped-text-action)' }}>{i + 1}</span>
+                          <span>{u}</span>
+                          {i < arr.length - 1 && <span style={{ color: 'var(--mapped-text-body)', opacity: 0.7 }}>→</span>}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1.2em', marginBottom: '1.4em' }}>
                   <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
@@ -549,7 +589,7 @@ export default function App() {
                   </div>
                   <div>
                     <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Mode</span>
-                    <p style={{ textTransform: 'capitalize' }}>{report.mode}</p>
+                    <p>{modeLabel(report.mode)}</p>
                   </div>
                   <div>
                     <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Started</span>
@@ -649,7 +689,7 @@ export default function App() {
                               <td style={{ padding: '0.7em 0.8em', wordBreak: 'break-all' }}>{h.domain}</td>
                               <td style={{ padding: '0.7em 0.8em', textTransform: 'capitalize' }}>{h.risk}</td>
                               <td style={{ padding: '0.7em 0.8em' }}>{h.score}</td>
-                              <td style={{ padding: '0.7em 0.8em', textTransform: 'capitalize' }}>{h.mode}</td>
+                              <td style={{ padding: '0.7em 0.8em', textTransform: 'capitalize' }}>{modeLabel(h.mode)}</td>
                             </tr>
                           );
                         })}

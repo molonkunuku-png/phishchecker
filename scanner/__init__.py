@@ -169,7 +169,6 @@ def _threat_intel(domain: str) -> dict[str, Any]:
 
 def _score(result: ScanResult, penalty: int = 0) -> None:
     reasons = list(result.reasons)
-    penalty += sum(1 for r in reasons if r.startswith("Missing ")) * 10
     ti = result.threat_intel
     penalty += int(ti.get("penalty", 0))
     domain = result.domain
@@ -240,4 +239,14 @@ def run_scan(url: str | None, mode: str = "standard") -> dict[str, Any]:
         threat_intel=ti,
     )
     _score(result, penalty=hdr_penalty + ssl_penalty)
+    if "score_math" not in result.details:
+        result.details["score_math"] = {
+            "base": 100,
+            "header_penalty": hdr_penalty,
+            "ssl_penalty": ssl_penalty,
+            "threat_intel_penalty": int(ti.get("penalty", 0)),
+            "domain_penalty": 5 if (len(domain.split(".")) <= 2 and len(domain) < 25) else 0,
+            "total_penalty": max(0, 100 - result.score),
+            "final_score": result.score,
+        }
     return result.to_dict()
