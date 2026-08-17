@@ -146,11 +146,30 @@ def _threat_intel(domain: str) -> dict[str, Any]:
     sources: list[dict[str, Any]] = []
     hits = 0
     details: list[str] = []
-    try:
-        sources.append({"name": "phishing_army", "enabled": True})
-        # text feed integration placeholder
-    except Exception:
-        pass
+    seen: set[str] = set()
+    feeds = [
+        ("phishing_army", "https://phishing.army/download/phishing_army_blocklist.txt"),
+        ("openphish", "https://openphish.com/feed.txt"),
+    ]
+    for name, url in feeds:
+        try:
+            r = requests.get(url, timeout=3, headers={"User-Agent": "PhishChecker/1.0"})
+            if r.ok:
+                for line in r.text.splitlines():
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    try:
+                        host = urlparse(line).netloc or urlparse("https://" + line).netloc
+                    except Exception:
+                        host = line
+                    if host and host.lower() == domain.lower() and host.lower() not in seen:
+                        seen.add(host.lower())
+                        hits += 1
+                        details.append(f"Listed in {name} from current")
+                        sources.append({"name": name, "url": url, "hit": True})
+        except requests.RequestException:
+            pass
     if hits >= 2:
         penalty = 40
     elif hits == 1:
