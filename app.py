@@ -147,11 +147,11 @@ def create_app(config: dict | None = None) -> Flask:
 
     @app.get("/privacy")
     def privacy():
-        return send_file(_dist_dir / "privacy.html")
+        return send_file(Path(__file__).parent / "static" / "privacy.html")
 
     @app.get("/terms")
     def terms():
-        return send_file(_dist_dir / "terms.html")
+        return send_file(Path(__file__).parent / "static" / "terms.html")
 
     @app.get("/")
     def root() -> Response:
