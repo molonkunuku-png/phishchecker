@@ -137,6 +137,7 @@ def create_app(config: dict | None = None) -> Flask:
             "version": "1.0.0",
             "features": {
                 "public_scanning": True,
+                "api_access": True,
                 "history": True,
                 "export": True,
                 "bulk_scan": True,
