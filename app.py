@@ -17,6 +17,7 @@ from services.scan_service import ScanService
 from middleware.csrf import CsrfMiddleware
 from middleware.cors import CORSMiddleware
 from middleware.auth import require_api_key
+from middleware.security import SecurityHeadersMiddleware, rate_limit
 
 
 def create_app(config: dict | None = None) -> Flask:
@@ -35,6 +36,7 @@ def create_app(config: dict | None = None) -> Flask:
     CORS(app, supports_credentials=True)
 
     CsrfMiddleware(app)
+    SecurityHeadersMiddleware(app)
 
     @app.get("/health")
     def health() -> Response:
@@ -53,7 +55,7 @@ def create_app(config: dict | None = None) -> Flask:
         return jsonify(result), 200
 
     @app.post("/api/v2/scans")
-    @require_api_key
+    @rate_limit
     def api_scan_v2() -> Response:
         payload = request.get_json(force=True) or {}
         url = payload.get("url")
@@ -64,7 +66,7 @@ def create_app(config: dict | None = None) -> Flask:
         return jsonify(result), 202
 
     @app.post("/scan")
-    @require_api_key
+    @rate_limit
     def api_scan_legacy() -> Response:
         payload = request.get_json(force=True) or {}
         url = payload.get("url")
@@ -74,7 +76,7 @@ def create_app(config: dict | None = None) -> Flask:
         return jsonify(result), 202
 
     @app.post("/api/v1/scan")
-    @require_api_key
+    @rate_limit
     def api_scan() -> Response:
         payload = request.get_json(force=True) or {}
         url = payload.get("url")
@@ -84,7 +86,7 @@ def create_app(config: dict | None = None) -> Flask:
         return jsonify(result), 202
 
     @app.post("/scan/bulk")
-    @require_api_key
+    @rate_limit
     def api_scan_bulk() -> Response:
         payload = request.get_json(force=True) or {}
         urls = payload.get("urls", [])
@@ -123,6 +125,19 @@ def create_app(config: dict | None = None) -> Flask:
         if not result:
             return jsonify({"error": "scan not found"}), 404
         return jsonify(result), 200
+
+    @app.get("/api/v2/status")
+    def api_status() -> Response:
+        return jsonify({
+            "service": "phishchecker",
+            "version": "1.0.0",
+            "features": {
+                "public_scanning": True,
+                "history": True,
+                "export": True,
+                "bulk_scan": True,
+            },
+        }), 200
 
     _dist_dir = Path(__file__).parent / "frontend" / "dist"
 

@@ -87,3 +87,11 @@ def test_queue_status(client):
 def test_status_feeds(client):
     r = client.get("/api/v2/status/feeds")
     assert r.status_code == 200
+
+
+def test_status(client):
+    r = client.get("/api/v2/status")
+    assert r.status_code == 200
+    data = r.get_json()
+    assert data["service"] == "phishchecker"
+    assert "features" in data
