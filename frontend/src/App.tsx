@@ -250,7 +250,12 @@ export default function App() {
                 <span aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3em' }}>🔒</span>
                 <span>No data stored</span>
               </div>
-              {error && <p style={{ color: '#b91c1c', marginTop: '0.75em', fontSize: '0.85em' }}>{error}</p>}
+              {error && (
+                <p style={{ color: '#b91c1c', marginTop: '0.75em', fontSize: '0.85em', display: 'flex', alignItems: 'center', gap: '0.5em', flexWrap: 'wrap' }}>
+                  {error}
+                  <button type="button" onClick={() => setError(null)} className="pc-btn-ghost" style={{ fontSize: '0.8em' }}>Retry</button>
+                </p>
+              )}
             </div>
           </section>
 
@@ -413,8 +418,16 @@ export default function App() {
                     <p>{result.started_at ? new Date(result.started_at).toLocaleString() : '—'}</p>
                   </div>
                   <div>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Domain age</span>
+                    <p>{(() => { const ssl = (result.details?.ssl || {}) as any; const start = ssl?.notBefore; if (!start) return '—'; const d = new Date(start); const days = Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000)); const yrs = (days / 365).toFixed(1); return `${days} days (${yrs} yrs)`; })()}</p>
+                  </div>
+                  <div>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Duration</span>
+                    <p>{result.duration_ms != null ? `${result.duration_ms} ms` : '—'}</p>
+                  </div>
+                  <div>
                     <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Certificate</span>
-                    <p>{(() => { const ssl = (result.details?.ssl || {}) as any; const grade = sslGrade(result.details); const issuer = ssl?.issuer || '—'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : (ssl?.valid ? 'Valid' : 'Invalid'); return `${grade ? `${grade.grade} ` : ''}${age} · ${issuer}`; })()}</p>
+                    <p>{(() => { const ssl = (result.details?.ssl || {}) as any; const grade = sslGrade(result.details); const issuer = ssl?.issuer || '—'; const valid = ssl?.valid ? 'Valid' : 'Invalid'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : ''; return `${grade ? grade.grade + ' ' : ''}${valid}${age ? ' · ' + age : ''} · ${issuer}`; })()}</p>
                   </div>
                 </div>
 
