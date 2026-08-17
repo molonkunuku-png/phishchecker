@@ -85,7 +85,7 @@ def _validate(url: str) -> dict[str, Any] | None:
 def _check_headers(url: str, mode: str = "standard") -> tuple[list[str], int, list[str]]:
     reasons: list[str] = []
     penalty = 0
-    timeout = 5 if mode == "quick" else 8
+    timeout = 5 if mode == "quick" else (15 if mode == "it" else 8)
     try:
         resp = requests.get(url, timeout=timeout, allow_redirects=True, headers={"User-Agent": "PhishChecker/1.0"})
         headers = {k.lower(): v for k, v in resp.headers.items()}
@@ -194,7 +194,7 @@ def _score(result: ScanResult, penalty: int = 0) -> None:
     if len(domain.split(".")) <= 2 and len(domain) < 25:
         penalty += 5
         reasons.append("Short or unusual domain shape")
-    score = max(0, 100 - penalty)
+    score = max(5, 100 - penalty)
     result.score = score
     if score < 50:
         result.risk = RiskLevel.high
