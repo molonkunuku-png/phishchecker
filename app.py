@@ -128,8 +128,15 @@ def create_app(config: dict | None = None) -> Flask:
             family = bool(payload.get("family")) if isinstance(payload.get("family"), bool) else str(payload.get("family", "")).lower() in ("1", "true", "yes")
         except Exception:
             family = False
-        result = ScanService().run_scan(url, mode=mode, family_mode=family)
-        return jsonify(result), 202
+        try:
+            result = ScanService().run_scan(url, mode=mode, family_mode=family)
+        except Exception as exc:
+            logger.exception("scan failed url=%s mode=%s rid=%s", url, mode, request.headers.get("X-Request-ID"))
+            inc("errors_total")
+            return jsonify({"error": "scan failed"}), 500
+        resp = jsonify(result)
+        resp.headers["Cache-Control"] = "no-store"
+        return resp, 202
 
     @app.post("/scan")
     @rate_limit
@@ -151,7 +158,9 @@ def create_app(config: dict | None = None) -> Flask:
             logger.exception("legacy scan failed url=%s mode=%s rid=%s", url, mode, request.headers.get("X-Request-ID"))
             inc("errors_total")
             return jsonify({"error": "scan failed"}), 500
-        return jsonify(result), 202
+        resp = jsonify(result)
+        resp.headers["Cache-Control"] = "no-store"
+        return resp, 202
 
     @app.post("/api/v1/scan")
     @rate_limit
@@ -173,7 +182,9 @@ def create_app(config: dict | None = None) -> Flask:
             logger.exception("api/v1 scan failed url=%s mode=%s rid=%s", url, mode, request.headers.get("X-Request-ID"))
             inc("errors_total")
             return jsonify({"error": "scan failed"}), 500
-        return jsonify(result), 202
+        resp = jsonify(result)
+        resp.headers["Cache-Control"] = "no-store"
+        return resp, 202
 
     @app.post("/scan/bulk")
     @rate_limit
@@ -216,8 +227,14 @@ def create_app(config: dict | None = None) -> Flask:
         data = repo.export(fmt=fmt)
         if fmt == "csv":
             from io import BytesIO
-            return Response(data, mimetype="text/csv", headers={"Content-Disposition": "attachment; filename=scans.csv"})
-        return jsonify(data), 200
+            resp = Response(data, mimetype="text/csv", headers={
+                "Content-Disposition": "attachment; filename=scans.csv",
+                "Cache-Control": "no-store",
+            })
+            return resp
+        resp = jsonify(data)
+        resp.headers["Cache-Control"] = "no-store"
+        return resp
 
     @app.get("/api/v2/queue/status")
     def api_queue_status() -> Response:
@@ -241,11 +258,20 @@ def create_app(config: dict | None = None) -> Flask:
         result = repo.get_scan(scan_id)
         if not result:
             return jsonify({"error": "scan not found"}), 404
-        return jsonify(result), 200
+        resp = jsonify(result)
+        resp.headers["Cache-Control"] = "no-store"
+        return resp, 200
 
     @app.get("/report/<scan_id>")
     def public_report(scan_id: str) -> Response:
         return redirect(f"/#/scan/{scan_id}", code=302)
+
+    @app.get("/openapi.json")
+    def openapi_spec() -> Response:
+        spec = Path(__file__).with_name("docs").joinpath("openapi.json")
+        if spec.exists():
+            return send_file(spec, mimetype="application/vnd.oai.openapi+json; version=3.0")
+        return jsonify({"error": "openapi spec not configured"}), 404
 
     @app.get("/api/v2/status")
     def api_status() -> tuple[Response, int]:

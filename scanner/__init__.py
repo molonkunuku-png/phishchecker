@@ -16,6 +16,9 @@ from urllib.parse import urlparse
 import requests
 
 
+_THREAT_INTEL_CACHE: dict[str, tuple[float, dict[str, Any]]] = {}
+
+
 class RiskLevel(str, Enum):
     clean = "clean"
     suspicious = "suspicious"
@@ -151,6 +154,9 @@ def _threat_intel(domain: str) -> dict[str, Any]:
         ("phishing_army", "https://phishing.army/download/phishing_army_blocklist.txt"),
         ("openphish", "https://openphish.com/feed.txt"),
     ]
+    cached = _THREAT_INTEL_CACHE.get(domain)
+    if cached and time.time() - cached[0] < 600:
+        return cached[1]
     for name, url in feeds:
         try:
             r = requests.get(url, timeout=3, headers={"User-Agent": "PhishChecker/1.0"})
@@ -177,13 +183,15 @@ def _threat_intel(domain: str) -> dict[str, Any]:
     else:
         penalty = 0
         details.append("Not yet reported — new or unreviewed domains often aren't in feeds yet.")
-    return {
+    result = {
         "hits": hits,
         "sources": sources,
         "summary": "; ".join(details) if details else "No active matches in public feeds.",
         "penalty": penalty,
         "details": details,
     }
+    _THREAT_INTEL_CACHE[domain] = (time.time(), result)
+    return result
 
 
 _SHORTENER_DOMAINS = {
