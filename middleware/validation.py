@@ -9,6 +9,16 @@ from typing import Any
 _URL_RE = re.compile(r"^https?://[^\s]+$")
 
 
+def _normalize_mode(mode: str) -> str:
+    mode = (mode or "standard").strip().lower()
+    if mode == "family":
+        return "standard"
+    return mode
+
+
+_ALLOWED_MODES = {"quick", "standard", "it", "family"}
+
+
 def validate_scan_payload(payload: dict[str, Any]) -> tuple[str, str]:
     url = (payload.get("url") or "").strip()
     if not url:
@@ -17,10 +27,12 @@ def validate_scan_payload(payload: dict[str, Any]) -> tuple[str, str]:
         raise ValueError("url too long")
     if "<" in url or ">" in url or ".." in url.lower() or "%00" in url.lower():
         raise ValueError("invalid url format")
-    mode = (payload.get("mode") or "standard").strip().lower()
-    if mode not in {"quick", "standard", "it"}:
-        raise ValueError("invalid mode")
-    return url, mode
+    raw_mode = (payload.get("mode") or "standard").strip().lower()
+    if raw_mode not in _ALLOWED_MODES:
+        raise ValueError(
+            f"invalid mode: '{payload.get('mode')}'. Allowed modes: quick, standard, it, family"
+        )
+    return url, _normalize_mode(raw_mode)
 
 
 def validate_bulk_payload(payload: dict[str, Any]) -> tuple[list[str], str]:
@@ -41,7 +53,9 @@ def validate_bulk_payload(payload: dict[str, Any]) -> tuple[list[str], str]:
         out.append(u)
     if not out:
         raise ValueError("urls is required")
-    mode = (payload.get("mode") or "quick").strip().lower()
-    if mode not in {"quick", "standard", "it"}:
-        raise ValueError("invalid mode")
-    return out, mode
+    raw_mode = (payload.get("mode") or "quick").strip().lower()
+    if raw_mode not in _ALLOWED_MODES:
+        raise ValueError(
+            f"invalid mode: '{payload.get('mode')}'. Allowed modes: quick, standard, it, family"
+        )
+    return out, _normalize_mode(raw_mode)
