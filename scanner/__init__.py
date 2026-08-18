@@ -229,6 +229,43 @@ def _check_dns_trust(domain: str) -> dict[str, Any]:
     }
 
 
+def _domain_age_days(domain: str) -> dict[str, Any]:
+    created_at = None
+    age_days = None
+    try:
+        import subprocess
+        out = subprocess.check_output(['whois', domain], text=True, timeout=6)
+        for line in out.splitlines():
+            if 'Creation Date' in line:
+                parts = line.split(':', 1)
+                if len(parts) == 2:
+                    val = parts[1].strip().split(' ')[0]
+                    created_at = val
+                    break
+        if created_at:
+            from datetime import datetime, timezone
+            created_dt = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+            age_days = max(0, (datetime.now(timezone.utc) - created_dt).days)
+    except Exception:
+        created_at = None
+        age_days = None
+    try:
+        import socket
+        answers = socket.getaddrinfo(domain, None)
+        has_dns = bool(answers)
+        mx = _check_mx(domain)
+        record_count = len({a[4][0] for a in answers}) if has_dns else 0
+        return {
+            "created_at": created_at,
+            "age_days": age_days,
+            "has_dns": has_dns,
+            "mx_hit": bool(mx.get("hit")),
+            "records": record_count,
+        }
+    except Exception:
+        return {"created_at": created_at, "age_days": age_days, "has_dns": False, "mx_hit": False, "records": 0}
+
+
 def _score(result: ScanResult, penalty: int = 0) -> None:
     reasons = list(result.reasons)
     ti = result.threat_intel
@@ -237,6 +274,18 @@ def _score(result: ScanResult, penalty: int = 0) -> None:
     if len(domain.split(".")) <= 2 and len(domain) < 25:
         penalty += 5
         reasons.append("Short or unusual domain shape")
+    domain_info = result.details.get("domain_age") or {}
+    created_at = domain_info.get("created_at")
+    age_days = domain_info.get("age_days")
+    if created_at and age_days is not None:
+        if age_days < 30:
+            reasons.append(f"Domain age: {age_days} days - flagged")
+        else:
+            reasons.append(f"Domain age: {age_days} days")
+        if age_days < 7:
+            penalty += 35
+        elif age_days <= 30:
+            penalty += 20
     score = max(5, 100 - penalty)
     result.score = score
     if score < 50:
@@ -245,6 +294,8 @@ def _score(result: ScanResult, penalty: int = 0) -> None:
         result.risk = RiskLevel.suspicious
     else:
         result.risk = RiskLevel.clean
+    if age_days is not None and age_days < 7 and result.risk == RiskLevel.clean:
+        result.risk = RiskLevel.suspicious
     if any("SSL validation issue" in r for r in reasons):
         if result.risk == RiskLevel.clean:
             result.risk = RiskLevel.suspicious
@@ -305,14 +356,27 @@ def run_scan(url: str | None, mode: str = "standard") -> dict[str, Any]:
     if mode == 'it':
         result.details.setdefault('headers', {})['IT review'] = False
         result.reasons.append('IT review not available')
+
+    domain_age = _domain_age_days(domain)
+    result.details["domain_age"] = domain_age
     _score(result, penalty=hdr_penalty + ssl_penalty)
     if "score_math" not in result.details:
+        domain_info = result.details.get("domain_age") or {}
+        age_days = domain_info.get("age_days")
+        domain_penalty = 0
+        if age_days is not None:
+            if age_days < 7:
+                domain_penalty = 35
+            elif age_days <= 30:
+                domain_penalty = 20
+        else:
+            domain_penalty = 5 if (len(domain.split(".")) <= 2 and len(domain) < 25) else 0
         result.details["score_math"] = {
             "base": 100,
             "header_penalty": hdr_penalty,
             "ssl_penalty": ssl_penalty,
             "threat_intel_penalty": int(ti.get("penalty", 0)),
-            "domain_penalty": 5 if (len(domain.split(".")) <= 2 and len(domain) < 25) else 0,
+            "domain_penalty": domain_penalty,
             "total_penalty": max(0, 100 - result.score),
             "final_score": result.score,
         }

@@ -601,7 +601,7 @@ export default function App() {
                   </div>
                   <div>
                     <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Domain age</span>
-                    <p>{(() => { const ssl = (result.details?.ssl || {}) as any; const start = ssl?.notBefore; if (!start) return '—'; const d = new Date(start); const days = Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000)); const yrs = (days / 365).toFixed(1); return `${days} days (${yrs} yrs)`; })()}</p>
+                    <p>{(() => { const da = (result.details?.domain_age || {}) as any; const days = da?.age_days; const created = da?.created_at; if (days == null && !created) return '—'; const text = days != null ? `${days} days` : `created ${created || 'unknown'}`; const flagged = typeof days === 'number' && days < 30 ? ' - flagged' : ''; return <><span>{text}{flagged}</span><div style={{ fontSize: '0.75em', color: 'var(--mapped-text-body)', marginTop: '0.25em' }}>New domains are more likely to be used in short-lived phishing campaigns.</div></>; })()}</p>
                   </div>
                   <div>
                     <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Duration</span>
@@ -747,7 +747,7 @@ export default function App() {
                   </div>
                   <div>
                     <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Domain age</span>
-                    <p>{(() => { const ssl = (report.details?.ssl || {}) as any; const start = ssl?.notBefore; if (!start) return '—'; const d = new Date(start); const days = Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000)); const yrs = (days / 365).toFixed(1); return `${days} days (${yrs} yrs)`; })()}</p>
+                    <p>{(() => { const da = (report.details?.domain_age || {}) as any; const days = da?.age_days; const created = da?.created_at; if (days == null && !created) return '—'; const text = days != null ? `${days} days` : `created ${created || 'unknown'}`; const flagged = typeof days === 'number' && days < 30 ? ' - flagged' : ''; return <><span>{text}{flagged}</span><div style={{ fontSize: '0.75em', color: 'var(--mapped-text-body)', marginTop: '0.25em' }}>New domains are more likely to be used in short-lived phishing campaigns.</div></>; })()}</p>
                   </div>
                   <div>
                     <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Duration</span>
