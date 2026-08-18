@@ -369,7 +369,8 @@ export default function App() {
               )}
               {!loading && !result && !error && (
                 <div aria-live="polite" style={{ marginTop: '1.2em', padding: '1.2em', border: '1px dashed var(--mapped-border-default)', background: 'var(--mapped-surface-default)', color: 'var(--mapped-text-body)', fontSize: '0.9em', textAlign: 'center' }}>
-                  Paste a URL above and press Scan to analyze phishing risk.
+                  Paste a URL above and press Enter to scan.
+                  <div style={{ marginTop: '0.4em', fontSize: '0.75em', opacity: 0.8 }}>Keyboard shortcut: focus URL, then Enter</div>
                 </div>
               )}
               <div style={{ marginTop: '0.8em', display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', opacity: 0.85 }}>

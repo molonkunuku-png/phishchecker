@@ -79,6 +79,18 @@ def create_app(config: dict | None = None) -> Flask:
     def health() -> Response:
         return jsonify({"ok": True, "service": "phishchecker", "version": "1.0.0"}), 200
 
+    @app.get("/health/deep")
+    def health_deep() -> tuple[Response, int]:
+        db_ok = False
+        try:
+            from services.db import get_engine
+            with get_engine().connect() as conn:
+                conn.execute(__import__("text", fromlist=["text"]).text("SELECT 1"))
+            db_ok = True
+        except Exception:
+            db_ok = False
+        return jsonify({"ok": db_ok, "service": "phishchecker", "database": db_ok}), 200 if db_ok else 503
+
     @app.get("/api/csrf")
     def api_csrf() -> Response:
         return jsonify({"csrf_token": secrets.token_hex(16)}), 200
