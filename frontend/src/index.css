@@ -616,6 +616,15 @@ details {
   .pc-panel, .pc-section { border: none !important; box-shadow: none !important; background: transparent !important; }
 }
 
+.pc-family-mode .pc-divider,
+.pc-family-mode details {
+  display: none !important;
+}
+.pc-family-mode {
+  font-size: 1.05em;
+  line-height: 1.7;
+}
+
 :focus-visible {
   outline: 2px solid var(--mapped-text-action);
   outline-offset: 2px;

@@ -63,7 +63,17 @@ function modeLabel(mode?: string): string {
   if (m === 'it') return 'IT';
   if (m === 'quick') return 'Quick';
   if (m === 'standard') return 'Standard';
+  if (m === 'family') return 'Family';
   return mode.charAt(0).toUpperCase() + mode.slice(1);
+}
+
+function familySummary(result: ScanResult | null): string {
+  if (!result) return '—';
+  const risk = (result.risk || '').toLowerCase();
+  if (risk === 'high') return 'This looks risky. Avoid entering any details or downloading anything from this site.';
+  if (risk === 'suspicious') return 'Some signs are concerning. Treat this site with extra caution.';
+  if (risk === 'clean') return 'No strong warning signs were found, but always stay cautious online.';
+  return 'Scan complete. When in doubt, verify with the official source.';
 }
 
 function findingSummary(r: string): string {
@@ -135,6 +145,7 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>(loadInitialTheme);
   const [url, setUrl] = useState('');
   const [mode, setMode] = useState('standard');
+  const [familyMode, setFamilyMode] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -250,7 +261,8 @@ export default function App() {
     }
     setLoading(true);
     try {
-      const data = await submitScan(trimmed, mode);
+      const scanMode = familyMode ? 'family' : mode;
+      const data = await submitScan(trimmed, scanMode);
       setResult(data);
       setHistory(prev => [data as unknown as HistoryItem, ...prev].slice(0, 50));
     } catch (err: any) {
@@ -347,7 +359,7 @@ export default function App() {
                     <button type="button" onClick={() => setUrl('')} disabled={loading} aria-label="Clear URL" style={{ position: 'absolute', right: '0.6em', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '0.9em', padding: '0.3em', lineHeight: 1 }}>×</button>
                   )}
                 </div>
-                <select value={mode} onChange={e => setMode(e.target.value)} className="pc-select" disabled={loading} aria-label="Scan mode">
+                <select value={mode} onChange={e => setMode(e.target.value)} className="pc-select" disabled={loading || familyMode} aria-label="Scan mode">
                   <option value="quick">Quick — fast surface check</option>
                   <option value="standard">Standard — balanced depth</option>
                   <option value="it">IT — deep technical scan</option>
@@ -361,6 +373,14 @@ export default function App() {
                   {loading ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}><span className="pc-spinner" style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'pc-spin 0.8s linear infinite' }} />Scanning...</span>) : 'Scan'}
                 </button>
               </form>
+              <div style={{ marginTop: '0.8em', display: 'flex', alignItems: 'center', gap: '0.6em', flexWrap: 'wrap' }}>
+                <button type="button" onClick={() => setFamilyMode(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.85em', color: familyMode ? 'var(--mapped-text-on-action)' : 'var(--mapped-text-action)', background: familyMode ? 'var(--mapped-surface-action)' : 'transparent', border: '1px solid', borderColor: familyMode ? 'var(--mapped-surface-action)' : 'var(--mapped-border-default)' }}>
+                  {familyMode ? 'Family mode: on' : 'Scanning for someone else? Try Family mode'}
+                </button>
+                {familyMode && (
+                  <span style={{ fontSize: '0.8em', color: 'var(--mapped-text-body)' }}>Showing a simpler result with plain-language guidance.</span>
+                )}
+              </div>
               {loading && (
                 <div aria-busy="true" style={{ marginTop: '1.2em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em' }}>
                   <div className="pc-skeleton" />
@@ -625,7 +645,7 @@ export default function App() {
           )}
 
           {!reportId && result && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+            <section className={`pc-animate-in ${familyMode ? 'pc-family-mode' : ''}`} style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '1.2em' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.8em', flexWrap: 'wrap' }}>
@@ -653,6 +673,12 @@ export default function App() {
                     <button onClick={() => result && downloadPDF(result)} className="pc-btn-ghost">Export report</button>
                   </div>
                 </div>
+
+                {familyMode && result && (
+                  <div style={{ marginTop: '1em', padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', fontSize: '1.05em', lineHeight: 1.7, color: 'var(--mapped-text-body)' }}>
+                    {familySummary(result)}
+                  </div>
+                )}
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1.2em', fontSize: '0.9em', lineHeight: 1.5, marginBottom: '1.4em' }} className="pc-mobile-stack">
                   <div>
