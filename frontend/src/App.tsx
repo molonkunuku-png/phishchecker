@@ -606,7 +606,7 @@ export default function App() {
                   </div>
                   <div>
                     <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Certificate</span>
-                    <p>{(() => { const ssl = (result.details?.ssl || {}) as any; const grade = sslGrade(result.details); const issuer = ssl?.issuer || '—'; const valid = ssl?.valid ? 'Valid' : 'Invalid or untrusted'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : ''; const text = `${valid}${grade && ssl?.valid ? ' · ' + grade.grade : ''}${age ? ' · ' + age : ''} · ${issuer}`; return (<><span>{text}</span><button type="button" onClick={() => { navigator.clipboard.writeText(text).catch(() => {}); }} className="pc-btn-ghost" style={{ marginLeft: '0.6em', padding: '0.4em 0.7em', fontSize: '0.65em' }}>Copy</button></>); })()}</p>
+                    <p style={{ wordBreak: 'break-all', display: 'flex', flexWrap: 'wrap', gap: '0.6em', alignItems: 'center' }}>{(() => { const ssl = (result.details?.ssl || {}) as any; const grade = sslGrade(result.details); const issuer = ssl?.issuer || '—'; const valid = ssl?.valid ? 'Valid' : 'Invalid or untrusted'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : ''; const text = `${valid}${grade && ssl?.valid ? ' · ' + grade.grade : ''}${age ? ' · ' + age : ''} · ${issuer}`; return (<><span style={{ flex: '1 1 auto', minWidth: '0' }}>{text}</span><button type="button" onClick={() => { navigator.clipboard.writeText(text).catch(() => {}); }} className="pc-btn-ghost" style={{ flex: '0 0 auto' }}>Copy</button></>); })()}</p>
                   </div>
                 </div>
 
@@ -752,7 +752,7 @@ export default function App() {
                   </div>
                   <div>
                     <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Certificate</span>
-                    <p>{(() => { const ssl = (report.details?.ssl || {}) as any; const grade = sslGrade(report.details); const issuer = ssl?.issuer || '—'; const valid = ssl?.valid ? 'Valid' : 'Invalid or untrusted'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : ''; const text = `${valid}${grade && ssl?.valid ? ' · ' + grade.grade : ''}${age ? ' · ' + age : ''} · ${issuer}`; return (<><span>{text}</span><button type="button" onClick={() => { navigator.clipboard.writeText(text).catch(() => {}); }} className="pc-btn-ghost" style={{ marginLeft: '0.6em', padding: '0.4em 0.7em', fontSize: '0.65em' }}>Copy</button></>); })()}</p>
+                    <p style={{ wordBreak: 'break-all', display: 'flex', flexWrap: 'wrap', gap: '0.6em', alignItems: 'center' }}>{(() => { const ssl = (report.details?.ssl || {}) as any; const grade = sslGrade(report.details); const issuer = ssl?.issuer || '—'; const valid = ssl?.valid ? 'Valid' : 'Invalid or untrusted'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : ''; const text = `${valid}${grade && ssl?.valid ? ' · ' + grade.grade : ''}${age ? ' · ' + age : ''} · ${issuer}`; return (<><span style={{ flex: '1 1 auto', minWidth: '0' }}>{text}</span><button type="button" onClick={() => { navigator.clipboard.writeText(text).catch(() => {}); }} className="pc-btn-ghost" style={{ flex: '0 0 auto' }}>Copy</button></>); })()}</p>
                   </div>
                 </div>
 

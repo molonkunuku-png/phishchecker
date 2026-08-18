@@ -5,17 +5,84 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Privacy Policy - PhishChecker</title>
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 2em; background: #0a0a0b; color: #f0f0f5; line-height: 1.6; }
-    h1 { font-size: 1.8em; border-bottom: 1px solid #26272a; padding-bottom: 0.3em; color: #ffffff; }
-    a { color: #93c5fd; text-decoration: underline; }
-    a:hover { color: #bfdbfe; }
-    p { color: #d4d4d8; }
+    :root {
+      --bg: #0a0a0b;
+      --surface: #111113;
+      --border: #26272a;
+      --text: #f0f0f5;
+      --muted: #d4d4d8;
+      --accent: #93c5fd;
+      --accent-hover: #bfdbfe;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #ffffff;
+        --surface: #f7f7f8;
+        --border: #e5e5ea;
+        --text: #0a0a0b;
+        --muted: #3a3a3c;
+        --accent: #2563eb;
+        --accent-hover: #1d4ed8;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 10% -10%, rgba(147,197,253,0.08), transparent), var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .wrap { max-width: 800px; margin: 0 auto; padding: 2em 1.5em 4em; }
+    header {
+      display: flex; align-items: center; justify-content: space-between; gap: 1em;
+      padding: 1em 0; border-bottom: 1px solid var(--border); margin-bottom: 1.5em;
+    }
+    .logo { font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); text-decoration: none; }
+    nav a { color: var(--muted); text-decoration: none; margin-left: 1em; font-size: 0.9em; }
+    nav a:hover { color: var(--accent); }
+    .meta { color: var(--muted); font-size: 0.85em; margin-bottom: 1.2em; }
+    h1 { font-size: 1.8em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; color: var(--text); margin: 0 0 0.8em; }
+    h2 { font-size: 1.15em; color: var(--text); margin: 1.6em 0 0.5em; }
+    p { color: var(--muted); }
+    a { color: var(--accent); text-decoration: underline; }
+    a:hover { color: var(--accent-hover); }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1em 1.2em;
+      margin: 0.8em 0;
+    }
+    ul { color: var(--muted); padding-left: 1.2em; }
+    li { margin: 0.35em 0; }
   </style>
 </head>
 <body>
-  <h1>Privacy Policy</h1>
-  <p>PhishChecker is a privacy-first scanning tool. We do not store any URLs you scan, nor do we collect personal information.</p>
-  <p>Scans are processed transiently and are not retained after analysis.</p>
-  <p><a href="/">← Back to PhishChecker</a></p>
+  <div class="wrap">
+    <header>
+      <a class="logo" href="/">PhishChecker</a>
+      <nav>
+        <a href="/">Scanner</a>
+        <a href="/terms">Terms</a>
+      </nav>
+    </header>
+
+    <h1>Privacy Policy</h1>
+    <div class="meta">Last updated: 2026-08-18</div>
+
+    <div class="card">
+      <p>PhishChecker is a privacy-first scanning tool. We do not store any URLs you scan, nor do we collect personal information beyond what is necessary to operate the service.</p>
+    </div>
+
+    <h2>Data handling</h2>
+    <ul>
+      <li>Scans are processed transiently and are not retained after analysis.</li>
+      <li>No account creation or personal identifiers are required.</li>
+      <li>Telemetry is limited to aggregate operational metrics and does not include scan contents.</li>
+    </ul>
+
+    <p><a href="/">← Back to PhishChecker</a></p>
+  </div>
 </body>
 </html>

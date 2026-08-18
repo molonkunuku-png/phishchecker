@@ -5,17 +5,93 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Terms of Service - PhishChecker</title>
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 2em; background: #0a0a0b; color: #f0f0f5; line-height: 1.6; }
-    h1 { font-size: 1.8em; border-bottom: 1px solid #26272a; padding-bottom: 0.3em; color: #ffffff; }
-    a { color: #93c5fd; text-decoration: underline; }
-    a:hover { color: #bfdbfe; }
-    p { color: #d4d4d8; }
+    :root {
+      --bg: #0a0a0b;
+      --surface: #111113;
+      --border: #26272a;
+      --text: #f0f0f5;
+      --muted: #d4d4d8;
+      --accent: #93c5fd;
+      --accent-hover: #bfdbfe;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #ffffff;
+        --surface: #f7f7f8;
+        --border: #e5e5ea;
+        --text: #0a0a0b;
+        --muted: #3a3a3c;
+        --accent: #2563eb;
+        --accent-hover: #1d4ed8;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 10% -10%, rgba(147,197,253,0.08), transparent), var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .wrap { max-width: 800px; margin: 0 auto; padding: 2em 1.5em 4em; }
+    header {
+      display: flex; align-items: center; justify-content: space-between; gap: 1em;
+      padding: 1em 0; border-bottom: 1px solid var(--border); margin-bottom: 1.5em;
+    }
+    .logo { font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); text-decoration: none; }
+    nav a { color: var(--muted); text-decoration: none; margin-left: 1em; font-size: 0.9em; }
+    nav a:hover { color: var(--accent); }
+    .meta { color: var(--muted); font-size: 0.85em; margin-bottom: 1.2em; }
+    h1 { font-size: 1.8em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; color: var(--text); margin: 0 0 0.8em; }
+    h2 { font-size: 1.15em; color: var(--text); margin: 1.6em 0 0.5em; }
+    p { color: var(--muted); }
+    a { color: var(--accent); text-decoration: underline; }
+    a:hover { color: var(--accent-hover); }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1em 1.2em;
+      margin: 0.8em 0;
+    }
+    ul { color: var(--muted); padding-left: 1.2em; }
+    li { margin: 0.35em 0; }
   </style>
 </head>
 <body>
-  <h1>Terms of Service</h1>
-  <p>By using PhishChecker, you agree to use this service responsibly and lawfully. Do not scan URLs you do not own or have permission to analyze.</p>
-  <p>We provide this tool as-is without warranties. Results are for informational purposes only.</p>
-  <p><a href="/">← Back to PhishChecker</a></p>
+  <div class="wrap">
+    <header>
+      <a class="logo" href="/">PhishChecker</a>
+      <nav>
+        <a href="/">Scanner</a>
+        <a href="/privacy">Privacy</a>
+      </nav>
+    </header>
+
+    <h1>Terms of Service</h1>
+    <div class="meta">Last updated: 2026-08-18</div>
+
+    <div class="card">
+      <p>By using PhishChecker, you agree to use this service responsibly and lawfully. Do not scan URLs you do not own or do not have explicit permission to analyze.</p>
+    </div>
+
+    <h2>Acceptable use</h2>
+    <ul>
+      <li>Use the scanner for legitimate security assessment, research, or personal verification.</li>
+      <li>Do not submit malicious payloads, exploit content, or abusive traffic.</li>
+      <li>Respect rate limits and do not attempt to disrupt service availability.</li>
+    </ul>
+
+    <h2>No guarantee of accuracy</h2>
+    <p>PhishChecker provides analysis based on heuristic signals, public indicators, and available metadata. Results are informational only and do not constitute legal, financial, or technical advice. We do not guarantee completeness, timeliness, or correctness. You remain solely responsible for decisions made using these results.</p>
+
+    <h2>Liability</h2>
+    <p>To the maximum extent permitted by law, PhishChecker is provided on an “as-is” and “as-available” basis without warranties of any kind. In no event shall the operators be liable for indirect, incidental, special, consequential, or punitive damages, or any loss of data, profit, or goodwill arising from use of the service.</p>
+
+    <h2>Disputes and contact</h2>
+    <p>If you have concerns about a result, a data issue, or an abuse matter, contact us at <a href="mailto:molonkunuku@gmail.com">molonkunuku@gmail.com</a>. We aim to respond within a reasonable timeframe and will review concrete, actionable reports.</p>
+
+    <p><a href="/">← Back to PhishChecker</a></p>
+  </div>
 </body>
 </html>
