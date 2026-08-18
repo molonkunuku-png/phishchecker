@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import Any
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
@@ -13,6 +14,8 @@ _SessionFactory = None
 
 
 def make_engine(db_uri: str) -> Any:
+    if db_uri == "sqlite:///phishchecker.db" and os.getenv("RENDER"):
+        db_uri = "sqlite:////tmp/phishchecker.db"
     return create_engine(db_uri, future=True, connect_args={"check_same_thread": False} if "sqlite" in db_uri else {})
 
 
@@ -28,7 +31,10 @@ def SessionFactory(db_uri: str | None = None) -> sessionmaker:
 def get_engine() -> Any:
     global _ENGINE
     if _ENGINE is None:
-        _ENGINE = make_engine("sqlite:///phishchecker.db")
+        uri = "sqlite:///phishchecker.db"
+        if os.getenv("RENDER"):
+            uri = "sqlite:////tmp/phishchecker.db"
+        _ENGINE = make_engine(uri)
     return _ENGINE
 
 

@@ -9,11 +9,7 @@ from datetime import datetime, timezone
 from typing import Any
 from models import Base, Scan
 from services.db import SessionFactory
-from middleware.scan_cache import ScanCache
 from scanner import run_scan
-
-
-_DEFAULT_CACHE = ScanCache(ttl_seconds=600, max_size=256)
 
 
 class ScanService:
@@ -76,6 +72,8 @@ class ScanService:
                 "page": page,
                 "page_size": page_size,
             }
+        except Exception:
+            return {"items": [], "count": 0, "page": page, "page_size": page_size}
         finally:
             session.close()
 
@@ -98,6 +96,8 @@ class ScanService:
                 "finished_at": s.finished_at.isoformat() if s.finished_at else None,
                 "duration_ms": s.duration_ms,
             }
+        except Exception:
+            return None
         finally:
             session.close()
 
@@ -137,5 +137,7 @@ class ScanService:
                     })
                 return buf.getvalue().encode("utf-8-sig")
             return {"items": rows}
+        except Exception:
+            return {"items": []}
         finally:
             session.close()
