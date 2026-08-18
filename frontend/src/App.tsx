@@ -356,7 +356,7 @@ export default function App() {
                 </div>
               )}
               {!loading && !result && !error && (
-                <div style={{ marginTop: '1.2em', padding: '1.2em', border: '1px dashed var(--mapped-border-default)', background: 'var(--mapped-surface-default)', color: 'var(--mapped-text-body)', fontSize: '0.9em', textAlign: 'center' }}>
+                <div aria-live="polite" style={{ marginTop: '1.2em', padding: '1.2em', border: '1px dashed var(--mapped-border-default)', background: 'var(--mapped-surface-default)', color: 'var(--mapped-text-body)', fontSize: '0.9em', textAlign: 'center' }}>
                   Paste a URL above and press Scan to analyze phishing risk.
                 </div>
               )}
@@ -792,16 +792,21 @@ export default function App() {
                   </div>
                 )}
 
-                {history.length === 0 && <div className="pc-history-empty">No scans yet.</div>}
+                {history.length === 0 && <div className="pc-history-empty" aria-live="polite">No scans yet.</div>}
                 {history.length > 0 && visibleHistory.length === 0 && (
-                  <div className="pc-history-empty">No matching scans.</div>
+                  <div className="pc-history-empty" aria-live="polite">No matching scans.</div>
                 )}
                 {visibleHistory.length > 0 && (
                   <div className="pc-history-wrap">
-                    <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap', marginBottom: '0.8em' }}>
-                      {['all','high','suspicious','low'].map(f => (
-                        <button key={f} type="button" onClick={() => { setHistoryFilter(f); setHistoryPage(1); }} className="pc-btn-ghost" style={{ opacity: historyFilter === f ? 1 : 0.6 }}>{f === 'all' ? 'All' : f[0].toUpperCase() + f.slice(1)}</button>
-                      ))}
+                    <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap', marginBottom: '0.8em', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap' }}>
+                        {['all','high','suspicious','low'].map(f => (
+                          <button key={f} type="button" onClick={() => { setHistoryFilter(f); setHistoryPage(1); }} className="pc-btn-ghost" style={{ opacity: historyFilter === f ? 1 : 0.6 }}>{f === 'all' ? 'All' : f[0].toUpperCase() + f.slice(1)}</button>
+                        ))}
+                      </div>
+                      {historySearch && (
+                        <button type="button" onClick={() => setHistorySearch('')} className="pc-btn-ghost" style={{ fontSize: '0.7em' }}>Clear search</button>
+                      )}
                     </div>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85em' }}>
                       <thead>
