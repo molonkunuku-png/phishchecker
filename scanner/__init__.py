@@ -259,6 +259,9 @@ def run_scan(url: str | None, mode: str = "standard") -> dict[str, Any]:
         duration_ms=int((datetime.now(timezone.utc) - started).total_seconds() * 1000),
         threat_intel=ti,
     )
+    if mode == 'it':
+        result.details.setdefault('headers', {})['IT review'] = False
+        result.reasons.append('IT review not available')
     _score(result, penalty=hdr_penalty + ssl_penalty)
     if "score_math" not in result.details:
         result.details["score_math"] = {

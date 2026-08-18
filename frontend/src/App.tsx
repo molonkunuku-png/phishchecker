@@ -66,6 +66,22 @@ function modeLabel(mode?: string): string {
   return mode.charAt(0).toUpperCase() + mode.slice(1);
 }
 
+function findingSummary(r: string): string {
+  const low = r.toLowerCase();
+  if (/missing.*header/.test(low)) return 'Add the missing security header to improve response hardening.';
+  if (/strict-transport-security/.test(low)) return 'Enable HSTS so browsers only use HTTPS for this origin.';
+  if (/content-security-policy/.test(low)) return 'Add CSP to limit inline script, framing, and unsafe sources.';
+  if (/x-frame-options/.test(low)) return 'Set X-Frame-Options or CSP frame-ancestors to reduce clickjacking risk.';
+  if (/x-content-type-options/.test(low)) return 'Set X-Content-Type-Options: nosniff to avoid MIME-type confusion.';
+  if (/referrer-policy/.test(low)) return 'Add a referrer policy to control how much referrer information is sent.';
+  if (/permissions-policy/.test(low)) return 'Add Permissions-Policy to disable unused browser features.';
+  if (/ssl validation issue/.test(low)) return 'Fix TLS validation so the certificate chain, hostname, or expiry passes.';
+  if (/could not fetch url/.test(low)) return 'The scanner could not fetch the URL; retry from a stable network.';
+  if (/listed in/.test(low)) return 'This domain appeared in a public phishing/threat feed.';
+  if (/short or unusual domain shape/.test(low)) return 'Short or unusually shaped domains are more common in phishing.';
+  return 'Review this signal as part of the overall URL risk assessment.';
+}
+
 function riskColor(risk?: string): string {
   if (risk === 'high') return '#b91c1c';
   if (risk === 'suspicious') return '#b45309';
@@ -135,10 +151,10 @@ export default function App() {
   const [historyFilter, setHistoryFilter] = useState<string>('all');
   const [historyPage, setHistoryPage] = useState(1);
   const [historyPageSize] = useState(10);
+  const [historySearch, setHistorySearch] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const [navShadow, setNavShadow] = useState(false);
   const [findingFilter, setFindingFilter] = useState<string>('all');
-  const [allExpanded, setAllExpanded] = useState(false);
   const [batchMode, setBatchMode] = useState(false);
   const [batchInput, setBatchInput] = useState('');
   const [batchResults, setBatchResults] = useState<ScanResult[] | null>(null);
@@ -181,9 +197,22 @@ export default function App() {
     } catch { }
   }
 
+  const visibleHistory = historySearch
+    ? history.filter(h =>
+        (h.domain || '').toLowerCase().includes(historySearch.toLowerCase()) ||
+        (h.url || '').toLowerCase().includes(historySearch.toLowerCase()) ||
+        (h.risk || '').toLowerCase().includes(historySearch.toLowerCase())
+      )
+    : history;
+
+  useEffect(() => {
+    setHistoryPage(1);
+    loadHistory(1, historyPageSize);
+  }, [historyFilter]);
+
   useEffect(() => {
     loadHistory(historyPage, historyPageSize);
-  }, [historyFilter, historyPage]);
+  }, [historyPage]);
 
   useEffect(() => {
     getStatus().then(setStatus).catch(() => setStatus(null));
@@ -211,7 +240,6 @@ export default function App() {
     e.preventDefault();
     setError(null);
     setResult(null);
-    setAllExpanded(false);
     setFindingFilter('all');
     const trimmed = url.trim();
     const v = validateUrl(trimmed);
@@ -265,10 +293,10 @@ export default function App() {
   }
 
   const historyStats = {
-    total: history.length,
-    high: history.filter(h => h.risk === 'high').length,
-    suspicious: history.filter(h => h.risk === 'suspicious').length,
-    low: history.filter(h => h.risk === 'low').length,
+    total: visibleHistory.length,
+    high: visibleHistory.filter(h => h.risk === 'high').length,
+    suspicious: visibleHistory.filter(h => h.risk === 'suspicious').length,
+    low: visibleHistory.filter(h => h.risk === 'low').length,
   };
 
   const currentScore = result?.score ?? report?.score ?? null;
@@ -622,12 +650,7 @@ export default function App() {
 
                 {result.reasons && result.reasons.length > 0 && (
                   <div className="pc-divider" style={{ marginTop: '1.4em', paddingTop: '1.2em' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.6em', flexWrap: 'wrap' }}>
-                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>Findings</h3>
-                      <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap' }}>
-                        <button type="button" onClick={() => setAllExpanded(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.7em' }}>{allExpanded ? 'Collapse all' : 'Expand all'}</button>
-                      </div>
-                    </div>
+                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.6em' }}>Findings</h3>
                     <div style={{ display: 'flex', gap: '0.4em', marginBottom: '0.6em', flexWrap: 'wrap' }}>
                       {['all', 'high', 'medium', 'low'].map(f => (
                         <button key={f} onClick={() => setFindingFilter(f)} className="pc-btn-ghost" style={{ fontSize: '0.7em', textTransform: 'capitalize', background: findingFilter === f ? 'var(--mapped-surface-action)' : undefined, color: findingFilter === f ? 'var(--mapped-text-on-action)' : undefined }}>{f === 'all' ? 'All' : f}</button>
@@ -639,19 +662,19 @@ export default function App() {
                         const st = severityStyle(sev);
                         return (
                           <li key={i} style={{ paddingLeft: '0.3em' }}>
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em', flexWrap: 'wrap' }}>
-                              <span style={{ fontSize: '0.65em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', background: st.bg, color: st.text, padding: '0.2em 0.45em', borderRadius: '0.25em' }}>{sev}</span>
-                              <span>{r}</span>
-                            </span>
+                            <details style={{ display: 'inline-block', width: '100%' }}>
+                              <summary style={{ cursor: 'pointer', fontWeight: 600, color: 'var(--mapped-text-headings)', listStyle: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.4em', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '0.65em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', background: st.bg, color: st.text, padding: '0.2em 0.45em', borderRadius: '0.25em' }}>{sev}</span>
+                                <span>{r}</span>
+                              </summary>
+                              <div style={{ marginTop: '0.5em', padding: '0.8em', background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', fontSize: '0.85em', lineHeight: 1.6, color: 'var(--mapped-text-body)' }}>
+                                {findingSummary(r)}
+                              </div>
+                            </details>
                           </li>
                         );
                       })}
                     </ul>
-                    {allExpanded && (
-                      <div style={{ marginTop: '1em', padding: '1em', background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', fontSize: '0.85em', lineHeight: 1.6, color: 'var(--mapped-text-body)' }}>
-                        These signals are based on URL structure, domain age, known patterns, and routing behavior. High severity findings indicate stronger phishing indicators. Medium suggests caution. Low means weak or indirect signals.
-                      </div>
-                    )}
                   </div>
                 )}
 
@@ -742,7 +765,10 @@ export default function App() {
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>Recent scans</h2>
-                  <button onClick={() => loadHistory()} className="pc-btn-ghost" style={{ color: 'var(--mapped-text-action)' }}>Refresh</button>
+                  <div style={{ display: 'flex', gap: '0.5em', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <input value={historySearch} onChange={e => setHistorySearch(e.target.value)} placeholder="Search domain, url, risk" className="pc-input" style={{ padding: '0.55em 0.7em', fontSize: '0.8em', minWidth: '14em' }} />
+                    <button onClick={() => loadHistory()} className="pc-btn-ghost" style={{ color: 'var(--mapped-text-action)' }}>Refresh</button>
+                  </div>
                 </div>
 
                 {history.length > 0 && (
@@ -767,7 +793,10 @@ export default function App() {
                 )}
 
                 {history.length === 0 && <div className="pc-history-empty">No scans yet.</div>}
-                {history.length > 0 && (
+                {history.length > 0 && visibleHistory.length === 0 && (
+                  <div className="pc-history-empty">No matching scans.</div>
+                )}
+                {visibleHistory.length > 0 && (
                   <div className="pc-history-wrap">
                     <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap', marginBottom: '0.8em' }}>
                       {['all','high','suspicious','low'].map(f => (
@@ -786,7 +815,7 @@ export default function App() {
                         </tr>
                       </thead>
                       <tbody>
-                        {history.filter(h => historyFilter === 'all' || h.risk === historyFilter).map((h, i) => {
+                        {visibleHistory.filter(h => historyFilter === 'all' || h.risk === historyFilter).map((h, i) => {
                           const checked = compareIds.includes(h.id || '');
                           return (
                             <tr key={h.id || i} style={{ borderBottom: '1px solid var(--mapped-border-default)', background: checked ? 'var(--mapped-surface-default)' : 'transparent' }}>
