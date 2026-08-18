@@ -1,0 +1,197 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "PhishChecker API",
+    "version": "2.0.0",
+    "description": "Privacy-first URL phishing risk scanner."
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Service health",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/csrf": {
+      "get": {
+        "summary": "Get CSRF token",
+        "responses": {
+          "200": {
+            "description": "CSRF token"
+          }
+        }
+      }
+    },
+    "/api/v2/status": {
+      "get": {
+        "summary": "Service status",
+        "responses": {
+          "200": {
+            "description": "Status"
+          }
+        }
+      }
+    },
+    "/api/v2/status/feeds": {
+      "get": {
+        "summary": "Feed configuration",
+        "responses": {
+          "200": {
+            "description": "Feeds"
+          }
+        }
+      }
+    },
+    "/api/v2/scans/history": {
+      "get": {
+        "summary": "Scan history",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "History"
+          }
+        }
+      }
+    },
+    "/api/v2/scans": {
+      "post": {
+        "summary": "Submit scan",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "url"
+                ],
+                "properties": {
+                  "url": {
+                    "type": "string"
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "quick",
+                      "standard",
+                      "it"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    },
+    "/api/v2/scans/{scan_id}": {
+      "get": {
+        "summary": "Get scan",
+        "parameters": [
+          {
+            "name": "scan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scan"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v2/scans/export": {
+      "get": {
+        "summary": "Export scans",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "csv"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Export"
+          }
+        }
+      }
+    },
+    "/scan/bulk": {
+      "post": {
+        "summary": "Bulk scan",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "urls"
+                ],
+                "properties": {
+                  "urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "quick",
+                      "standard",
+                      "it"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    }
+  }
+}

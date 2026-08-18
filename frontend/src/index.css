@@ -611,8 +611,9 @@ details {
 
 @media print {
   body { background: #fff; color: #000; }
-  .pc-nav, .pc-scan-form, footer, .pc-animate-in, .pc-history-wrap { display: none !important; }
+  .pc-nav, .pc-scan-form, footer, .pc-animate-in, .pc-history-wrap, .pc-btn-ghost, .pc-skeleton { display: none !important; }
   main { padding-top: 0 !important; }
+  .pc-panel, .pc-section { border: none !important; box-shadow: none !important; background: transparent !important; }
 }
 
 :focus-visible {

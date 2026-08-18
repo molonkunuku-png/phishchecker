@@ -292,6 +292,13 @@ export default function App() {
     } catch { }
   }
 
+  async function copyScanJSON() {
+    if (!result) return;
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(result, null, 2));
+    } catch { }
+  }
+
   const historyStats = {
     total: visibleHistory.length,
     high: visibleHistory.filter(h => h.risk === 'high').length,
@@ -333,7 +340,12 @@ export default function App() {
               </p>
               <form onSubmit={handleScan} id="scan" className="pc-scan-form" style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.5em', maxWidth: '42em' }}>
                 <label htmlFor="url-input" style={{ position: 'absolute', overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', width: '1px', height: '1px' }}>URL to check</label>
-                <input ref={inputRef} id="url-input" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com" className="pc-input pc-placeholder" disabled={loading} aria-describedby="url-hint" />
+                <div style={{ position: 'relative' }}>
+                  <input ref={inputRef} id="url-input" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com" className="pc-input pc-placeholder" disabled={loading} aria-describedby="url-hint" style={{ paddingRight: url ? '2.2em' : undefined }} />
+                  {url && (
+                    <button type="button" onClick={() => setUrl('')} disabled={loading} aria-label="Clear URL" style={{ position: 'absolute', right: '0.6em', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '0.9em', padding: '0.3em', lineHeight: 1 }}>×</button>
+                  )}
+                </div>
                 <select value={mode} onChange={e => setMode(e.target.value)} className="pc-select" disabled={loading} aria-label="Scan mode">
                   <option value="quick">Quick — fast surface check</option>
                   <option value="standard">Standard — balanced depth</option>
@@ -558,6 +570,7 @@ export default function App() {
                   </div>
                   <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap' }}>
                     <button onClick={copyScanLink} className="pc-btn-ghost">Copy link</button>
+                    <button onClick={copyScanJSON} className="pc-btn-ghost">Copy JSON</button>
                     <button onClick={() => downloadExport('json')} className="pc-btn-ghost">Export JSON</button>
                     <button onClick={() => downloadExport('csv')} className="pc-btn-ghost">Export CSV</button>
                     <button onClick={() => window.print()} className="pc-btn-ghost">Print</button>

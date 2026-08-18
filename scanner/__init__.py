@@ -186,6 +186,49 @@ def _threat_intel(domain: str) -> dict[str, Any]:
     }
 
 
+_SHORTENER_DOMAINS = {
+    "bit.ly", "tinyurl.com", "t.co", "ow.ly", "is.gd", "buff.ly", "adf.ly", "cutt.ly", "rebrand.ly"
+}
+
+
+def _check_shorteners(url: str) -> dict[str, Any]:
+    try:
+        host = urlparse(url).netloc or ""
+    except Exception:
+        host = ""
+    hit = host.lower() in _SHORTENER_DOMAINS
+    return {"enabled": True, "hit": hit, "matched": hit and [host.lower()]}
+
+
+def _check_idn(domain: str) -> dict[str, Any]:
+    try:
+        encoded = domain.encode("idna")
+        has_punycode = encoded.decode() != domain
+        return {"enabled": True, "hit": has_punycode, "punycode": has_punycode and domain}
+    except Exception:
+        return {"enabled": True, "hit": False, "punycode": None}
+
+
+def _check_mx(domain: str) -> dict[str, Any]:
+    try:
+        import socket
+        answers = socket.getaddrinfo(domain, None)
+        return {"enabled": True, "hit": bool(answers), "records": 0 if not answers else len({a[4][0] for a in answers})}
+    except Exception:
+        return {"enabled": True, "hit": False, "records": 0}
+
+
+def _check_dns_trust(domain: str) -> dict[str, Any]:
+    mx = _check_mx(domain)
+    return {
+        "enabled": True,
+        "hit": bool(mx.get("hit")),
+        "mx": mx,
+        "spf_likely": False,
+        "dmarc_likely": False,
+    }
+
+
 def _score(result: ScanResult, penalty: int = 0) -> None:
     reasons = list(result.reasons)
     ti = result.threat_intel
@@ -273,4 +316,12 @@ def run_scan(url: str | None, mode: str = "standard") -> dict[str, Any]:
             "total_penalty": max(0, 100 - result.score),
             "final_score": result.score,
         }
+    if "shorteners" not in result.details:
+        result.details["shorteners"] = _check_shorteners(url)
+    if "idn" not in result.details:
+        result.details["idn"] = _check_idn(domain)
+    if "mx" not in result.details:
+        result.details["mx"] = _check_mx(domain)
+    if "dns_trust" not in result.details:
+        result.details["dns_trust"] = _check_dns_trust(domain)
     return result.to_dict()

@@ -18,6 +18,34 @@ from middleware.csrf import CsrfMiddleware
 from middleware.cors import CORSMiddleware
 from middleware.auth import require_api_key
 from middleware.security import SecurityHeadersMiddleware, rate_limit
+from middleware.logging import RequestIdMiddleware, RequestLoggingMiddleware
+from middleware.metrics import inc, snapshot
+from middleware.validation import validate_scan_payload, validate_bulk_payload
+
+import signal as _signal
+
+
+def _graceful_shutdown(*_: Any) -> None:
+    raise SystemExit(0)
+
+
+def setup_graceful_shutdown(app: Any) -> None:
+    try:
+        _signal.signal(_signal.SIGTERM, _graceful_shutdown)
+        _signal.signal(_signal.SIGINT, _graceful_shutdown)
+    except Exception:
+        pass
+
+
+def _validate_config(config: dict[str, Any]) -> None:
+    if os.getenv("PHISHCHECKER_ENV") != "production":
+        return
+    secret = config.get("SECRET_KEY", "")
+    if not secret or secret == "change-me":
+        raise RuntimeError("SECRET_KEY must be set to a strong value")
+    db_uri = config.get("SQLALCHEMY_DATABASE_URI", "")
+    if not db_uri or not str(db_uri).startswith(("sqlite://", "postgresql://", "mysql://")):
+        raise RuntimeError("SQLALCHEMY_DATABASE_URI must be a valid database URI")
 
 
 def create_app(config: dict | None = None) -> Flask:
@@ -30,6 +58,8 @@ def create_app(config: dict | None = None) -> Flask:
     app.config.setdefault("ENFORCE_HTTPS", True)
     app.config.setdefault("API_KEYS_ENABLED", os.getenv("PHISHCHECKER_API_KEYS_ENABLED", "false").lower() in ("1", "true", "yes"))
 
+    _validate_config(app.config)
+
     Base.metadata.bind = SessionFactory(app.config["SQLALCHEMY_DATABASE_URI"])
     Base.metadata.create_all(get_engine())
 
@@ -37,6 +67,12 @@ def create_app(config: dict | None = None) -> Flask:
 
     CsrfMiddleware(app)
     SecurityHeadersMiddleware(app)
+    RequestIdMiddleware(app)
+    RequestLoggingMiddleware(app)
+
+    if os.getenv("PHISHCHECKER_IP_CONTROL", "false").lower() in ("1", "true", "yes"):
+        from middleware.ip_control import ip_control
+        ip_control(app)
 
     @app.get("/health")
     def health() -> Response:
@@ -56,45 +92,53 @@ def create_app(config: dict | None = None) -> Flask:
 
     @app.post("/api/v2/scans")
     @rate_limit
-    def api_scan_v2() -> Response:
+    def api_scan_v2() -> tuple[Response, int]:
         payload = request.get_json(force=True) or {}
-        url = payload.get("url")
-        if not url:
-            return jsonify({"error": "url is required"}), 400
-        mode = payload.get("mode", "standard")
+        try:
+            url, mode = validate_scan_payload(payload)
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+        inc("requests_total")
+        inc("scans_total")
         result = ScanService().run_scan(url, mode=mode)
         return jsonify(result), 202
 
     @app.post("/scan")
     @rate_limit
-    def api_scan_legacy() -> Response:
+    def api_scan_legacy() -> tuple[Response, int]:
         payload = request.get_json(force=True) or {}
-        url = payload.get("url")
-        if not url:
-            return jsonify({"error": "url is required"}), 400
-        result = ScanService().run_scan(url, mode="standard")
+        try:
+            url, mode = validate_scan_payload(payload)
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+        inc("requests_total")
+        inc("scans_total")
+        result = ScanService().run_scan(url, mode=mode)
         return jsonify(result), 202
 
     @app.post("/api/v1/scan")
     @rate_limit
-    def api_scan() -> Response:
+    def api_scan() -> tuple[Response, int]:
         payload = request.get_json(force=True) or {}
-        url = payload.get("url")
-        if not url:
-            return jsonify({"error": "url is required"}), 400
-        result = ScanService().run_scan(url, mode="standard")
+        try:
+            url, mode = validate_scan_payload(payload)
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+        inc("requests_total")
+        inc("scans_total")
+        result = ScanService().run_scan(url, mode=mode)
         return jsonify(result), 202
 
     @app.post("/scan/bulk")
     @rate_limit
-    def api_scan_bulk() -> Response:
+    def api_scan_bulk() -> tuple[Response, int]:
         payload = request.get_json(force=True) or {}
-        urls = payload.get("urls", [])
-        if not urls:
-            return jsonify({"error": "urls is required"}), 400
-        if len(urls) > 20:
-            return jsonify({"error": "Max 20 URLs per bulk check"}), 400
-        mode = payload.get("mode", "quick")
+        try:
+            urls, mode = validate_bulk_payload(payload)
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+        inc("requests_total")
+        inc("bulk_scans_total")
         results = []
         for url in urls:
             results.append(ScanService().run_scan(url, mode=mode))
@@ -114,12 +158,19 @@ def create_app(config: dict | None = None) -> Flask:
     def api_queue_status() -> Response:
         return jsonify({"queued": 0, "processing": 0}), 200
 
+    @app.get("/metrics")
+    def metrics() -> tuple[Response, int]:
+        return jsonify(snapshot()), 200
+
     @app.get("/api/v2/status/feeds")
-    def api_status_feeds() -> Response:
-        return jsonify({"feeds": []}), 200
+    def api_status_feeds() -> tuple[Response, int]:
+        return jsonify({"feeds": [
+            {"name": "phishing_army", "url": "https://phishing.army/download/phishing_army_blocklist.txt", "last_checked": None, "status": "configured"},
+            {"name": "openphish", "url": "https://openphish.com/feed.txt", "last_checked": None, "status": "configured"},
+        ]}), 200
 
     @app.get("/api/v2/scans/<scan_id>")
-    def api_scan_detail(scan_id: str) -> Response:
+    def api_scan_detail(scan_id: str) -> tuple[Response, int]:
         repo = ScanService()
         result = repo.get_scan(scan_id)
         if not result:
@@ -127,11 +178,11 @@ def create_app(config: dict | None = None) -> Flask:
         return jsonify(result), 200
 
     @app.get("/report/<scan_id>")
-    def public_report(scan_id: str):
+    def public_report(scan_id: str) -> Response:
         return redirect(f"/#/scan/{scan_id}", code=302)
 
     @app.get("/api/v2/status")
-    def api_status() -> Response:
+    def api_status() -> tuple[Response, int]:
         return jsonify({
             "service": "phishchecker",
             "version": "1.0.0",
@@ -169,4 +220,5 @@ def create_app(config: dict | None = None) -> Flask:
 
 
 app = create_app()
+setup_graceful_shutdown(app)
 init_db()

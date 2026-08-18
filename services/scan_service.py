@@ -9,7 +9,11 @@ from datetime import datetime, timezone
 from typing import Any
 from models import Base, Scan
 from services.db import SessionFactory
+from middleware.scan_cache import ScanCache
 from scanner import run_scan
+
+
+_DEFAULT_CACHE = ScanCache(ttl_seconds=600, max_size=256)
 
 
 class ScanService:
@@ -116,10 +120,21 @@ class ScanService:
             ]
             if fmt == "csv":
                 buf = io.StringIO()
+                fieldnames = ["id", "url", "domain", "risk", "score", "mode", "started_at", "finished_at", "duration_ms"]
                 writer = csv.DictWriter(buf, fieldnames=fieldnames)
                 writer.writeheader()
-                writer.writerows(rows)
-                buf.seek(0)
+                for s in items:
+                    writer.writerow({
+                        "id": s.id,
+                        "url": s.url,
+                        "domain": s.domain,
+                        "risk": s.risk,
+                        "score": s.score,
+                        "mode": s.mode,
+                        "started_at": s.started_at.isoformat() if s.started_at else "",
+                        "finished_at": s.finished_at.isoformat() if s.finished_at else "",
+                        "duration_ms": s.duration_ms or "",
+                    })
                 return buf.getvalue().encode("utf-8-sig")
             return {"items": rows}
         finally:

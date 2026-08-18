@@ -48,7 +48,11 @@ def rate_limit(fn: Any) -> Any:
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         ip = request.remote_addr or "unknown"
         if _check_rate(ip):
-            return jsonify({"error": "rate limit exceeded"}), 429
+            resp = jsonify({"error": "rate limit exceeded"}), 429
+            resp[0].headers["Retry-After"] = str(_RATE_WINDOW)
+            resp[0].headers["X-RateLimit-Limit"] = str(_RATE_LIMIT)
+            resp[0].headers["X-RateLimit-Window"] = str(_RATE_WINDOW)
+            return resp
         return fn(*args, **kwargs)
 
     return wrapper

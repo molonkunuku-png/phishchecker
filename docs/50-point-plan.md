@@ -62,10 +62,17 @@
 59. Changelog footer
 60. Live threat-intel blocklist lookup
 
-## Pending
-- Remaining contrast/mobile polish
-- Final accessibility/test UX
-- Feature ideas: batch scan, screenshot preview, domain reputation lookup
+## Completed backend foundation
+1. Request ID + structured logging middleware
+2. Rate-limit response headers (`Retry-After`, `X-RateLimit-*`)
+3. Request validation helpers for scan/bulk payloads
+4. Feed health metadata endpoint (`/api/v2/status/feeds`)
+5. Metrics endpoint (`/metrics`)
+6. Startup config validation guard
+7. Graceful shutdown hook via `SIGTERM`/`SIGINT`
+8. IP allowlist/blocklist middleware file (`middleware/ip_control.py`)
+9. OpenAPI spec added at `docs/openapi.json`
+10. Export CSV expanded to include finished_at + duration_ms
 
 
 ## Completed (from prior work)
