@@ -375,7 +375,7 @@ export default function App() {
               )}
               <div style={{ marginTop: '0.8em', display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', opacity: 0.85 }}>
                 <span aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3em' }}>🔒</span>
-                <span>No data stored</span>
+                <span>No personal data stored</span>
               </div>
               {error && (
                 <p role="alert" aria-live="assertive" style={{ color: '#b91c1c', marginTop: '0.75em', fontSize: '0.85em', display: 'flex', alignItems: 'center', gap: '0.5em', flexWrap: 'wrap' }}>
@@ -544,6 +544,9 @@ export default function App() {
                 </div>
                 <div style={{ marginTop: '1.2em', padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', fontSize: '0.85em', color: 'var(--mapped-text-body)', lineHeight: 1.6 }}>
                   Scanner availability: use the form above for direct scans. This panel shows service health and access mode only.
+                  <div style={{ marginTop: '0.6em' }}>
+                    <strong>API access:</strong> {status.features?.publicScanning ? 'Open' : 'Restricted'} — contact <a href="mailto:molonkunuku@gmail.com" style={{ color: 'var(--mapped-text-action)', textDecoration: 'underline' }}>molonkunuku@gmail.com</a> to request access.
+                  </div>
                 </div>
               </div>
             </section>
@@ -778,7 +781,10 @@ export default function App() {
             <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>Recent scans</h2>
+                  <div>
+                    <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)', margin: 0 }}>Recent scans</h2>
+                    <div style={{ fontSize: '0.75em', color: 'var(--mapped-text-body)', marginTop: '0.35em' }}>Results shown for [X hours], then cleared.</div>
+                  </div>
                   <div style={{ display: 'flex', gap: '0.5em', flexWrap: 'wrap', alignItems: 'center' }}>
                     <input value={historySearch} onChange={e => setHistorySearch(e.target.value)} placeholder="Search domain, url, risk" className="pc-input" style={{ padding: '0.55em 0.7em', fontSize: '0.8em', minWidth: '14em' }} />
                     <button onClick={() => loadHistory()} className="pc-btn-ghost" style={{ color: 'var(--mapped-text-action)' }}>Refresh</button>
