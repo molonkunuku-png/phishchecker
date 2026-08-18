@@ -11,9 +11,7 @@ _URL_RE = re.compile(r"^https?://[^\s]+$")
 
 def _normalize_mode(mode: str) -> str:
     mode = (mode or "standard").strip().lower()
-    if mode == "family":
-        return "standard"
-    return mode
+    return mode if mode in _ALLOWED_MODES else "standard"
 
 
 _ALLOWED_MODES = {"quick", "standard", "it", "family"}

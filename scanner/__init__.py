@@ -304,7 +304,7 @@ def _score(result: ScanResult, penalty: int = 0) -> None:
     result.reasons = reasons
 
 
-def run_scan(url: str | None, mode: str = "standard") -> dict[str, Any]:
+def run_scan(url: str | None, mode: str = "standard", family_mode: bool = False) -> dict[str, Any]:
     started = datetime.now(timezone.utc)
     url = (url or "").strip()
     err = _validate(url)
@@ -356,6 +356,11 @@ def run_scan(url: str | None, mode: str = "standard") -> dict[str, Any]:
     if mode == 'it':
         result.details.setdefault('headers', {})['IT review'] = False
         result.reasons.append('IT review not available')
+
+    if family_mode:
+        result.details['family_mode'] = True
+        result.reasons = [r for r in result.reasons if not r.startswith('Missing ')]
+        result.details.pop('score_math', None)
 
     domain_age = _domain_age_days(domain)
     result.details["domain_age"] = domain_age

@@ -248,10 +248,11 @@ export default function App() {
     return { ok: true };
   }
 
-  async function handleScan(e: React.FormEvent) {
-    e.preventDefault();
+  async function doScan(): Promise<void> {
     setError(null);
     setResult(null);
+    setReportId(null);
+    setReport(null);
     setFindingFilter('all');
     const trimmed = url.trim();
     const v = validateUrl(trimmed);
@@ -270,6 +271,11 @@ export default function App() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleScan(e: React.FormEvent) {
+    e.preventDefault();
+    await doScan();
   }
 
   async function handleBatch(e: React.FormEvent) {
@@ -401,7 +407,7 @@ export default function App() {
               {error && (
                 <p role="alert" aria-live="assertive" style={{ color: '#b91c1c', marginTop: '0.75em', fontSize: '0.85em', display: 'flex', alignItems: 'center', gap: '0.5em', flexWrap: 'wrap' }}>
                   {error}
-                  <button type="button" onClick={() => setError(null)} className="pc-btn-ghost" style={{ fontSize: '0.8em' }}>Retry</button>
+                  <button type="button" onClick={doScan} className="pc-btn-ghost" style={{ fontSize: '0.8em' }}>Retry</button>
                 </p>
               )}
             </div>

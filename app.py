@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from flask import Flask, jsonify, request, send_file, Response, render_template, redirect
 from flask_cors import CORS
+import logging
 from pathlib import Path
 import os
 import time
 import secrets
 import threading
 from typing import Any
+
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from models import Base, Scan
 from services.db import SessionFactory, init_db, get_engine
@@ -23,6 +26,9 @@ from middleware.metrics import inc, snapshot
 from middleware.validation import validate_scan_payload, validate_bulk_payload
 
 import signal as _signal
+
+
+logger = logging.getLogger("phishchecker")
 
 
 def _graceful_shutdown(*_: Any) -> None:
@@ -51,12 +57,16 @@ def _validate_config(config: dict[str, Any]) -> None:
 
 def create_app(config: dict | None = None) -> Flask:
     app = Flask(__name__, static_folder=None, template_folder="templates")
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
     app.config.update(config or {})
 
     app.config.setdefault("SECRET_KEY", os.getenv("PHISHCHECKER_SECRET", os.getenv("SECRET_KEY", "change-me")))
     app.config.setdefault("SQLALCHEMY_DATABASE_URI", os.getenv("DATABASE_URL", "sqlite:///phishchecker.db"))
     app.config.setdefault("SQLALCHEMY_TRACK_MODIFICATIONS", False)
     app.config.setdefault("ENFORCE_HTTPS", True)
+    if app.config["ENFORCE_HTTPS"]:
+        app.config["PREFERRED_URL_SCHEME"] = "https"
+
     app.config.setdefault("API_KEYS_ENABLED", os.getenv("PHISHCHECKER_API_KEYS_ENABLED", "false").lower() in ("1", "true", "yes"))
 
     _validate_config(app.config)
@@ -114,7 +124,11 @@ def create_app(config: dict | None = None) -> Flask:
             return jsonify({"error": str(e)}), 400
         inc("requests_total")
         inc("scans_total")
-        result = ScanService().run_scan(url, mode=mode)
+        try:
+            family = bool(payload.get("family")) if isinstance(payload.get("family"), bool) else str(payload.get("family", "")).lower() in ("1", "true", "yes")
+        except Exception:
+            family = False
+        result = ScanService().run_scan(url, mode=mode, family_mode=family)
         return jsonify(result), 202
 
     @app.post("/scan")
@@ -127,7 +141,16 @@ def create_app(config: dict | None = None) -> Flask:
             return jsonify({"error": str(e)}), 400
         inc("requests_total")
         inc("scans_total")
-        result = ScanService().run_scan(url, mode=mode)
+        try:
+            family = bool(payload.get("family")) if isinstance(payload.get("family"), bool) else str(payload.get("family", "")).lower() in ("1", "true", "yes")
+        except Exception:
+            family = False
+        try:
+            result = ScanService().run_scan(url, mode=mode, family_mode=family)
+        except Exception as exc:
+            logger.exception("legacy scan failed url=%s mode=%s rid=%s", url, mode, request.headers.get("X-Request-ID"))
+            inc("errors_total")
+            return jsonify({"error": "scan failed"}), 500
         return jsonify(result), 202
 
     @app.post("/api/v1/scan")
@@ -140,7 +163,16 @@ def create_app(config: dict | None = None) -> Flask:
             return jsonify({"error": str(e)}), 400
         inc("requests_total")
         inc("scans_total")
-        result = ScanService().run_scan(url, mode=mode)
+        try:
+            family = bool(payload.get("family")) if isinstance(payload.get("family"), bool) else str(payload.get("family", "")).lower() in ("1", "true", "yes")
+        except Exception:
+            family = False
+        try:
+            result = ScanService().run_scan(url, mode=mode, family_mode=family)
+        except Exception as exc:
+            logger.exception("api/v1 scan failed url=%s mode=%s rid=%s", url, mode, request.headers.get("X-Request-ID"))
+            inc("errors_total")
+            return jsonify({"error": "scan failed"}), 500
         return jsonify(result), 202
 
     @app.post("/scan/bulk")
@@ -154,9 +186,28 @@ def create_app(config: dict | None = None) -> Flask:
         inc("requests_total")
         inc("bulk_scans_total")
         results = []
+        partial_error = None
         for url in urls:
-            results.append(ScanService().run_scan(url, mode=mode))
-        return jsonify({"results": results}), 202
+            try:
+                results.append(ScanService().run_scan(url, mode=mode))
+            except Exception as exc:
+                logger.exception("bulk scan failed url=%s mode=%s rid=%s", url, mode, request.headers.get("X-Request-ID"))
+                inc("errors_total")
+                results.append({
+                    "url": url,
+                    "domain": "",
+                    "risk": "unknown",
+                    "score": 0,
+                    "reasons": ["scan failed"],
+                    "details": {},
+                    "mode": mode,
+                    "duration_ms": 0,
+                })
+                partial_error = partial_error or "one or more scans failed"
+        payload_out = {"results": results}
+        if partial_error:
+            payload_out["error"] = partial_error
+        return jsonify(payload_out), 202
 
     @app.get("/api/v2/scans/export")
     def api_export() -> Response:
@@ -173,6 +224,7 @@ def create_app(config: dict | None = None) -> Flask:
         return jsonify({"queued": 0, "processing": 0}), 200
 
     @app.get("/metrics")
+    @rate_limit
     def metrics() -> tuple[Response, int]:
         return jsonify(snapshot()), 200
 

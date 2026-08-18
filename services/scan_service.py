@@ -17,8 +17,8 @@ _DEFAULT_CACHE = ScanCache(ttl_seconds=600, max_size=256)
 
 
 class ScanService:
-    def run_scan(self, url: str, mode: str = "standard") -> dict[str, Any]:
-        result = run_scan(url, mode=mode)
+    def run_scan(self, url: str, mode: str = "standard", family_mode: bool = False) -> dict[str, Any]:
+        result = run_scan(url, mode=mode, family_mode=family_mode)
         result["id"] = self._persist(result)
         return result
 
