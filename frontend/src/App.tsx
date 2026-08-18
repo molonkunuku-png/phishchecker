@@ -141,6 +141,7 @@ export default function App() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [showAwareness, setShowAwareness] = useState(false);
+  const [awarenessMode, setAwarenessMode] = useState<'simple' | 'detailed'>('simple');
   const [showApi, setShowApi] = useState(false);
   const [reportId, setReportId] = useState<string | null>(null);
   const [report, setReport] = useState<ScanResult | null>(null);
@@ -450,31 +451,102 @@ export default function App() {
           {showAwareness && (
             <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)', marginBottom: '0.8em' }}>Phishing awareness</h2>
-                <div style={{ display: 'grid', gap: '1em', fontSize: '0.9em', lineHeight: 1.6 }}>
-                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>Red flags</h3>
-                    <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.35em' }}>
-                      <li>Unexpected links or attachments from unknown senders</li>
-                      <li>URLs that impersonate known brands with typos or extra words</li>
-                      <li>Requests for credentials, OTPs, or payments via email/SMS</li>
-                      <li>Shortened URLs that hide the real destination</li>
-                    </ul>
-                  </div>
-                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>How to check safely</h3>
-                    <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.35em' }}>
-                      <li>Hover to inspect the real link destination</li>
-                      <li>Use this scanner for fast risk analysis</li>
-                      <li>Check SSL/TLS and certificate age</li>
-                      <li>Prefer official apps over links when possible</li>
-                    </ul>
-                  </div>
-                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>Understanding risk</h3>
-                    <p>High risk means multiple suspicious indicators were found. Suspicious means some signals warrant caution. Clean means no strong phishing indicators were detected in the checked URL.</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.8em', flexWrap: 'wrap' }}>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)', margin: 0 }}>Phishing awareness</h2>
+                  <div style={{ display: 'inline-flex', gap: '0.4em', background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '0.3em', borderRadius: '999px' }}>
+                    <button type="button" onClick={() => setAwarenessMode('simple')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: '999px', background: awarenessMode === 'simple' ? 'var(--mapped-surface-action)' : 'transparent', color: awarenessMode === 'simple' ? 'var(--mapped-text-on-action)' : 'var(--mapped-text-body)' }}>Simple mode</button>
+                    <button type="button" onClick={() => setAwarenessMode('detailed')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: '999px', background: awarenessMode === 'detailed' ? 'var(--mapped-surface-action)' : 'transparent', color: awarenessMode === 'detailed' ? 'var(--mapped-text-on-action)' : 'var(--mapped-text-body)' }}>Detailed mode</button>
                   </div>
                 </div>
+
+                {awarenessMode === 'simple' && (
+                  <div style={{ fontSize: '1.05em', lineHeight: 1.7, color: 'var(--mapped-text-body)' }}>
+                    <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginBottom: '1em' }}>
+                      <p style={{ margin: 0, fontSize: '1.05em' }}>Phishing is when someone pretends to be a trusted person or brand.</p>
+                      <p style={{ margin: '0.6em 0 0', fontSize: '1.05em' }}>They want your password, OTP, or payment.</p>
+                      <p style={{ margin: '0.6em 0 0', fontSize: '1.05em' }}>New or unknown senders are the biggest warning sign.</p>
+                    </div>
+
+                    <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginBottom: '1em' }}>
+                      <h3 style={{ fontSize: '1em', fontWeight: 700, color: 'var(--mapped-text-headings)', margin: '0 0 0.6em' }}>Example 1: Fake bank text</h3>
+                      <div style={{ background: 'var(--bg)', border: '1px solid var(--mapped-border-default)', borderRadius: '0.6em', padding: '1em', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace', fontSize: '0.95em', lineHeight: 1.6 }}>
+                        <div style={{ color: 'var(--mapped-text-body)' }}>SMS: <strong style={{ color: '#fca5a5' }}>ALERT:</strong> Your bank account is locked.</div>
+                        <div style={{ color: 'var(--mapped-text-body)', marginTop: '0.4em' }}>Tap here to verify: <span style={{ color: '#93c5fd' }}>http://bank-secure.xyz/login</span></div>
+                        <div style={{ color: '#fca5a5', marginTop: '0.6em', fontWeight: 700 }}>Red flags:</div>
+                        <ul style={{ color: 'var(--mapped-text-body)', paddingLeft: '1.2em', marginTop: '0.3em' }}>
+                          <li>Creates fear with words like "locked" or "urgent"</li>
+                          <li>Uses a strange web address, not your bank's site</li>
+                          <li>Asks for login details by text</li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginBottom: '1em' }}>
+                      <h3 style={{ fontSize: '1em', fontWeight: 700, color: 'var(--mapped-text-headings)', margin: '0 0 0.6em' }}>Example 2: Fake delivery notification</h3>
+                      <div style={{ background: 'var(--bg)', border: '1px solid var(--mapped-border-default)', borderRadius: '0.6em', padding: '1em', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace', fontSize: '0.95em', lineHeight: 1.6 }}>
+                        <div style={{ color: 'var(--mapped-text-body)' }}>Email: <strong style={{ color: '#fca5a5' }}>Action required:</strong> Your parcel cannot be delivered.</div>
+                        <div style={{ color: 'var(--mapped-text-body)', marginTop: '0.4em' }}>Open the label here: <span style={{ color: '#93c5fd' }}>https://delivery-tracking.info/parcel</span></div>
+                        <div style={{ color: '#fca5a5', marginTop: '0.6em', fontWeight: 700 }}>Red flags:</div>
+                        <ul style={{ color: 'var(--mapped-text-body)', paddingLeft: '1.2em', marginTop: '0.3em' }}>
+                          <li>No tracking number from the real courier</li>
+                          <li>Link domain does not match the courier name</li>
+                          <li>Asks you to download or open an unexpected file</li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginBottom: '1em' }}>
+                      <h3 style={{ fontSize: '1em', fontWeight: 700, color: 'var(--mapped-text-headings)', margin: '0 0 0.6em' }}>Example 3: Fake account alert</h3>
+                      <div style={{ background: 'var(--bg)', border: '1px solid var(--mapped-border-default)', borderRadius: '0.6em', padding: '1em', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace', fontSize: '0.95em', lineHeight: 1.6 }}>
+                        <div style={{ color: 'var(--mapped-text-body)' }}>Email: <strong style={{ color: '#fca5a5' }}>Security notice:</strong> Someone logged into your account.</div>
+                        <div style={{ color: 'var(--mapped-text-body)', marginTop: '0.4em' }}>Secure it now: <span style={{ color: '#93c5fd' }}>https://account-security-alert.xyz/reset</span></div>
+                        <div style={{ color: '#fca5a5', marginTop: '0.6em', fontWeight: 700 }}>Red flags:</div>
+                        <ul style={{ color: 'var(--mapped-text-body)', paddingLeft: '1.2em', marginTop: '0.3em' }}>
+                          <li>No account name, service name, or location</li>
+                          <li>Asks you to reset password on a suspicious site</li>
+                          <li>Feels urgent even though it gives no real proof</li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+                      <h3 style={{ fontSize: '1em', fontWeight: 700, color: 'var(--mapped-text-headings)', margin: '0 0 0.6em' }}>Quick checks</h3>
+                      <ul style={{ color: 'var(--mapped-text-body)', paddingLeft: '1.2em', display: 'grid', gap: '0.4em', fontSize: '1.05em' }}>
+                        <li>Hover over a link to see where it really goes.</li>
+                        <li>Open the app or website directly instead of clicking the message.</li>
+                        <li>Ask: did I expect this? Is it asking for secrets?</li>
+                        <li>When in doubt, do not tap. Verify with the official source.</li>
+                      </ul>
+                    </div>
+                  </div>
+                )}
+
+                {awarenessMode === 'detailed' && (
+                  <div style={{ fontSize: '0.9em', lineHeight: 1.6, color: 'var(--mapped-text-body)' }}>
+                    <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginBottom: '1em' }}>
+                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>Red flags</h3>
+                      <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.35em' }}>
+                        <li>Unexpected links or attachments from unknown senders</li>
+                        <li>URLs that impersonate known brands with typos or extra words</li>
+                        <li>Requests for credentials, OTPs, or payments via email/SMS</li>
+                        <li>Shortened URLs that hide the real destination</li>
+                      </ul>
+                    </div>
+                    <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginBottom: '1em' }}>
+                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>How to check safely</h3>
+                      <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.35em' }}>
+                        <li>Hover to inspect the real link destination</li>
+                        <li>Use this scanner for fast risk analysis</li>
+                        <li>Check SSL/TLS and certificate age</li>
+                        <li>Prefer official apps over links when possible</li>
+                      </ul>
+                    </div>
+                    <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>Understanding risk</h3>
+                      <p>High risk means multiple suspicious indicators were found. Suspicious means some signals warrant caution. Clean means no strong phishing indicators were detected in the checked URL.</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </section>
           )}
