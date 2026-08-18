@@ -23,6 +23,7 @@ class ScanService:
         return result
 
     def _persist(self, result: dict[str, Any]) -> str:
+        session = None
         try:
             session = SessionFactory()()
             started = datetime.fromisoformat(result.get("started_at", "")) if result.get("started_at") else None
@@ -45,10 +46,17 @@ class ScanService:
             return scan.id
         except Exception:
             try:
-                session.rollback()
+                if session is not None:
+                    session.rollback()
             except Exception:
                 pass
             return result.get("id") or ""
+        finally:
+            try:
+                if session is not None:
+                    session.close()
+            except Exception:
+                pass
 
     def history(self, page: int = 1, page_size: int = 20) -> dict[str, Any]:
         session = SessionFactory()()

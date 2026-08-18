@@ -93,35 +93,35 @@ function findingSummary(r: string): string {
 }
 
 function riskColor(risk?: string): string {
-  if (risk === 'high') return '#b91c1c';
-  if (risk === 'suspicious') return '#b45309';
-  if (risk === 'clean') return '#047857';
+  if (risk === 'high') return 'var(--pc-risk-high)';
+  if (risk === 'suspicious') return 'var(--pc-risk-suspicious)';
+  if (risk === 'clean') return 'var(--pc-risk-low)';
   return 'var(--mapped-text-body)';
 }
 
 function scoreColor(score?: number | null): string {
   if (score == null) return 'var(--mapped-text-body)';
-  if (score < 50) return '#b91c1c';
-  if (score < 80) return '#b45309';
-  return '#047857';
+  if (score < 50) return 'var(--pc-risk-high)';
+  if (score < 80) return 'var(--pc-risk-suspicious)';
+  return 'var(--pc-risk-low)';
 }
 
 function confidenceMeta(score?: number | null): { label: string; color: string } | null {
   if (score == null) return null;
-  if (score < 50) return { label: 'High risk', color: '#b91c1c' };
-  if (score < 80) return { label: 'Elevated risk', color: '#b45309' };
-  return { label: 'Low risk', color: '#047857' };
+  if (score < 50) return { label: 'High risk', color: 'var(--pc-risk-high)' };
+  if (score < 80) return { label: 'Elevated risk', color: 'var(--pc-risk-suspicious)' };
+  return { label: 'Low risk', color: 'var(--pc-risk-low)' };
 }
 
 function sslGrade(details?: Record<string, unknown>): { grade: string; color: string } | null {
   const ssl = (details?.ssl || {}) as any;
-  if (!ssl || !ssl.valid) return { grade: 'F', color: '#b91c1c' };
+  if (!ssl || !ssl.valid) return { grade: 'F', color: 'var(--pc-risk-high)' };
   const age = ssl.age_days as number | undefined;
-  if (age == null) return { grade: 'A', color: '#047857' };
-  if (age < 30) return { grade: 'A+', color: '#047857' };
-  if (age < 180) return { grade: 'A', color: '#059669' };
-  if (age < 365) return { grade: 'B', color: '#b45309' };
-  return { grade: 'C', color: '#b91c1c' };
+  if (age == null) return { grade: 'A', color: 'var(--pc-risk-low)' };
+  if (age < 30) return { grade: 'A+', color: 'var(--pc-risk-low)' };
+  if (age < 180) return { grade: 'A', color: 'var(--pc-risk-low)' };
+  if (age < 365) return { grade: 'B', color: 'var(--pc-risk-suspicious)' };
+  return { grade: 'C', color: 'var(--pc-risk-high)' };
 }
 
 type Severity = 'high' | 'medium' | 'low';
@@ -136,9 +136,9 @@ function severityOf(reason: string): Severity {
 }
 
 function severityStyle(s: Severity): { bg: string; text: string } {
-  if (s === 'high') return { bg: '#b91c1c', text: '#fff' };
-  if (s === 'medium') return { bg: '#b45309', text: '#fff' };
-  return { bg: '#047857', text: '#fff' };
+  if (s === 'high') return { bg: 'var(--pc-risk-high)', text: 'var(--pc-risk-on)' };
+  if (s === 'medium') return { bg: 'var(--pc-risk-suspicious)', text: 'var(--pc-risk-on)' };
+  return { bg: 'var(--pc-risk-low)', text: 'var(--pc-risk-on)' };
 }
 
 export default function App() {
@@ -405,10 +405,11 @@ export default function App() {
                 <span>No personal data stored</span>
               </div>
               {error && (
-                <p role="alert" aria-live="assertive" style={{ color: '#b91c1c', marginTop: '0.75em', fontSize: '0.85em', display: 'flex', alignItems: 'center', gap: '0.5em', flexWrap: 'wrap' }}>
-                  {error}
-                  <button type="button" onClick={doScan} className="pc-btn-ghost" style={{ fontSize: '0.8em' }}>Retry</button>
-                </p>
+                <div role="alert" aria-live="assertive" style={{ position: 'fixed', top: '1em', left: '50%', transform: 'translateX(-50%)', zIndex: 200, background: 'var(--pc-risk-high)', color: 'var(--pc-risk-on)', padding: '0.8em 1.2em', borderRadius: '0.4em', fontSize: '0.85em', boxShadow: '0 6px 20px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', gap: '0.6em', maxWidth: '92vw' }}>
+                  <span style={{ fontWeight: 600 }}>Error</span>
+                  <span>{error}</span>
+                  <button type="button" onClick={doScan} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderColor: 'rgba(255,255,255,0.35)', color: 'inherit' }}>Retry</button>
+                </div>
               )}
             </div>
           </section>
@@ -430,7 +431,7 @@ export default function App() {
                     <span style={{ fontSize: '0.7em', color: 'var(--mapped-text-body)', alignSelf: 'center' }}>Max 20 URLs</span>
                   </div>
                   {batchError && (
-                    <p style={{ color: '#b91c1c', marginTop: '0.4em', fontSize: '0.85em', display: 'flex', alignItems: 'center', gap: '0.5em', flexWrap: 'wrap' }}>
+                    <p style={{ color: 'var(--pc-risk-high)', marginTop: '0.4em', fontSize: '0.85em', display: 'flex', alignItems: 'center', gap: '0.5em', flexWrap: 'wrap' }}>
                       {batchError}
                       <button type="button" onClick={() => setBatchError(null)} className="pc-btn-ghost" style={{ fontSize: '0.8em' }}>Retry</button>
                     </p>
@@ -624,7 +625,7 @@ export default function App() {
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>Service status</h2>
-                  <span className="pc-chip" style={{ background: '#059669', color: '#fff', borderColor: '#059669' }}>Operational</span>
+                  <span className="pc-chip" style={{ background: 'var(--pc-ok)', color: '#fff', borderColor: 'var(--pc-ok)' }}>Operational</span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5 }}>
                   <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
@@ -723,10 +724,10 @@ export default function App() {
                     <div style={{ marginTop: '0.8em', padding: '1em', background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', fontSize: '0.85em', lineHeight: 1.6, color: 'var(--mapped-text-body)' }}>
                       <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.4em 1em', alignItems: 'center' }}>
                         <span>Base score</span><span style={{ fontWeight: 600 }}>100</span>
-                        <span>Headers</span><span style={{ color: '#b91c1c' }}>-{((result.details as any)?.score_math as any)?.header_penalty}</span>
-                        <span>SSL/TLS</span><span style={{ color: '#b91c1c' }}>-{((result.details as any)?.score_math as any)?.ssl_penalty}</span>
-                        <span>Threat intel</span><span style={{ color: '#b91c1c' }}>-{((result.details as any)?.score_math as any)?.threat_intel_penalty}</span>
-                        <span>Domain shape</span><span style={{ color: '#b91c1c' }}>-{((result.details as any)?.score_math as any)?.domain_penalty}</span>
+                        <span>Headers</span><span style={{ color: 'var(--pc-risk-high)' }}>-{((result.details as any)?.score_math as any)?.header_penalty}</span>
+                        <span>SSL/TLS</span><span style={{ color: 'var(--pc-risk-high)' }}>-{((result.details as any)?.score_math as any)?.ssl_penalty}</span>
+                        <span>Threat intel</span><span style={{ color: 'var(--pc-risk-high)' }}>-{((result.details as any)?.score_math as any)?.threat_intel_penalty}</span>
+                        <span>Domain shape</span><span style={{ color: 'var(--pc-risk-high)' }}>-{((result.details as any)?.score_math as any)?.domain_penalty}</span>
                         <span style={{ fontWeight: 600, borderTop: '1px solid var(--mapped-border-default)', paddingTop: '0.4em' }}>Final score</span><span style={{ fontWeight: 700, color: scoreColor(currentScore) }}>{((result.details as any)?.score_math as any)?.final_score}</span>
                       </div>
                     </div>
@@ -903,15 +904,15 @@ export default function App() {
                     </div>
                     <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
                       <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>High</div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: '#b91c1c' }}>{historyStats.high}</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--pc-risk-high)' }}>{historyStats.high}</div>
                     </div>
                     <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
                       <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Suspicious</div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: '#b45309' }}>{historyStats.suspicious}</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--pc-risk-suspicious)' }}>{historyStats.suspicious}</div>
                     </div>
                     <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
                       <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Low</div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: '#047857' }}>{historyStats.low}</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--pc-risk-low)' }}>{historyStats.low}</div>
                     </div>
                   </div>
                 )}

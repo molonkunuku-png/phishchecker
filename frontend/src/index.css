@@ -30,6 +30,11 @@
   --mapped-surface-action-hover: var(--brand-orange-hover);
   --mapped-text-action: var(--brand-orange);
   --mapped-text-on-action: #ffffff;
+  --pc-risk-high: #b91c1c;
+  --pc-risk-suspicious: #b45309;
+  --pc-risk-low: #047857;
+  --pc-risk-on: #ffffff;
+  --pc-ok: #059669;
 }
 
 .light {

@@ -159,7 +159,10 @@ def _threat_intel(domain: str) -> dict[str, Any]:
         return cached[1]
     for name, url in feeds:
         try:
-            r = requests.get(url, timeout=3, headers={"User-Agent": "PhishChecker/1.0"})
+            try:
+                r = requests.get(url, timeout=5, headers={"User-Agent": "PhishChecker/1.0"})
+            except requests.RequestException:
+                continue
             if r.ok:
                 for line in r.text.splitlines():
                     line = line.strip()

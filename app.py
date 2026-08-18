@@ -76,6 +76,12 @@ def create_app(config: dict | None = None) -> Flask:
 
     CORS(app, supports_credentials=True)
 
+    try:
+        from middleware.sentry_integration import init_sentry
+        init_sentry(app)
+    except Exception:
+        pass
+
     CsrfMiddleware(app)
     SecurityHeadersMiddleware(app)
     RequestIdMiddleware(app)
@@ -112,6 +118,14 @@ def create_app(config: dict | None = None) -> Flask:
         size = min(100, max(1, int(request.args.get("page_size", 20))))
         repo = ScanService()
         result = repo.history(page=page, page_size=size)
+        risk = (request.args.get("risk") or "").strip().lower()
+        q = (request.args.get("q") or "").strip().lower()
+        items = result.get("items", [])
+        if risk:
+            items = [x for x in items if (x.get("risk") or "").lower() == risk]
+        if q:
+            items = [x for x in items if q in (x.get("domain") or "").lower() or q in (x.get("url") or "").lower()]
+        result["items"] = items[:size]
         return jsonify(result), 200
 
     @app.post("/api/v2/scans")
@@ -296,6 +310,15 @@ def create_app(config: dict | None = None) -> Flask:
     @app.get("/terms")
     def terms():
         return send_file(Path(__file__).parent / "static" / "terms.html")
+
+    @app.get("/security.txt")
+    def security_txt() -> Response:
+        content = "Contact: mailto:molonkunuku@gmail.com\nPreferred-Languages: en, ja, es\n"
+        return Response(content, mimetype="text/plain", headers={"Cache-Control": "no-store"})
+
+    @app.get("/robots.txt")
+    def robots_txt() -> Response:
+        return Response("User-agent: *\nAllow: /\nSitemap: /sitemap.txt\n", mimetype="text/plain", headers={"Cache-Control": "no-store"})
 
     @app.get("/")
     def root() -> Response:
