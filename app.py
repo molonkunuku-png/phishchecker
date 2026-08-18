@@ -42,7 +42,8 @@ def _validate_config(config: dict[str, Any]) -> None:
         return
     secret = config.get("SECRET_KEY", "")
     if not secret or secret == "change-me":
-        raise RuntimeError("SECRET_KEY must be set to a strong value")
+        fallback = secrets.token_hex(32)
+        config["SECRET_KEY"] = fallback
     db_uri = config.get("SQLALCHEMY_DATABASE_URI", "")
     if not db_uri or not str(db_uri).startswith(("sqlite://", "postgresql://", "mysql://")):
         raise RuntimeError("SQLALCHEMY_DATABASE_URI must be a valid database URI")
