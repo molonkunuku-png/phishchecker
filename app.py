@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flask import Flask, jsonify, request, send_file, Response, render_template, redirect
+from flask import Flask, jsonify, request, send_file, Response, render_template, redirect, send_from_directory
 from flask_cors import CORS
 import logging
 from pathlib import Path
@@ -302,6 +302,19 @@ def create_app(config: dict | None = None) -> Flask:
         }), 200
 
     _dist_dir = Path(__file__).parent / "frontend" / "dist"
+    _public_dir = Path(__file__).parent / "frontend" / "public"
+
+    @app.get("/manifest.json")
+    def manifest() -> Response:
+        return send_file(_public_dir / "manifest.json", mimetype="application/json")
+
+    @app.get("/sw.js")
+    def service_worker() -> Response:
+        return send_file(_public_dir / "sw.js", mimetype="application/javascript")
+
+    @app.get("/static/icons/<path:name>")
+    def icon(name: str) -> Response:
+        return send_from_directory(str(_public_dir / "static" / "icons"), name)
 
     @app.get("/privacy")
     def privacy():

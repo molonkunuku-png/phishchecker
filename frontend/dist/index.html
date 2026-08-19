@@ -4,11 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="PhishChecker - privacy-first URL phishing risk scanner" />
+    <meta name="theme-color" content="#7c3aed" />
     <title>PhishChecker</title>
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" href="/static/icons/icon-192.png" />
     <script type="module" crossorigin src="/assets/index-D4-pe6lv.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-B__EB74C.css">
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>
