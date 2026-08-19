@@ -29,6 +29,48 @@ export async function submitScan(url: string, mode = 'standard'): Promise<ScanRe
   return data;
 }
 
+export async function submitScreenshotScan(imageData: string): Promise<ScanResult> {
+  const token = await getCsrf();
+  const { data } = await base.post('/api/v2/scan/screenshot', { image: imageData }, {
+    headers: { 'X-CSRF-Token': token },
+  });
+  return data;
+}
+
+export async function submitQRScan(imageData: string): Promise<ScanResult> {
+  const token = await getCsrf();
+  const { data } = await base.post('/api/v2/scan/qr', { image: imageData }, {
+    headers: { 'X-CSRF-Token': token },
+  });
+  return data;
+}
+
+export async function submitFlag(payload: { url: string; domain: string; category?: string; notes?: string }): Promise<{ ok: boolean; token: string }> {
+  const token = await getCsrf();
+  const { data } = await base.post('/api/v2/community/flag', payload, {
+    headers: { 'X-CSRF-Token': token },
+  });
+  return data;
+}
+
+export async function fetchFlags(): Promise<{ flags: Array<{ url: string; domain: string; category: string; notes: string; created_at?: string }> }> {
+  const { data } = await base.get('/api/v2/community/flags');
+  return data;
+}
+
+export async function createScheduledCheck(payload: { url: string; cadence_hours?: number }): Promise<{ ok: boolean; token: string; domain: string; cadence_hours: number }> {
+  const token = await getCsrf();
+  const { data } = await base.post('/api/v2/scheduled', payload, {
+    headers: { 'X-CSRF-Token': token },
+  });
+  return data;
+}
+
+export async function fetchScheduledChecks(): Promise<{ scheduled: Array<{ domain: string; url: string; cadence_hours: number; last_score?: number; last_risk?: string; last_checked_at?: string }> }> {
+  const { data } = await base.get('/api/v2/scheduled');
+  return data;
+}
+
 export async function submitBulk(urls: string[], mode = 'quick'): Promise<BulkResponse> {
   const token = await getCsrf();
   const { data } = await base.post('/scan/bulk', { urls, mode }, {
