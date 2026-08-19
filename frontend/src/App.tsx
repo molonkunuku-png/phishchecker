@@ -333,29 +333,46 @@ export default function App() {
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
       <div className="min-h-screen" style={{ background: 'var(--mapped-surface-page)', color: 'var(--mapped-text-body)' }}>
-        <nav className={`pc-nav ${navShadow ? 'pc-nav-shadow' : ''}`} style={{ overflow: 'visible' }}>
+        <nav className={`pc-nav ${navShadow ? 'pc-nav-scrolled' : ''}`} style={{ overflow: 'visible' }}>
           <a href="#main" className="pc-skip-link">Skip to content</a>
-          <a href="/" className="pc-nav-logo">PHISHCHECKER</a>
+          <a href="/" className="pc-nav-brand" aria-label="PhishChecker home">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M32 4L8 14v14c0 16 10.4 28.8 24 34 13.6-5.2 24-18 24-34V14L32 4z" fill="url(#shieldGrad)" opacity="0.15"/>
+              <path d="M32 8L12 16.5V30c0 14.3 9.2 26 20 30.5C42.8 56 52 44.3 52 30V16.5L32 8z" fill="url(#shieldGrad)" opacity="0.25"/>
+              <path d="M32 12L16 19v11c0 12.5 8 22.8 16 26.5 8-3.7 16-14 16-26.5V19L32 12z" fill="url(#shieldGrad)"/>
+              <path d="M24 34l6 6 10-12" stroke="#0D1B2A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <defs>
+                <linearGradient id="shieldGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#D4AF37"/>
+                  <stop offset="100%" stopColor="#bfa030"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            PhishChecker
+          </a>
           <button onClick={() => { const items = document.getElementById('pc-nav-items'); if (items) items.classList.toggle('pc-nav-open'); }} className="pc-nav-hamburger" aria-label="Toggle navigation" style={{ display: 'none', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 1em', fontSize: '1.2em', lineHeight: 1 }}>☰</button>
-          <div id="pc-nav-items" className="pc-nav-items">
-            <button onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }} className={`pc-nav-item ${showHistory ? 'pc-nav-item-active' : ''}`}>History</button>
-            <button onClick={() => { setShowAwareness(v => !v); }} className={`pc-nav-item ${showAwareness ? 'pc-nav-item-active' : ''}`}>{showAwareness ? 'Scan' : 'Awareness'}</button>
-            <button onClick={() => { setShowApi(v => !v); }} className={`pc-nav-item ${showApi ? 'pc-nav-item-active' : ''}`}>{showApi ? 'Scan' : 'API'}</button>
-            <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className={`pc-nav-item ${showStatus ? 'pc-nav-item-active' : ''}`}>{showStatus ? 'Scan' : 'Status'}</button>
-            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className={`pc-nav-item ${theme === 'dark' ? 'pc-nav-item-active' : ''}`} aria-label="Toggle theme">{theme === 'dark' ? 'Theme ☀' : 'Theme ☾'}</button>
+          <div id="pc-nav-items" className="pc-nav-links">
+            <button onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }} className={`pc-nav-link ${showHistory ? 'pc-nav-item-active' : ''}`}>History</button>
+            <button onClick={() => { setShowAwareness(v => !v); }} className={`pc-nav-link ${showAwareness ? 'pc-nav-item-active' : ''}`}>{showAwareness ? 'Scan' : 'Awareness'}</button>
+            <button onClick={() => { setShowApi(v => !v); }} className={`pc-nav-link ${showApi ? 'pc-nav-item-active' : ''}`}>{showApi ? 'Scan' : 'API'}</button>
+            <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className={`pc-nav-link ${showStatus ? 'pc-nav-item-active' : ''}`}>{showStatus ? 'Scan' : 'Status'}</button>
+            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className={`pc-nav-link ${theme === 'dark' ? 'pc-nav-item-active' : ''}`} aria-label="Toggle theme">{theme === 'dark' ? '☀ Light' : '☾ Dark'}</button>
           </div>
           <button onClick={() => { document.getElementById('scan')?.scrollIntoView({ behavior: 'smooth' }); }} className="pc-nav-cta" style={{ marginLeft: 'auto', flexShrink: 0 }}>Scan now</button>
         </nav>
 
-        <main id="main" style={{ paddingTop: '4.2em' }}>
-          <section className="pc-panel" style={{ borderTop: 'none', borderRadius: 0, borderLeft: 'none', borderRight: 'none' }}>
-            <div style={{ maxWidth: '56em', margin: '0 auto', padding: '3em 1.5em' }} className="pc-section">
-              <p className="pc-chip" style={{ marginBottom: '1em', background: 'var(--mapped-surface-default)', borderColor: 'var(--mapped-border-default)', color: 'var(--mapped-text-action)' }}>PRIVACY-FIRST SCANNING</p>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.4rem, 5.2vw, 4rem)', lineHeight: 0.95, letterSpacing: '-0.04em', color: 'var(--mapped-text-headings)', marginBottom: '0.75em' }}>
-                Check links before<br />you trust them.
+        <main id="main" style={{ paddingTop: '4.5em' }}>
+          <section className="pc-panel" style={{ borderTop: 'none', borderRadius: 0, borderLeft: 'none', borderRight: 'none', background: 'linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-midnight) 100%)' }}>
+            <div style={{ maxWidth: '56em', margin: '0 auto', padding: '3.5em 1.5em' }} className="pc-section">
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em', padding: '0.35em 0.8em', borderRadius: '9999px', background: 'var(--gold-muted)', border: '1px solid var(--border-gold)', color: 'var(--gold)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.2em' }}>
+                <svg width="14" height="14" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 12L16 19v11c0 12.5 8 22.8 16 26.5 8-3.7 16-14 16-26.5V19L32 12z" fill="currentColor"/><path d="M24 34l6 6 10-12" stroke="#0D1B2A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
+                Privacy-first scanning
+              </div>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', lineHeight: 1.05, letterSpacing: '-0.03em', color: 'var(--text-primary)', marginBottom: '0.8em', maxWidth: '18ch' }}>
+                Check links before you trust them.
               </h1>
-              <p style={{ fontSize: '1.1em', lineHeight: 1.45, maxWidth: '28em', color: 'var(--mapped-text-body)', marginBottom: '2em' }}>
-                Fast phishing-risk analysis with clear results. No accounts. No tracking. Just scan.
+              <p style={{ fontSize: '1.15em', lineHeight: 1.5, maxWidth: '32ch', color: 'var(--text-secondary)', marginBottom: '2em' }}>
+                Fast phishing-risk analysis with plain-language results. No accounts. No tracking. Just scan.
               </p>
               <form onSubmit={handleScan} id="scan" className="pc-scan-form" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.6em', maxWidth: '38em' }}>
                 <label htmlFor="url-input" style={{ position: 'absolute', overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', width: '1px', height: '1px' }}>URL to check</label>
@@ -402,8 +419,8 @@ export default function App() {
                   <div style={{ marginTop: '0.4em', fontSize: '0.75em', opacity: 0.8 }}>Keyboard shortcut: focus URL, then Enter</div>
                 </div>
               )}
-              <div style={{ marginTop: '0.8em', display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', opacity: 0.85 }}>
-                <span aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3em' }}>🔒</span>
+              <div style={{ marginTop: '0.8em', display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 <span>No personal data stored</span>
               </div>
               {error && (
