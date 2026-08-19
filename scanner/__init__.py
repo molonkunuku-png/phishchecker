@@ -18,6 +18,32 @@ import requests
 
 _THREAT_INTEL_CACHE: dict[str, tuple[float, dict[str, Any]]] = {}
 
+_LOCAL_BRAND_PATTERNS = [
+    ('maybank', 'Maybank'),
+    ('cimb', 'CIMB'),
+    ('hongleong', 'Hong Leong'),
+    ('rhb', 'RHB'),
+    ('affinbank', 'Affin Bank'),
+    ('uob', 'UOB'),
+    ('bankislam', 'Bank Islam'),
+    ('ambank', 'AmBank'),
+    ('bnm', 'Bank Negara'),
+    ('tnb', 'TNB'),
+    ('petronas', 'Petronas'),
+    ('digi', 'Digi'),
+    ('celcom', 'Celcom'),
+    ('maxis', 'Maxis'),
+    ('umobile', 'U Mobile'),
+    ('pdrn', 'PDRM'),
+    ('pdrm', 'PDRM'),
+    ('johor', 'JPJ'),
+    ('imigresen', 'Imigresen'),
+    ('lhdn', 'LHDN'),
+    ('mof', 'MOF'),
+    ('eservices', 'MyGov'),
+    ('mygov', 'MyGov'),
+]
+
 
 class RiskLevel(str, Enum):
     clean = "clean"
@@ -240,6 +266,18 @@ def _check_dns_trust(domain: str) -> dict[str, Any]:
     }
 
 
+def _check_local_brand_patterns(domain: str) -> dict[str, Any]:
+    low = domain.lower()
+    hits = [name for pattern, name in _LOCAL_BRAND_PATTERNS if pattern in low]
+    matched = hits[0] if hits else None
+    return {
+        "enabled": True,
+        "hit": bool(hits),
+        "matched": matched,
+        "matches": hits,
+    }
+
+
 def _domain_age_days(domain: str) -> dict[str, Any]:
     created_at = None
     age_days = None
@@ -404,4 +442,5 @@ def run_scan(url: str | None, mode: str = "standard", family_mode: bool = False)
         result.details["mx"] = _check_mx(domain)
     if "dns_trust" not in result.details:
         result.details["dns_trust"] = _check_dns_trust(domain)
+    result.details["local_brand_patterns"] = _check_local_brand_patterns(domain)
     return result.to_dict()

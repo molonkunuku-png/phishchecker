@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ThemeContext, Theme } from './lib/ThemeContext';
 import { submitScan, fetchHistory, downloadExport, getStatus, fetchScanDetail, submitBulk } from './lib/api';
 import type { ScanResult, HistoryItem, StatusResponse } from './lib/types';
+import { LANG, type Lang } from './lib/i18n';
 
 function downloadPDF(result: ScanResult) {
   const lines = [
@@ -144,7 +145,7 @@ function severityStyle(s: Severity): { bg: string; text: string } {
 export default function App() {
   const [theme, setTheme] = useState<Theme>(loadInitialTheme);
   const [url, setUrl] = useState('');
-  const [mode, setMode] = useState('standard');
+  const [mode, setMode] = useState<'quick' | 'standard' | 'it'>('standard');
   const [familyMode, setFamilyMode] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -172,6 +173,13 @@ export default function App() {
   const [batchResults, setBatchResults] = useState<ScanResult[] | null>(null);
   const [batchRunning, setBatchRunning] = useState(false);
   const [batchError, setBatchError] = useState<string | null>(null);
+  const [lang, setLang] = useState<Lang>(() => {
+    try {
+      const stored = localStorage.getItem('phishchecker-lang');
+      if (stored && stored in LANG) return stored as Lang;
+    } catch { }
+    return 'en';
+  });
 
   useEffect(() => {
     document.documentElement.classList.remove('dark', 'light');
@@ -191,10 +199,16 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    try { localStorage.setItem('phishchecker-lang', lang); } catch { }
+  }, [lang]);
+
+  useEffect(() => {
     const onScroll = () => setNavShadow(window.scrollY > 10);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  const changeLang = (next: Lang) => () => setLang(next);
 
   useEffect(() => {
     if (!reportId) return;
@@ -352,11 +366,16 @@ export default function App() {
           </a>
           <button onClick={() => { const items = document.getElementById('pc-nav-items'); if (items) items.classList.toggle('pc-nav-open'); }} className="pc-nav-hamburger" aria-label="Toggle navigation" style={{ display: 'none', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 1em', fontSize: '1.2em', lineHeight: 1 }}>☰</button>
           <div id="pc-nav-items" className="pc-nav-links">
-            <button onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }} className={`pc-nav-link ${showHistory ? 'pc-nav-item-active' : ''}`}>History</button>
-            <button onClick={() => { setShowAwareness(v => !v); }} className={`pc-nav-link ${showAwareness ? 'pc-nav-item-active' : ''}`}>{showAwareness ? 'Scan' : 'Awareness'}</button>
-            <button onClick={() => { setShowApi(v => !v); }} className={`pc-nav-link ${showApi ? 'pc-nav-item-active' : ''}`}>{showApi ? 'Scan' : 'API'}</button>
-            <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className={`pc-nav-link ${showStatus ? 'pc-nav-item-active' : ''}`}>{showStatus ? 'Scan' : 'Status'}</button>
+            <button onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }} className={`pc-nav-link ${showHistory ? 'pc-nav-item-active' : ''}`}>{LANG[lang].nav.history}</button>
+            <button onClick={() => { setShowAwareness(v => !v); }} className={`pc-nav-link ${showAwareness ? 'pc-nav-item-active' : ''}`}>{showAwareness ? LANG[lang].scan : LANG[lang].nav.awareness}</button>
+            <button onClick={() => { setShowApi(v => !v); }} className={`pc-nav-link ${showApi ? 'pc-nav-item-active' : ''}`}>{showApi ? LANG[lang].scan : LANG[lang].nav.api}</button>
+            <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className={`pc-nav-link ${showStatus ? 'pc-nav-item-active' : ''}`}>{showStatus ? LANG[lang].scan : LANG[lang].nav.status}</button>
             <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className={`pc-nav-link ${theme === 'dark' ? 'pc-nav-item-active' : ''}`} aria-label="Toggle theme">{theme === 'dark' ? '☀ Light' : '☾ Dark'}</button>
+            <span style={{ display: 'inline-flex', gap: '0.3em', alignItems: 'center', marginLeft: '0.4em' }}>
+              {(Object.keys(LANG) as Lang[]).map(k => (
+                <button key={k} onClick={changeLang(k)} aria-label={k} className={`pc-nav-link ${lang === k ? 'pc-nav-item-active' : ''}`} style={{ padding: '0.3em 0.5em', fontSize: '0.75em', borderRadius: '999px' }}>{k.toUpperCase()}</button>
+              ))}
+            </span>
           </div>
           <button onClick={() => { document.getElementById('scan')?.scrollIntoView({ behavior: 'smooth' }); }} className="pc-nav-cta" style={{ marginLeft: 'auto', flexShrink: 0 }}>Scan now</button>
         </nav>
@@ -383,27 +402,27 @@ export default function App() {
                       <button type="button" onClick={() => setUrl('')} disabled={loading} aria-label="Clear URL" style={{ position: 'absolute', right: '0.6em', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '0.9em', padding: '0.3em', lineHeight: 1 }}>×</button>
                     )}
                   </div>
-                  <select value={mode} onChange={e => setMode(e.target.value)} className="pc-select" disabled={loading || familyMode} aria-label="Scan mode" style={{ minWidth: '10em' }}>
+                  <select value={mode} onChange={e => setMode(e.target.value as 'quick' | 'standard' | 'it')} className="pc-select" disabled={loading || familyMode} aria-label="Scan mode" style={{ minWidth: '10em' }}>
                     <option value="quick">Quick</option>
                     <option value="standard">Standard</option>
                     <option value="it">IT</option>
                   </select>
                   <button type="submit" disabled={loading} className="pc-btn-primary" style={{ whiteSpace: 'nowrap', minHeight: '44px' }}>
-                    {loading ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}><span className="pc-spinner" style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'pc-spin 0.8s linear infinite' }} />Scanning...</span>) : 'Scan'}
+                    {loading ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}><span className="pc-spinner" style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'pc-spin 0.8s linear infinite' }} />{LANG[lang].scanning}</span>) : LANG[lang].scan}
                   </button>
                 </div>
                 {mode && (
                   <span id="url-hint" style={{ fontSize: '0.75em', color: 'var(--mapped-text-body)', padding: '0.2em 0' }}>
-                    {mode === 'quick' ? 'Lightweight: headers, TLS, basic patterns.' : mode === 'standard' ? 'Balanced: headers, TLS, domain patterns, behavior.' : 'Deep: full header audit, TLS details, behavior, routing, extended intel.'}
+                    {LANG[lang].urlHint[mode]}
                   </span>
                 )}
               </form>
               <div style={{ marginTop: '0.8em', display: 'flex', alignItems: 'center', gap: '0.6em', flexWrap: 'wrap' }}>
                 <button type="button" onClick={() => setFamilyMode(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.85em', color: familyMode ? 'var(--mapped-text-on-action)' : 'var(--mapped-text-action)', background: familyMode ? 'var(--mapped-surface-action)' : 'transparent', border: '1px solid', borderColor: familyMode ? 'var(--mapped-surface-action)' : 'var(--mapped-border-default)' }}>
-                  {familyMode ? 'Family mode: on' : 'Scanning for someone else? Try Family mode'}
+                  {familyMode ? LANG[lang].familyMode.on : LANG[lang].familyMode.off}
                 </button>
                 {familyMode && (
-                  <span style={{ fontSize: '0.8em', color: 'var(--mapped-text-body)' }}>Showing a simpler result with plain-language guidance.</span>
+                  <span style={{ fontSize: '0.8em', color: 'var(--mapped-text-body)' }}>{LANG[lang].familyMode.helper}</span>
                 )}
               </div>
               {loading && (
