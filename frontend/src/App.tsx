@@ -407,18 +407,41 @@ export default function App() {
                 )}
               </div>
               {loading && (
-                <div aria-busy="true" style={{ marginTop: '1.2em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em' }}>
-                  <div className="pc-skeleton" />
-                  <div className="pc-skeleton" />
-                  <div className="pc-skeleton" />
+                <div aria-busy="true" style={{ marginTop: '1.2em', display: 'grid', gap: '0.8em', maxWidth: '38em' }}>
+                  <div style={{ display: 'flex', gap: '0.6em', alignItems: 'center' }}>
+                    <div className="pc-skeleton" style={{ width: '2.5em', height: '2.5em', borderRadius: '50%', flexShrink: 0 }} />
+                    <div style={{ flex: 1, display: 'grid', gap: '0.5em' }}>
+                      <div className="pc-skeleton pc-skeleton-title" style={{ width: '70%' }} />
+                      <div className="pc-skeleton pc-skeleton-text-short" style={{ width: '40%' }} />
+                    </div>
+                  </div>
+                  <div className="pc-skeleton" style={{ height: '4.5em' }} />
+                  <div className="pc-skeleton" style={{ height: '4.5em' }} />
                 </div>
               )}
               {!loading && !result && !error && (
-                <div aria-live="polite" style={{ marginTop: '1.2em', padding: '1.2em', border: '1px dashed var(--mapped-border-default)', background: 'var(--mapped-surface-default)', color: 'var(--mapped-text-body)', fontSize: '0.9em', textAlign: 'center' }}>
-                  Paste a URL above and press Enter to scan.
-                  <div style={{ marginTop: '0.4em', fontSize: '0.75em', opacity: 0.8 }}>Keyboard shortcut: focus URL, then Enter</div>
+                <div aria-live="polite" style={{ marginTop: '1.2em', padding: '1.6em', border: '1px dashed var(--border-subtle)', background: 'var(--bg-surface-raised)', color: 'var(--text-muted)', fontSize: '0.95em', textAlign: 'center', borderRadius: 'var(--r-lg)' }}>
+                  <div style={{ fontSize: '2.4em', marginBottom: '0.6em', opacity: 0.9 }} aria-hidden="true">🛡️</div>
+                  <div style={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.3em' }}>No scans yet</div>
+                  <div>Paste a link above and press Enter to check it.</div>
+                  <div style={{ marginTop: '0.4em', fontSize: '0.8em', opacity: 0.8 }}>Keyboard shortcut: focus URL, then Enter</div>
                 </div>
               )}
+
+              <div style={{ marginTop: '2em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(8em, 1fr))', gap: '0.6em', fontSize: '0.8em', color: 'var(--text-muted)', textAlign: 'center' }} aria-label="Service stats">
+                <div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold)', fontFamily: 'var(--font-display)' }}>100%</div>
+                  <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Uptime</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold)', fontFamily: 'var(--font-display)' }}>0</div>
+                  <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Scans blocked</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold)', fontFamily: 'var(--font-display)' }}>Free</div>
+                  <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Forever</div>
+                </div>
+              </div>
               <div style={{ marginTop: '0.8em', display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 <span>No personal data stored</span>
@@ -942,8 +965,8 @@ export default function App() {
                   </div>
                 )}
 
-                {history.length === 0 && <div className="pc-history-empty" aria-live="polite" style={{ padding: '1.2em', border: '1px dashed var(--mapped-border-default)', background: 'var(--mapped-surface-default)', color: 'var(--mapped-text-body)', fontSize: '0.9em', textAlign: 'center' }}>No scans yet.</div>}
-                {history.length > 0 && visibleHistory.length === 0 && <div className="pc-history-empty" aria-live="polite" style={{ padding: '1.2em', border: '1px dashed var(--mapped-border-default)', background: 'var(--mapped-surface-default)', color: 'var(--mapped-text-body)', fontSize: '0.9em', textAlign: 'center' }}>No matching scans.</div>}
+                {history.length === 0 && <div className="pc-empty" aria-live="polite"><div className="pc-empty-icon" aria-hidden="true">🕰️</div><div className="pc-empty-title">No scans yet</div><div className="pc-empty-body">Your recent checks will appear here so you can review them anytime.</div></div>}
+                {history.length > 0 && visibleHistory.length === 0 && <div className="pc-empty" aria-live="polite"><div className="pc-empty-icon" aria-hidden="true">🔎</div><div className="pc-empty-title">No matching scans</div><div className="pc-empty-body">Try a different search term or clear the filter.</div></div>}
 
                 {visibleHistory.length > 0 && (
                   <div style={{ display: 'grid', gap: '0.6em' }}>
