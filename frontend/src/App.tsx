@@ -3,6 +3,7 @@ import { ThemeContext, Theme } from './lib/ThemeContext';
 import { submitScan, fetchHistory, downloadExport, getStatus, fetchScanDetail, submitBulk, submitScreenshotScan, submitQRScan, submitFlag, fetchFlags, createScheduledCheck, fetchScheduledChecks } from './lib/api';
 import type { ScanResult, HistoryItem, StatusResponse } from './lib/types';
 import { LANG, type Lang } from './lib/i18n';
+import { UI } from './lib/ui-i18n';
 
 function downloadPDF(result: ScanResult) {
   const lines = [
@@ -209,6 +210,7 @@ export default function App() {
   }, []);
 
   const changeLang = (next: Lang) => () => setLang(next);
+  const t = (key: string) => UI[lang][key];
 
   useEffect(() => {
     if (!reportId) return;
@@ -348,8 +350,8 @@ export default function App() {
     <ThemeContext.Provider value={{ theme, setTheme }}>
       <div className="min-h-screen" style={{ background: 'var(--mapped-surface-page)', color: 'var(--mapped-text-body)' }}>
         <nav className={`pc-nav ${navShadow ? 'pc-nav-scrolled' : ''}`} style={{ overflow: 'visible' }}>
-          <a href="#main" className="pc-skip-link">Skip to content</a>
-          <a href="/" className="pc-nav-brand" aria-label="PhishChecker home">
+          <a href="#main" className="pc-skip-link">{t("skipToContent")}</a>
+          <a href="/" className="pc-nav-brand" aria-label={t("ariaHome")}>
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path d="M32 4L8 14v14c0 16 10.4 28.8 24 34 13.6-5.2 24-18 24-34V14L32 4z" fill="url(#shieldGrad)" opacity="0.15"/>
               <path d="M32 8L12 16.5V30c0 14.3 9.2 26 20 30.5C42.8 56 52 44.3 52 30V16.5L32 8z" fill="url(#shieldGrad)" opacity="0.25"/>
@@ -362,22 +364,22 @@ export default function App() {
                 </linearGradient>
               </defs>
             </svg>
-            PhishChecker
+            {t("brand")}
           </a>
-          <button onClick={() => { const items = document.getElementById('pc-nav-items'); if (items) items.classList.toggle('pc-nav-open'); }} className="pc-nav-hamburger" aria-label="Toggle navigation" style={{ display: 'none', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 1em', fontSize: '1.2em', lineHeight: 1 }}>☰</button>
+          <button onClick={() => { const items = document.getElementById('pc-nav-items'); if (items) items.classList.toggle('pc-nav-open'); }} className="pc-nav-hamburger" aria-label={t("toggleNav")} style={{ display: 'none', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 1em', fontSize: '1.2em', lineHeight: 1 }}>☰</button>
           <div id="pc-nav-items" className="pc-nav-links">
             <button onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }} className={`pc-nav-link ${showHistory ? 'pc-nav-item-active' : ''}`}>{LANG[lang].nav.history}</button>
             <button onClick={() => { setShowAwareness(v => !v); }} className={`pc-nav-link ${showAwareness ? 'pc-nav-item-active' : ''}`}>{showAwareness ? LANG[lang].scan : LANG[lang].nav.awareness}</button>
             <button onClick={() => { setShowApi(v => !v); }} className={`pc-nav-link ${showApi ? 'pc-nav-item-active' : ''}`}>{showApi ? LANG[lang].scan : LANG[lang].nav.api}</button>
             <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className={`pc-nav-link ${showStatus ? 'pc-nav-item-active' : ''}`}>{showStatus ? LANG[lang].scan : LANG[lang].nav.status}</button>
-            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className={`pc-nav-link ${theme === 'dark' ? 'pc-nav-item-active' : ''}`} aria-label="Toggle theme">{theme === 'dark' ? '☀ Light' : '☾ Dark'}</button>
+            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className={`pc-nav-link ${theme === 'dark' ? 'pc-nav-item-active' : ''}`} aria-label={t("toggleTheme")}>{theme === 'dark' ? '☀ Light' : '☾ Dark'}</button>
             <span style={{ display: 'inline-flex', gap: '0.3em', alignItems: 'center', marginLeft: '0.4em' }}>
               {(Object.keys(LANG) as Lang[]).map(k => (
                 <button key={k} onClick={changeLang(k)} aria-label={k} className={`pc-nav-link ${lang === k ? 'pc-nav-item-active' : ''}`} style={{ padding: '0.3em 0.5em', fontSize: '0.75em', borderRadius: '999px' }}>{k.toUpperCase()}</button>
               ))}
             </span>
           </div>
-          <button onClick={() => { document.getElementById('scan')?.scrollIntoView({ behavior: 'smooth' }); }} className="pc-nav-cta" style={{ marginLeft: 'auto', flexShrink: 0 }}>Scan now</button>
+          <button onClick={() => { document.getElementById('scan')?.scrollIntoView({ behavior: 'smooth' }); }} className="pc-nav-cta" style={{ marginLeft: 'auto', flexShrink: 0 }}>{t("scanNow")}</button>
         </nav>
 
         <main id="main" style={{ paddingTop: '4.5em' }}>
@@ -394,18 +396,18 @@ export default function App() {
                 Fast phishing-risk analysis with plain-language results. No accounts. No tracking. Just scan.
               </p>
               <form onSubmit={handleScan} id="scan" className="pc-scan-form" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.6em', maxWidth: '38em' }}>
-                <label htmlFor="url-input" style={{ position: 'absolute', overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', width: '1px', height: '1px' }}>URL to check</label>
+                <label htmlFor="url-input" style={{ position: 'absolute', overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', width: '1px', height: '1px' }}>{t("urlLabel")}</label>
                 <div style={{ display: 'flex', gap: '0.5em', flexWrap: 'wrap' }}>
                   <div style={{ position: 'relative', flex: '1 1 auto', minWidth: '14em' }}>
-                    <input ref={inputRef} id="url-input" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com" className="pc-input pc-placeholder" disabled={loading} aria-describedby="url-hint" style={{ paddingRight: url ? '2.2em' : undefined }} />
+                    <input ref={inputRef} id="url-input" value={url} onChange={e => setUrl(e.target.value)} placeholder={t("urlPlaceholder")} className="pc-input pc-placeholder" disabled={loading} aria-describedby="url-hint" style={{ paddingRight: url ? '2.2em' : undefined }} />
                     {url && (
-                      <button type="button" onClick={() => setUrl('')} disabled={loading} aria-label="Clear URL" style={{ position: 'absolute', right: '0.6em', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '0.9em', padding: '0.3em', lineHeight: 1 }}>×</button>
+                      <button type="button" onClick={() => setUrl('')} disabled={loading} aria-label={t("clearUrl")} style={{ position: 'absolute', right: '0.6em', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '0.9em', padding: '0.3em', lineHeight: 1 }}>×</button>
                     )}
                   </div>
-                  <select value={mode} onChange={e => setMode(e.target.value as 'quick' | 'standard' | 'it')} className="pc-select" disabled={loading || familyMode} aria-label="Scan mode" style={{ minWidth: '10em' }}>
-                    <option value="quick">Quick</option>
-                    <option value="standard">Standard</option>
-                    <option value="it">IT</option>
+                  <select value={mode} onChange={e => setMode(e.target.value as 'quick' | 'standard' | 'it')} className="pc-select" disabled={loading || familyMode} aria-label={t("fieldMode")} style={{ minWidth: '10em' }}>
+                    <option value="quick">{t("quick")}</option>
+                    <option value="standard">{t("standard")}</option>
+                    <option value="it">{t("itMode")}</option>
                   </select>
                   <button type="submit" disabled={loading} className="pc-btn-primary" style={{ whiteSpace: 'nowrap', minHeight: '44px' }}>
                     {loading ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}><span className="pc-spinner" style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'pc-spin 0.8s linear infinite' }} />{LANG[lang].scanning}</span>) : LANG[lang].scan}
@@ -439,15 +441,15 @@ export default function App() {
                 </div>
               )}
               <div style={{ marginTop: '1em', display: 'grid', gap: '0.8em', maxWidth: '38em' }}>
-                <div style={{ fontSize: '0.75em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>More tools</div>
+                <div style={{ fontSize: '0.75em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>{t("moreTools")}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(12em, 1fr))', gap: '0.6em' }}>
                   <label className="pc-card" style={{ padding: '1em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-md)', cursor: 'pointer', display: 'grid', gap: '0.4em' }}>
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Screenshot scan</span>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{t("screenshotTitle")}</span>
                     <span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>{LANG[lang].screenshot.body}</span>
                     <input type="file" accept="image/*" style={{ fontSize: '0.7em' }} onChange={async (e) => { const file = e.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = async () => { setError(null); setResult(null); setLoading(true); try { const data = await submitScreenshotScan(reader.result as string); setResult(data as any); } catch (err: any) { setError(err?.message || 'scan failed'); } finally { setLoading(false); } }; reader.readAsDataURL(file); }} />
                   </label>
                   <label className="pc-card" style={{ padding: '1em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-md)', cursor: 'pointer', display: 'grid', gap: '0.4em' }}>
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>QR scan</span>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{t("qrTitle")}</span>
                     <span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>{LANG[lang].qr.body}</span>
                     <input type="file" accept="image/*" style={{ fontSize: '0.7em' }} onChange={async (e) => { const file = e.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = async () => { setError(null); setResult(null); setLoading(true); try { const data = await submitQRScan(reader.result as string); setResult(data as any); } catch (err: any) { setError(err?.message || 'scan failed'); } finally { setLoading(false); } }; reader.readAsDataURL(file); }} />
                   </label>
@@ -455,52 +457,52 @@ export default function App() {
               </div>
 
               <div style={{ marginTop: '1.2em', display: 'grid', gap: '0.8em', maxWidth: '38em' }}>
-                <div style={{ fontSize: '0.75em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Community</div>
+                <div style={{ fontSize: '0.75em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>{t("communityTitle")}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(12em, 1fr))', gap: '0.6em' }}>
                   <div className="pc-card" style={{ padding: '1em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-md)', display: 'grid', gap: '0.4em' }}>
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Flag suspicious link</span>
-                    <span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>Report a suspicious URL to help protect others.</span>
-                    <button type="button" className="pc-btn-secondary" style={{ fontSize: '0.8em', padding: '0.5em 0.7em' }} onClick={async () => { const url = prompt('Suspicious URL'); if (!url) return; const notes = prompt('Notes', '') || ''; setLoading(true); try { const data = await submitFlag({ url: url.trim(), domain: new URL(url.trim()).hostname, notes }); alert('Flagged: ' + JSON.stringify(data)); } catch (err: any) { setError(err?.message || 'failed'); } finally { setLoading(false); } }}>Report URL</button>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{t("flagTitle")}</span>
+                    <span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>{t("flagBody")}</span>
+                    <button type="button" className="pc-btn-secondary" style={{ fontSize: '0.8em', padding: '0.5em 0.7em' }} onClick={async () => { const url = prompt('Suspicious URL'); if (!url) return; const notes = prompt('Notes', '') || ''; setLoading(true); try { const data = await submitFlag({ url: url.trim(), domain: new URL(url.trim()).hostname, notes }); alert('Flagged: ' + JSON.stringify(data)); } catch (err: any) { setError(err?.message || 'failed'); } finally { setLoading(false); } }}>{t("reportUrl")}</button>
                   </div>
                   <div className="pc-card" style={{ padding: '1em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-md)', display: 'grid', gap: '0.4em' }}>
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Scheduled rechecks</span>
-                    <span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>Monitor a link over time for new risk signals.</span>
-                    <button type="button" className="pc-btn-secondary" style={{ fontSize: '0.8em', padding: '0.5em 0.7em' }} onClick={async () => { const url = prompt('URL to monitor'); if (!url) return; const mins = prompt('Repeat every (minutes):', '1440'); if (!mins) return; const hours = Math.max(1, Math.round(Number(mins) / 60)); setLoading(true); try { const data = await createScheduledCheck({ url: url.trim(), cadence_hours: hours }); alert('Scheduled: ' + JSON.stringify(data)); } catch (err: any) { setError(err?.message || 'failed'); } finally { setLoading(false); } }}>Create monitor</button>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{t("scheduledTitle")}</span>
+                    <span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>{t("scheduledBody")}</span>
+                    <button type="button" className="pc-btn-secondary" style={{ fontSize: '0.8em', padding: '0.5em 0.7em' }} onClick={async () => { const url = prompt('URL to monitor'); if (!url) return; const mins = prompt('Repeat every (minutes):', '1440'); if (!mins) return; const hours = Math.max(1, Math.round(Number(mins) / 60)); setLoading(true); try { const data = await createScheduledCheck({ url: url.trim(), cadence_hours: hours }); alert('Scheduled: ' + JSON.stringify(data)); } catch (err: any) { setError(err?.message || 'failed'); } finally { setLoading(false); } }}>{t("createMonitor")}</button>
                   </div>
                 </div>
               </div>
               {!loading && !result && !error && (
                 <div aria-live="polite" style={{ marginTop: '1.2em', padding: '1.6em', border: '1px dashed var(--border-subtle)', background: 'var(--bg-surface-raised)', color: 'var(--text-muted)', fontSize: '0.95em', textAlign: 'center', borderRadius: 'var(--r-lg)' }}>
                   <div style={{ fontSize: '2.4em', marginBottom: '0.6em', opacity: 0.9 }} aria-hidden="true">🛡️</div>
-                  <div style={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.3em' }}>No scans yet</div>
-                  <div>Paste a link above and press Enter to check it.</div>
-                  <div style={{ marginTop: '0.4em', fontSize: '0.8em', opacity: 0.8 }}>Keyboard shortcut: focus URL, then Enter</div>
+                  <div style={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.3em' }}>{t("noScansTitle")}</div>
+                  <div>{t("noScansBody")}</div>
+                  <div style={{ marginTop: '0.4em', fontSize: '0.8em', opacity: 0.8 }}>{t("noScansShortcut")}</div>
                 </div>
               )}
 
-              <div style={{ marginTop: '2em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(8em, 1fr))', gap: '0.6em', fontSize: '0.8em', color: 'var(--text-muted)', textAlign: 'center' }} aria-label="Service stats">
+              <div style={{ marginTop: '2em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(8em, 1fr))', gap: '0.6em', fontSize: '0.8em', color: 'var(--text-muted)', textAlign: 'center' }} aria-label={t("serviceStats")}>
                 <div>
                   <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold)', fontFamily: 'var(--font-display)' }}>100%</div>
-                  <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Uptime</div>
+                  <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("uptime")}</div>
                 </div>
                 <div>
                   <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold)', fontFamily: 'var(--font-display)' }}>0</div>
-                  <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Scans blocked</div>
+                  <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("scansBlocked")}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold)', fontFamily: 'var(--font-display)' }}>Free</div>
-                  <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Forever</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold)', fontFamily: 'var(--font-display)' }}>{t("free")}</div>
+                  <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("forever")}</div>
                 </div>
               </div>
               <div style={{ marginTop: '0.8em', display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <span>No personal data stored</span>
+                <span>{t("noPersonalData")}</span>
               </div>
               {error && (
                 <div role="alert" aria-live="assertive" style={{ position: 'fixed', top: '1em', left: '50%', transform: 'translateX(-50%)', zIndex: 200, background: 'var(--pc-risk-high)', color: 'var(--pc-risk-on)', padding: '0.8em 1.2em', borderRadius: '0.4em', fontSize: '0.85em', boxShadow: '0 6px 20px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', gap: '0.6em', maxWidth: '92vw' }}>
-                  <span style={{ fontWeight: 600 }}>Error</span>
+                  <span style={{ fontWeight: 600 }}>{t("errorTitle")}</span>
                   <span>{error}</span>
-                  <button type="button" onClick={doScan} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderColor: 'rgba(255,255,255,0.35)', color: 'inherit' }}>Retry</button>
+                  <button type="button" onClick={doScan} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderColor: 'rgba(255,255,255,0.35)', color: 'inherit' }}>{t("retry")}</button>
                 </div>
               )}
             </div>
@@ -509,23 +511,23 @@ export default function App() {
           <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
             <div style={{ maxWidth: '56em', margin: '0 auto', padding: '1.6em 1.5em' }} className="pc-section">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.8em', flexWrap: 'wrap' }}>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--mapped-text-headings)' }}>Batch scan</h2>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--mapped-text-headings)' }}>{t("batchTitle")}</h2>
                 <button type="button" onClick={() => { setBatchMode(v => !v); setBatchResults(null); setBatchError(null); }} className="pc-btn-ghost" style={{ fontSize: '0.7em' }}>{batchMode ? 'Close batch' : 'Open batch'}</button>
               </div>
               {batchMode && (
                 <form onSubmit={handleBatch} style={{ display: 'grid', gap: '0.6em', maxWidth: '42em' }}>
-                  <label htmlFor="batch-input" style={{ position: 'absolute', overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', width: '1px', height: '1px' }}>URLs</label>
-                  <textarea id="batch-input" value={batchInput} onChange={e => setBatchInput(e.target.value)} placeholder="One URL per line&#10;https://example.com&#10;https://example.org" className="pc-input pc-placeholder" disabled={batchRunning} rows={6} style={{ resize: 'vertical' }} />
+                  <label htmlFor="batch-input" style={{ position: 'absolute', overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', width: '1px', height: '1px' }}>{t("batchLabel")}</label>
+                  <textarea id="batch-input" value={batchInput} onChange={e => setBatchInput(e.target.value)} placeholder={t("batchPlaceholder")} className="pc-input pc-placeholder" disabled={batchRunning} rows={6} style={{ resize: 'vertical' }} />
                   <div style={{ display: 'flex', gap: '0.5em', flexWrap: 'wrap' }}>
                     <button type="submit" disabled={batchRunning} className="pc-btn-primary" style={{ whiteSpace: 'nowrap' }}>
-                      {batchRunning ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}><span className="pc-spinner" style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'pc-spin 0.8s linear infinite' }} />Scanning...</span>) : 'Scan batch'}
+                      {batchRunning ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}><span className="pc-spinner" style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'pc-spin 0.8s linear infinite' }} />{t("scanning")}</span>) : 'Scan batch'}
                     </button>
-                    <span style={{ fontSize: '0.7em', color: 'var(--mapped-text-body)', alignSelf: 'center' }}>Max 20 URLs</span>
+                    <span style={{ fontSize: '0.7em', color: 'var(--mapped-text-body)', alignSelf: 'center' }}>{t("maxUrls")}</span>
                   </div>
                   {batchError && (
                     <p style={{ color: 'var(--pc-risk-high)', marginTop: '0.4em', fontSize: '0.85em', display: 'flex', alignItems: 'center', gap: '0.5em', flexWrap: 'wrap' }}>
                       {batchError}
-                      <button type="button" onClick={() => setBatchError(null)} className="pc-btn-ghost" style={{ fontSize: '0.8em' }}>Retry</button>
+                      <button type="button" onClick={() => setBatchError(null)} className="pc-btn-ghost" style={{ fontSize: '0.8em' }}>{t("retry")}</button>
                     </p>
                   )}
                   {batchResults && (
@@ -571,19 +573,19 @@ export default function App() {
             <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.8em', flexWrap: 'wrap' }}>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)', margin: 0 }}>Phishing awareness</h2>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)', margin: 0 }}>{t("awarenessTitle")}</h2>
                   <div style={{ display: 'inline-flex', gap: '0.4em', background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '0.3em', borderRadius: '999px' }}>
-                    <button type="button" onClick={() => setAwarenessMode('simple')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: '999px', background: awarenessMode === 'simple' ? 'var(--mapped-surface-action)' : 'transparent', color: awarenessMode === 'simple' ? 'var(--mapped-text-on-action)' : 'var(--mapped-text-body)' }}>Simple mode</button>
-                    <button type="button" onClick={() => setAwarenessMode('detailed')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: '999px', background: awarenessMode === 'detailed' ? 'var(--mapped-surface-action)' : 'transparent', color: awarenessMode === 'detailed' ? 'var(--mapped-text-on-action)' : 'var(--mapped-text-body)' }}>Detailed mode</button>
+                    <button type="button" onClick={() => setAwarenessMode('simple')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: '999px', background: awarenessMode === 'simple' ? 'var(--mapped-surface-action)' : 'transparent', color: awarenessMode === 'simple' ? 'var(--mapped-text-on-action)' : 'var(--mapped-text-body)' }}>{t("simpleMode")}</button>
+                    <button type="button" onClick={() => setAwarenessMode('detailed')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: '999px', background: awarenessMode === 'detailed' ? 'var(--mapped-surface-action)' : 'transparent', color: awarenessMode === 'detailed' ? 'var(--mapped-text-on-action)' : 'var(--mapped-text-body)' }}>{t("detailedMode")}</button>
                   </div>
                 </div>
 
                 {awarenessMode === 'simple' && (
                   <div style={{ fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
                     <div style={{ padding: '1.2em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
-                      <p style={{ margin: 0, fontSize: '1.05em', color: 'var(--text-primary)' }}>Phishing is when someone pretends to be a trusted person or brand.</p>
+                      <p style={{ margin: 0, fontSize: '1.05em', color: 'var(--text-primary)' }}>{t("awarenessLead")}</p>
                       <p style={{ margin: '0.6em 0 0', fontSize: '1.05em', color: 'var(--text-primary)' }}>They want your password, OTP, or payment.</p>
-                      <p style={{ margin: '0.6em 0 0', fontSize: '1.05em', color: 'var(--text-primary)' }}>New or unknown senders are the biggest warning sign.</p>
+                      <p style={{ margin: '0.6em 0 0', fontSize: '1.05em', color: 'var(--text-primary)' }}>{t("awarenessLine2")}</p>
                     </div>
 
                     <div style={{ padding: '1.2em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
@@ -591,10 +593,10 @@ export default function App() {
                         <span aria-hidden="true">📱</span> Example 1: Fake bank text
                       </h3>
                       <div style={{ background: 'var(--bg-midnight)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '22em' }}>
-                        <div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>SMS</div>
+                        <div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("smsLabel")}</div>
                         <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                          <strong style={{ color: '#fca5a5' }}>ALERT:</strong> Your bank account is locked.<br/>
-                          <span style={{ color: '#93c5fd' }}>Tap here to verify:</span><br/>
+                          <strong style={{ color: '#fca5a5' }}>{t("alertLabel")}</strong> Your bank account is locked.<br/>
+                          <span style={{ color: '#93c5fd' }}>{t("tapHere")}</span><br/>
                           <span style={{ color: 'var(--danger)', textDecoration: 'underline' }}>http://bank-secure.xyz/login</span>
                         </div>
                         <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '0.35em', fontSize: '0.85em', color: '#fca5a5' }}>
@@ -608,9 +610,9 @@ export default function App() {
                         <span aria-hidden="true">📧</span> Example 2: Fake delivery notification
                       </h3>
                       <div style={{ background: 'var(--bg-midnight)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '24em' }}>
-                        <div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Email</div>
+                        <div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("emailLabel")}</div>
                         <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                          <strong style={{ color: '#fca5a5' }}>Action required:</strong> Your parcel cannot be delivered.<br/>
+                          <strong style={{ color: '#fca5a5' }}>{t("actionRequired")}</strong> Your parcel cannot be delivered.<br/>
                           Open the label: <span style={{ color: '#93c5fd' }}>https://delivery-tracking.info/parcel</span>
                         </div>
                         <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '0.35em', fontSize: '0.85em', color: '#fca5a5' }}>
@@ -624,9 +626,9 @@ export default function App() {
                         <span aria-hidden="true">🔐</span> Example 3: Fake account alert
                       </h3>
                       <div style={{ background: 'var(--bg-midnight)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '24em' }}>
-                        <div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Email</div>
+                        <div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("emailLabel")}</div>
                         <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                          <strong style={{ color: '#fca5a5' }}>Security notice:</strong> Someone logged into your account.<br/>
+                          <strong style={{ color: '#fca5a5' }}>{t("securityNotice")}</strong> Someone logged into your account.<br/>
                           Secure it now: <span style={{ color: '#93c5fd' }}>https://account-security-alert.xyz/reset</span>
                         </div>
                         <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '0.35em', fontSize: '0.85em', color: '#fca5a5' }}>
@@ -640,8 +642,8 @@ export default function App() {
                         <span aria-hidden="true">✅</span> Quick checks
                       </h3>
                       <ul style={{ color: 'var(--text-secondary)', paddingLeft: '1.2em', display: 'grid', gap: '0.5em', fontSize: '1.05em' }}>
-                        <li>Hover over a link to see where it really goes.</li>
-                        <li>Open the app or website directly instead of clicking the message.</li>
+                        <li>{t("checkHover")}</li>
+                        <li>{t("checkApp")}</li>
                         <li>Ask: did I expect this? Is it asking for secrets?</li>
                         <li>When in doubt, do not tap. Verify with the official source.</li>
                       </ul>
@@ -652,26 +654,26 @@ export default function App() {
                 {awarenessMode === 'detailed' && (
                   <div style={{ fontSize: '0.9em', lineHeight: 1.6, color: 'var(--mapped-text-body)' }}>
                     <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginBottom: '1em' }}>
-                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>Red flags</h3>
+                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>{t("redFlags")}</h3>
                       <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.35em' }}>
-                        <li>Unexpected links or attachments from unknown senders</li>
-                        <li>URLs that impersonate known brands with typos or extra words</li>
+                        <li>{t("detailUnexpected")}</li>
+                        <li>{t("detailImpersonate")}</li>
                         <li>Requests for credentials, OTPs, or payments via email/SMS</li>
-                        <li>Shortened URLs that hide the real destination</li>
+                        <li>{t("detailShortened")}</li>
                       </ul>
                     </div>
                     <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginBottom: '1em' }}>
-                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>How to check safely</h3>
+                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>{t("howToCheck")}</h3>
                       <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.35em' }}>
-                        <li>Hover to inspect the real link destination</li>
-                        <li>Use this scanner for fast risk analysis</li>
-                        <li>Check SSL/TLS and certificate age</li>
-                        <li>Prefer official apps over links when possible</li>
+                        <li>{t("howHover")}</li>
+                        <li>{t("howScanner")}</li>
+                        <li>{t("howSsl")}</li>
+                        <li>{t("howOfficial")}</li>
                       </ul>
                     </div>
                     <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>Understanding risk</h3>
-                      <p>High risk means multiple suspicious indicators were found. Suspicious means some signals warrant caution. Clean means no strong phishing indicators were detected in the checked URL.</p>
+                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>{t("understandingRisk")}</h3>
+                      <p>{t("riskHigh")} {t("riskSuspicious")} {t("riskClean")}</p>
                     </div>
                   </div>
                 )}
@@ -682,14 +684,14 @@ export default function App() {
           {showApi && (
             <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)', marginBottom: '0.8em' }}>API reference</h2>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)', marginBottom: '0.8em' }}>{t("apiTitle")}</h2>
                 <div style={{ display: 'grid', gap: '1em', fontSize: '0.9em', lineHeight: 1.6 }}>
                   <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6em', marginBottom: '0.4em', flexWrap: 'wrap' }}>
                       <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>POST</span>
                       <code style={{ background: 'var(--brand-grey-200)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/scans</code>
                     </div>
-                    <p>Submit a URL for scanning. Requires CSRF token from <code>/api/csrf</code>.</p>
+                    <p>{t("apiScanPost")} <code>/api/csrf</code>.</p>
                     <pre style={{ marginTop: '0.6em', whiteSpace: 'pre-wrap', wordBreak: 'break-word', padding: '1em', background: 'var(--mapped-surface-default)', fontSize: '0.8em', lineHeight: 1.6, border: '1px solid var(--mapped-border-default)' }}>{`{
   "url": "https://example.com",
   "mode": "standard"
@@ -700,7 +702,7 @@ export default function App() {
                       <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>GET</span>
                       <code style={{ background: 'var(--brand-grey-200)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/scans/history</code>
                     </div>
-                    <p>List recent scans. Supports <code>page</code> and <code>page_size</code> query params.</p>
+                    <p>{t("apiHistory")} <code>page</code> {t("and")} <code>page_size</code> {t("queryParams")}.</p>
                   </div>
                   <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6em', marginBottom: '0.4em', flexWrap: 'wrap' }}>
@@ -714,7 +716,7 @@ export default function App() {
                       <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>GET</span>
                       <code style={{ background: 'var(--brand-grey-200)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/scans/export</code>
                     </div>
-                    <p>Export scan history. Use <code>?format=json</code> or <code>?format=csv</code>.</p>
+                    <p>{t("apiExport")} <code>?format=json</code> {t("or")} <code>?format=csv</code>.</p>
                   </div>
                 </div>
               </div>
@@ -725,27 +727,27 @@ export default function App() {
             <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>Service status</h2>
-                  <span className="pc-chip" style={{ background: 'var(--pc-ok)', color: '#fff', borderColor: 'var(--pc-ok)' }}>Operational</span>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>{t("statusTitle")}</h2>
+                  <span className="pc-chip" style={{ background: 'var(--pc-ok)', color: '#fff', borderColor: 'var(--pc-ok)' }}>{t("operational")}</span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5 }}>
                   <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Service</div>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("statusService")}</div>
                     <div style={{ color: 'var(--mapped-text-headings)', fontWeight: 600 }}>{status.service || 'PhishChecker'}</div>
                   </div>
                   <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Version</div>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("statusVersion")}</div>
                     <div style={{ color: 'var(--mapped-text-headings)', fontWeight: 600 }}>{status.version || '—'}</div>
                   </div>
                   <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>API access</div>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("apiAccess")}</div>
                     <div style={{ color: 'var(--mapped-text-headings)', fontWeight: 600 }}>{status.features?.publicScanning ? 'Open' : 'Restricted'}</div>
                   </div>
                 </div>
                 <div style={{ marginTop: '1.2em', padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', fontSize: '0.85em', color: 'var(--mapped-text-body)', lineHeight: 1.6 }}>
                   Scanner availability: use the form above for direct scans. This panel shows service health and access mode only.
                   <div style={{ marginTop: '0.6em' }}>
-                    <strong>Support:</strong> use the in-app contact or <a href="/security.txt" style={{ color: 'var(--mapped-text-action)', textDecoration: 'underline' }}>security contact</a>.
+                    <strong>{t("supportText")}</strong> use the in-app contact or <a href="/security.txt" style={{ color: 'var(--mapped-text-action)', textDecoration: 'underline' }}>{t("securityContact")}</a>.
                   </div>
                 </div>
               </div>
@@ -767,7 +769,7 @@ export default function App() {
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.3em' }}>Risk score</div>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.3em' }}>{t("riskScore")}</div>
                     <div style={{ fontSize: '1.1rem', fontWeight: 700, color: currentRisk === 'high' ? 'var(--danger)' : currentRisk === 'suspicious' ? 'var(--warning)' : currentRisk === 'clean' ? 'var(--success)' : 'var(--text-primary)', marginBottom: '0.3em' }}>{currentRisk ? currentRisk.toUpperCase() : '—'}</div>
                     {confidence && (
                       <div style={{ fontSize: '0.75em', color: confidence.color, fontWeight: 600 }}>{confidence.label}</div>
@@ -786,56 +788,56 @@ export default function App() {
                 )}
 
                 <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap', marginBottom: '1.2em' }}>
-                  <button onClick={copyScanLink} className="pc-btn-ghost">Copy link</button>
-                  <button onClick={copyScanJSON} className="pc-btn-ghost">Copy JSON</button>
-                  <button onClick={() => downloadExport('json')} className="pc-btn-ghost">Export JSON</button>
-                  <button onClick={() => downloadExport('csv')} className="pc-btn-ghost">Export CSV</button>
-                  <button onClick={() => window.print()} className="pc-btn-ghost">Print</button>
-                  <button onClick={() => result && downloadPDF(result)} className="pc-btn-ghost">Export report</button>
+                  <button onClick={copyScanLink} className="pc-btn-ghost">{t("copyLink")}</button>
+                  <button onClick={copyScanJSON} className="pc-btn-ghost">{t("copyJson")}</button>
+                  <button onClick={() => downloadExport('json')} className="pc-btn-ghost">{t("exportJson")}</button>
+                  <button onClick={() => downloadExport('csv')} className="pc-btn-ghost">{t("exportCsv")}</button>
+                  <button onClick={() => window.print()} className="pc-btn-ghost">{t("print")}</button>
+                  <button onClick={() => result && downloadPDF(result)} className="pc-btn-ghost">{t("exportReport")}</button>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5, marginBottom: '1.2em' }} className="pc-mobile-stack">
                   <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
-                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>URL</span>
+                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>{t("fieldUrl")}</span>
                     <p style={{ wordBreak: 'break-all', color: 'var(--text-primary)' }}>{result.url}</p>
                   </div>
                   <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
-                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>Domain</span>
+                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>{t("fieldDomain")}</span>
                     <p style={{ wordBreak: 'break-all', color: 'var(--text-primary)' }}>{result.domain}</p>
                   </div>
                   <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
-                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>Mode</span>
+                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>{t("fieldMode")}</span>
                     <p style={{ color: 'var(--text-primary)' }}>{modeLabel(result.mode)}</p>
                   </div>
                   <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
-                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>Started</span>
+                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>{t("fieldStarted")}</span>
                     <p style={{ color: 'var(--text-primary)' }}>{result.started_at ? new Date(result.started_at).toLocaleString() : '—'}</p>
                   </div>
                   <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
-                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>Domain age</span>
-                    <p style={{ color: 'var(--text-primary)' }}>{(() => { const da = (result.details?.domain_age || {}) as any; const days = da?.age_days; const created = da?.created_at; if (days == null && !created) return '—'; const text = days != null ? `${days} days` : `created ${created || 'unknown'}`; const flagged = typeof days === 'number' && days < 30 ? ' - flagged' : ''; return <><span>{text}{flagged}</span><div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginTop: '0.25em' }}>New domains are more likely to be used in short-lived phishing campaigns.</div></>; })()}</p>
+                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>{t("fieldDomainAge")}</span>
+                    <p style={{ color: 'var(--text-primary)' }}>{(() => { const da = (result.details?.domain_age || {}) as any; const days = da?.age_days; const created = da?.created_at; if (days == null && !created) return '—'; const text = days != null ? `${days} days` : `created ${created || 'unknown'}`; const flagged = typeof days === 'number' && days < 30 ? ' - flagged' : ''; return <><span>{text}{flagged}</span><div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginTop: '0.25em' }}>{t("newDomainWarning")}</div></>; })()}</p>
                   </div>
                   <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
-                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>Duration</span>
+                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>{t("fieldDuration")}</span>
                     <p style={{ color: 'var(--text-primary)' }}>{result.duration_ms != null ? `${result.duration_ms} ms` : '—'}</p>
                   </div>
                   <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)', gridColumn: '1 / -1' }}>
-                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>Certificate</span>
-                    <p style={{ wordBreak: 'break-all', display: 'flex', flexWrap: 'wrap', gap: '0.6em', alignItems: 'center', color: 'var(--text-primary)' }}>{(() => { const ssl = (result.details?.ssl || {}) as any; const grade = sslGrade(result.details); const issuer = ssl?.issuer || '—'; const valid = ssl?.valid ? 'Valid' : 'Invalid or untrusted'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : ''; const text = `${valid}${grade && ssl?.valid ? ' · ' + grade.grade : ''}${age ? ' · ' + age : ''} · ${issuer}`; return <><span style={{ flex: '1 1 auto', minWidth: '0' }}>{text}</span><button type="button" onClick={() => { navigator.clipboard.writeText(text).catch(() => {}); }} className="pc-btn-ghost" style={{ flex: '0 0 auto' }}>Copy</button></>; })()}</p>
+                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>{t("fieldCertificate")}</span>
+                    <p style={{ wordBreak: 'break-all', display: 'flex', flexWrap: 'wrap', gap: '0.6em', alignItems: 'center', color: 'var(--text-primary)' }}>{(() => { const ssl = (result.details?.ssl || {}) as any; const grade = sslGrade(result.details); const issuer = ssl?.issuer || '—'; const valid = ssl?.valid ? 'Valid' : 'Invalid or untrusted'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : ''; const text = `${valid}${grade && ssl?.valid ? ' · ' + grade.grade : ''}${age ? ' · ' + age : ''} · ${issuer}`; return <><span style={{ flex: '1 1 auto', minWidth: '0' }}>{text}</span><button type="button" onClick={() => { navigator.clipboard.writeText(text).catch(() => {}); }} className="pc-btn-ghost" style={{ flex: '0 0 auto' }}>{t("copy")}</button></>; })()}</p>
                   </div>
                 </div>
 
                 {((result.details || {}) as any).score_math && (
                   <details style={{ marginTop: '1.2em', fontSize: '0.9em' }}>
-                    <summary style={{ cursor: 'pointer', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', fontSize: '0.8em' }}>Score breakdown</summary>
+                    <summary style={{ cursor: 'pointer', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', fontSize: '0.8em' }}>{t("scoreBreakdown")}</summary>
                     <div style={{ marginTop: '0.8em', padding: '1em', background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', fontSize: '0.85em', lineHeight: 1.6, color: 'var(--mapped-text-body)' }}>
                       <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.4em 1em', alignItems: 'center' }}>
-                        <span>Base score</span><span style={{ fontWeight: 600 }}>100</span>
-                        <span>Headers</span><span style={{ color: 'var(--pc-risk-high)' }}>-{((result.details as any)?.score_math as any)?.header_penalty}</span>
-                        <span>SSL/TLS</span><span style={{ color: 'var(--pc-risk-high)' }}>-{((result.details as any)?.score_math as any)?.ssl_penalty}</span>
-                        <span>Threat intel</span><span style={{ color: 'var(--pc-risk-high)' }}>-{((result.details as any)?.score_math as any)?.threat_intel_penalty}</span>
-                        <span>Domain shape</span><span style={{ color: 'var(--pc-risk-high)' }}>-{((result.details as any)?.score_math as any)?.domain_penalty}</span>
-                        <span style={{ fontWeight: 600, borderTop: '1px solid var(--mapped-border-default)', paddingTop: '0.4em' }}>Final score</span><span style={{ fontWeight: 700, color: scoreColor(currentScore) }}>{((result.details as any)?.score_math as any)?.final_score}</span>
+                        <span>{t("baseScore")}</span><span style={{ fontWeight: 600 }}>100</span>
+                        <span>{t("headersPenalty")}</span><span style={{ color: 'var(--pc-risk-high)' }}>-{((result.details as any)?.score_math as any)?.header_penalty}</span>
+                        <span>{t("sslPenalty")}</span><span style={{ color: 'var(--pc-risk-high)' }}>-{((result.details as any)?.score_math as any)?.ssl_penalty}</span>
+                        <span>{t("threatIntelPenalty")}</span><span style={{ color: 'var(--pc-risk-high)' }}>-{((result.details as any)?.score_math as any)?.threat_intel_penalty}</span>
+                        <span>{t("domainShapePenalty")}</span><span style={{ color: 'var(--pc-risk-high)' }}>-{((result.details as any)?.score_math as any)?.domain_penalty}</span>
+                        <span style={{ fontWeight: 600, borderTop: '1px solid var(--mapped-border-default)', paddingTop: '0.4em' }}>{t("finalScore")}</span><span style={{ fontWeight: 700, color: scoreColor(currentScore) }}>{((result.details as any)?.score_math as any)?.final_score}</span>
                       </div>
                     </div>
                   </details>
@@ -843,7 +845,7 @@ export default function App() {
 
                 {(((result.details || {}) as any).redirect_chain?.length || 0) > 1 && (
                   <div style={{ marginTop: '1.2em', fontSize: '0.9em' }}>
-                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>Redirect chain</div>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>{t("redirectChain")}</div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.4em', color: 'var(--mapped-text-body)', lineHeight: 1.6, wordBreak: 'break-all' }}>
                       {(((result.details || {}) as any).redirect_chain as string[]).map((u: string, i: number, arr: string[]) => (
                         <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em' }}>
@@ -859,7 +861,7 @@ export default function App() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1.2em', marginBottom: '1.4em' }}>
                   <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6em' }}>
-                      <span style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>Risk level</span>
+                      <span style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>{t("riskLevel")}</span>
                       <span style={{ fontSize: '0.7em', fontWeight: 600, color: riskColor(currentRisk) }}>{currentRisk || '—'}</span>
                     </div>
                     <div style={{ height: '6px', background: 'var(--brand-grey-200)', overflow: 'hidden' }}>
@@ -868,7 +870,7 @@ export default function App() {
                   </div>
                   <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6em' }}>
-                      <span style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>Score</span>
+                      <span style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>{t("scoreLabel")}</span>
                       <span style={{ fontSize: '0.7em', fontWeight: 600, color: 'var(--mapped-text-headings)' }}>{currentScore ?? '—'}/100</span>
                     </div>
                     <div style={{ height: '6px', background: 'var(--brand-grey-200)', overflow: 'hidden' }}>
@@ -879,7 +881,7 @@ export default function App() {
 
                 {result.reasons && result.reasons.length > 0 && (
                   <div className="pc-divider" style={{ marginTop: '1.4em', paddingTop: '1.2em' }}>
-                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.6em' }}>Findings</h3>
+                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.6em' }}>{t("findings")}</h3>
                     <div style={{ display: 'flex', gap: '0.4em', marginBottom: '0.6em', flexWrap: 'wrap' }}>
                       {['all', 'high', 'medium', 'low'].map(f => (
                         <button key={f} onClick={() => setFindingFilter(f)} className="pc-btn-ghost" style={{ fontSize: '0.7em', textTransform: 'capitalize', background: findingFilter === f ? 'var(--mapped-surface-action)' : undefined, color: findingFilter === f ? 'var(--mapped-text-on-action)' : undefined }}>{f === 'all' ? 'All' : f}</button>
@@ -909,7 +911,7 @@ export default function App() {
 
                 {result.details && (
                   <details style={{ marginTop: '1.2em', fontSize: '0.9em' }}>
-                    <summary style={{ cursor: 'pointer', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', fontSize: '0.8em' }}>Raw details</summary>
+                    <summary style={{ cursor: 'pointer', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', fontSize: '0.8em' }}>{t("rawDetails")}</summary>
                     <pre style={{ marginTop: '0.8em', whiteSpace: 'pre-wrap', wordBreak: 'break-word', padding: '1em', background: 'var(--mapped-surface-default)', fontSize: '0.8em', lineHeight: 1.6, border: '1px solid var(--mapped-border-default)' }}>{JSON.stringify(result.details, null, 2)}</pre>
                   </details>
                 )}
@@ -921,8 +923,8 @@ export default function App() {
             <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>Scan report</h2>
-                  <button onClick={() => { setReportId(null); setReport(null); window.location.hash = ''; }} className="pc-btn-ghost">Back</button>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>{t("scanReport")}</h2>
+                  <button onClick={() => { setReportId(null); setReport(null); window.location.hash = ''; }} className="pc-btn-ghost">{t("back")}</button>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8em', marginBottom: '1.2em', flexWrap: 'wrap' }}>
                   <div style={{ position: 'relative', width: '3.2em', height: '3.2em' }}>
@@ -933,7 +935,7 @@ export default function App() {
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75em', fontWeight: 700, color: 'var(--mapped-text-headings)', transform: 'none' }}>{report.score ?? '—'}</div>
                   </div>
                   <div>
-                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Risk score</div>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>{t("riskScore")}</div>
                     <div style={{ fontSize: '0.85em', fontWeight: 600, color: riskColor(report.risk) }}>{report.risk ? report.risk.toUpperCase() : '—'}</div>
                     {confidence && (
                       <div style={{ fontSize: '0.65em', color: confidence.color, fontWeight: 600 }}>{confidence.label}</div>
@@ -942,38 +944,38 @@ export default function App() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1.2em', fontSize: '0.9em', lineHeight: 1.5 }}>
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>URL</span>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("fieldUrl")}</span>
                     <p style={{ wordBreak: 'break-all' }}>{report.url}</p>
                   </div>
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Domain</span>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("fieldDomain")}</span>
                     <p style={{ wordBreak: 'break-all' }}>{report.domain}</p>
                   </div>
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Mode</span>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("fieldMode")}</span>
                     <p>{modeLabel(report.mode)}</p>
                   </div>
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Started</span>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("fieldStarted")}</span>
                     <p>{report.started_at ? new Date(report.started_at).toLocaleString() : '—'}</p>
                   </div>
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Domain age</span>
-                    <p>{(() => { const da = (report.details?.domain_age || {}) as any; const days = da?.age_days; const created = da?.created_at; if (days == null && !created) return '—'; const text = days != null ? `${days} days` : `created ${created || 'unknown'}`; const flagged = typeof days === 'number' && days < 30 ? ' - flagged' : ''; return <><span>{text}{flagged}</span><div style={{ fontSize: '0.75em', color: 'var(--mapped-text-body)', marginTop: '0.25em' }}>New domains are more likely to be used in short-lived phishing campaigns.</div></>; })()}</p>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("fieldDomainAge")}</span>
+                    <p>{(() => { const da = (report.details?.domain_age || {}) as any; const days = da?.age_days; const created = da?.created_at; if (days == null && !created) return '—'; const text = days != null ? `${days} days` : `created ${created || 'unknown'}`; const flagged = typeof days === 'number' && days < 30 ? ' - flagged' : ''; return <><span>{text}{flagged}</span><div style={{ fontSize: '0.75em', color: 'var(--mapped-text-body)', marginTop: '0.25em' }}>{t("newDomainWarning")}</div></>; })()}</p>
                   </div>
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Duration</span>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("fieldDuration")}</span>
                     <p>{report.duration_ms != null ? `${report.duration_ms} ms` : '—'}</p>
                   </div>
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Certificate</span>
-                    <p style={{ wordBreak: 'break-all', display: 'flex', flexWrap: 'wrap', gap: '0.6em', alignItems: 'center' }}>{(() => { const ssl = (report.details?.ssl || {}) as any; const grade = sslGrade(report.details); const issuer = ssl?.issuer || '—'; const valid = ssl?.valid ? 'Valid' : 'Invalid or untrusted'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : ''; const text = `${valid}${grade && ssl?.valid ? ' · ' + grade.grade : ''}${age ? ' · ' + age : ''} · ${issuer}`; return (<><span style={{ flex: '1 1 auto', minWidth: '0' }}>{text}</span><button type="button" onClick={() => { navigator.clipboard.writeText(text).catch(() => {}); }} className="pc-btn-ghost" style={{ flex: '0 0 auto' }}>Copy</button></>); })()}</p>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("fieldCertificate")}</span>
+                    <p style={{ wordBreak: 'break-all', display: 'flex', flexWrap: 'wrap', gap: '0.6em', alignItems: 'center' }}>{(() => { const ssl = (report.details?.ssl || {}) as any; const grade = sslGrade(report.details); const issuer = ssl?.issuer || '—'; const valid = ssl?.valid ? 'Valid' : 'Invalid or untrusted'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : ''; const text = `${valid}${grade && ssl?.valid ? ' · ' + grade.grade : ''}${age ? ' · ' + age : ''} · ${issuer}`; return (<><span style={{ flex: '1 1 auto', minWidth: '0' }}>{text}</span><button type="button" onClick={() => { navigator.clipboard.writeText(text).catch(() => {}); }} className="pc-btn-ghost" style={{ flex: '0 0 auto' }}>{t("copy")}</button></>); })()}</p>
                   </div>
                 </div>
 
                 {report.reasons && report.reasons.length > 0 && (
                   <div className="pc-divider" style={{ marginTop: '1.4em', paddingTop: '1.2em' }}>
-                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.6em' }}>Findings</h3>
+                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.6em' }}>{t("findings")}</h3>
                     <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.35em', fontSize: '0.9em', lineHeight: 1.5 }}>
                       {report.reasons.map((r, i) => <li key={i}>{r}</li>)}
                     </ul>
@@ -985,7 +987,7 @@ export default function App() {
 
           {reportId && !report && (
             <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em', color: 'var(--mapped-text-body)' }}>Loading scan report...</div>
+              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em', color: 'var(--mapped-text-body)' }}>{t("loadingReport")}</div>
             </section>
           )}
 
@@ -994,38 +996,38 @@ export default function App() {
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
                   <div>
-                    <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)', margin: 0 }}>Recent scans</h2>
-                    <div style={{ fontSize: '0.75em', color: 'var(--mapped-text-body)', marginTop: '0.35em' }}>Results are temporary and cleared over time.</div>
+                    <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)', margin: 0 }}>{t("recentScans")}</h2>
+                    <div style={{ fontSize: '0.75em', color: 'var(--mapped-text-body)', marginTop: '0.35em' }}>{t("historyNote")}</div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.5em', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <input value={historySearch} onChange={e => setHistorySearch(e.target.value)} placeholder="Search domain, url, risk" className="pc-input" style={{ padding: '0.55em 0.7em', fontSize: '0.8em', minWidth: '14em' }} />
-                    <button onClick={() => loadHistory()} className="pc-btn-ghost" style={{ color: 'var(--mapped-text-action)' }}>Refresh</button>
+                    <input value={historySearch} onChange={e => setHistorySearch(e.target.value)} placeholder={t("historySearchPlaceholder")} className="pc-input" style={{ padding: '0.55em 0.7em', fontSize: '0.8em', minWidth: '14em' }} />
+                    <button onClick={() => loadHistory()} className="pc-btn-ghost" style={{ color: 'var(--mapped-text-action)' }}>{t("refresh")}</button>
                   </div>
                 </div>
 
                 {history.length > 0 && (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(12em, 1fr))', gap: '0.8em', marginBottom: '1.2em' }}>
                     <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
-                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Total</div>
+                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("total")}</div>
                       <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--mapped-text-headings)' }}>{historyStats.total}</div>
                     </div>
                     <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
-                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>High</div>
+                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("high")}</div>
                       <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--pc-risk-high)' }}>{historyStats.high}</div>
                     </div>
                     <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
-                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Suspicious</div>
+                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("suspicious")}</div>
                       <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--pc-risk-suspicious)' }}>{historyStats.suspicious}</div>
                     </div>
                     <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
-                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Low</div>
+                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("low")}</div>
                       <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--pc-risk-low)' }}>{historyStats.low}</div>
                     </div>
                   </div>
                 )}
 
-                {history.length === 0 && <div className="pc-empty" aria-live="polite"><div className="pc-empty-icon" aria-hidden="true">🕰️</div><div className="pc-empty-title">No scans yet</div><div className="pc-empty-body">Your recent checks will appear here so you can review them anytime.</div></div>}
-                {history.length > 0 && visibleHistory.length === 0 && <div className="pc-empty" aria-live="polite"><div className="pc-empty-icon" aria-hidden="true">🔎</div><div className="pc-empty-title">No matching scans</div><div className="pc-empty-body">Try a different search term or clear the filter.</div></div>}
+                {history.length === 0 && <div className="pc-empty" aria-live="polite"><div className="pc-empty-icon" aria-hidden="true">🕰️</div><div className="pc-empty-title">{t("noScansTitle")}</div><div className="pc-empty-body">{t("recentEmpty")}</div></div>}
+                {history.length > 0 && visibleHistory.length === 0 && <div className="pc-empty" aria-live="polite"><div className="pc-empty-icon" aria-hidden="true">🔎</div><div className="pc-empty-title">{t("noMatchingScans")}</div><div className="pc-empty-body">{t("noMatchingHint")}</div></div>}
 
                 {visibleHistory.length > 0 && (
                   <div style={{ display: 'grid', gap: '0.6em' }}>
@@ -1047,7 +1049,7 @@ export default function App() {
                             </div>
                           </div>
                           <div style={{ display: 'flex', gap: '0.4em', justifyContent: 'flex-end' }}>
-                            <button className="pc-btn-ghost" style={{ fontSize: '0.7em', padding: '0.45em 0.7em' }} onClick={() => { setReportId(h.id); setReport(null); window.location.hash = `#/scan/${h.id}`; }}>View</button>
+                            <button className="pc-btn-ghost" style={{ fontSize: '0.7em', padding: '0.45em 0.7em' }} onClick={() => { setReportId(h.id); setReport(null); window.location.hash = `#/scan/${h.id}`; }}>{t("view")}</button>
                           </div>
                         </div>
                       );
@@ -1058,8 +1060,8 @@ export default function App() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.8em', fontSize: '0.8em', color: 'var(--mapped-text-body)', flexWrap: 'wrap', gap: '0.5em' }}>
                   <span>{history.length ? `Page ${historyPage}` : ''}</span>
                   <div style={{ display: 'flex', gap: '0.4em' }}>
-                    <button disabled={historyPage <= 1} onClick={() => setHistoryPage(p => p - 1)} className="pc-btn-ghost">Prev</button>
-                    <button disabled={history.length < historyPageSize} onClick={() => setHistoryPage(p => p + 1)} className="pc-btn-ghost">Next</button>
+                    <button disabled={historyPage <= 1} onClick={() => setHistoryPage(p => p - 1)} className="pc-btn-ghost">{t("prev")}</button>
+                    <button disabled={history.length < historyPageSize} onClick={() => setHistoryPage(p => p + 1)} className="pc-btn-ghost">{t("next")}</button>
                   </div>
                 </div>
               </div>
@@ -1070,8 +1072,8 @@ export default function App() {
             <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>Comparison</h2>
-                  <button onClick={() => setShowCompare(false)} className="pc-btn-ghost">Close</button>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>{t("comparison")}</h2>
+                  <button onClick={() => setShowCompare(false)} className="pc-btn-ghost">{t("close")}</button>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1.2em' }}>
                   {compareIds.map(id => {
@@ -1080,23 +1082,23 @@ export default function App() {
                     const riskColorVal = riskColor(item.risk);
                     return (
                       <div key={id} style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
-                        <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Domain</div>
+                        <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("fieldDomain")}</div>
                         <div style={{ wordBreak: 'break-all', marginBottom: '1em' }}>{item.domain}</div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6em', fontSize: '0.85em' }}>
                           <div>
-                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Risk</div>
+                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>{t("riskLevel")}</div>
                             <div style={{ color: riskColorVal, fontWeight: 600 }}>{item.risk}</div>
                           </div>
                           <div>
-                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Score</div>
+                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>{t("scoreLabel")}</div>
                             <div style={{ fontWeight: 600 }}>{item.score}/100</div>
                           </div>
                           <div>
-                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Mode</div>
+                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>{t("fieldMode")}</div>
                             <div style={{ textTransform: 'capitalize' }}>{modeLabel(item.mode)}</div>
                           </div>
                           <div>
-                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Duration</div>
+                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>{t("fieldDuration")}</div>
                             <div>{item.duration_ms != null ? `${item.duration_ms} ms` : '—'}</div>
                           </div>
                         </div>
@@ -1110,19 +1112,19 @@ export default function App() {
 
           <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
             <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--mapped-text-headings)', marginBottom: '0.8em' }}>How it works</h2>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--mapped-text-headings)', marginBottom: '0.8em' }}>{t("howItWorks")}</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5 }} className="pc-section pc-mobile-stack">
                 <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
                   <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-action)', marginBottom: '0.4em' }}>01 — Paste</div>
-                  <p style={{ color: 'var(--mapped-text-body)' }}>Drop any link into the scanner. We do not require accounts or personal data.</p>
+                  <p style={{ color: 'var(--mapped-text-body)' }}>{t("stepPasteBody")}</p>
                 </div>
                 <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
                   <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-action)', marginBottom: '0.4em' }}>02 — Analyze</div>
-                  <p style={{ color: 'var(--mapped-text-body)' }}>Check domain signals, URL patterns, and routing behavior for phishing indicators.</p>
+                  <p style={{ color: 'var(--mapped-text-body)' }}>{t("stepAnalyzeBody")}</p>
                 </div>
                 <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
                   <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-action)', marginBottom: '0.4em' }}>03 — Decide</div>
-                  <p style={{ color: 'var(--mapped-text-body)' }}>Get a risk score and clear findings. Export or share the result when needed.</p>
+                  <p style={{ color: 'var(--mapped-text-body)' }}>{t("stepDecideBody")}</p>
                 </div>
               </div>
             </div>
@@ -1132,13 +1134,13 @@ export default function App() {
         <footer style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginTop: '2em' }}>
           <div style={{ maxWidth: '56em', margin: '0 auto', padding: '1.5em', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5em', fontSize: '0.75em', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>
             <span>PhishChecker</span>
-            <span>Privacy-first scanning</span>
+            <span>{t("privacyBadge")}</span>
             <span>{status?.version ? `v${status.version}` : ''}</span>
           </div>
           <div style={{ maxWidth: '56em', margin: '0 auto', padding: '0 1.5em 1.5em', display: 'flex', gap: '1em', flexWrap: 'wrap', fontSize: '0.7em', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-            <a href="/privacy" style={{ color: 'var(--gold)', textDecoration: 'none' }}>Privacy</a>
-            <a href="/terms" style={{ color: 'var(--gold)', textDecoration: 'none' }}>Terms</a>
-            <a href="/changelog" style={{ color: 'var(--gold)', textDecoration: 'none' }}>Changelog</a>
+            <a href="/privacy" style={{ color: 'var(--gold)', textDecoration: 'none' }}>{t("privacy")}</a>
+            <a href="/terms" style={{ color: 'var(--gold)', textDecoration: 'none' }}>{t("terms")}</a>
+            <a href="/changelog" style={{ color: 'var(--gold)', textDecoration: 'none' }}>{t("changelog")}</a>
             <span>© {new Date().getFullYear()} PhishChecker</span>
           </div>
         </footer>
