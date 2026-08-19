@@ -92,18 +92,18 @@ function findingSummary(r: string): string {
   return 'Review this signal as part of the overall URL risk assessment.';
 }
 
-function riskColor(risk?: string): string {
-  if (risk === 'high') return 'var(--pc-risk-high)';
-  if (risk === 'suspicious') return 'var(--pc-risk-suspicious)';
-  if (risk === 'clean') return 'var(--pc-risk-low)';
-  return 'var(--mapped-text-body)';
-}
-
 function scoreColor(score?: number | null): string {
   if (score == null) return 'var(--mapped-text-body)';
   if (score < 50) return 'var(--pc-risk-high)';
   if (score < 80) return 'var(--pc-risk-suspicious)';
   return 'var(--pc-risk-low)';
+}
+
+function riskColor(risk?: string): string {
+  if (risk === 'high') return 'var(--pc-risk-high)';
+  if (risk === 'suspicious') return 'var(--pc-risk-suspicious)';
+  if (risk === 'clean') return 'var(--pc-risk-low)';
+  return 'var(--mapped-text-body)';
 }
 
 function confidenceMeta(score?: number | null): { label: string; color: string } | null {
@@ -351,33 +351,35 @@ export default function App() {
           <section className="pc-panel" style={{ borderTop: 'none', borderRadius: 0, borderLeft: 'none', borderRight: 'none' }}>
             <div style={{ maxWidth: '56em', margin: '0 auto', padding: '3em 1.5em' }} className="pc-section">
               <p className="pc-chip" style={{ marginBottom: '1em', background: 'var(--mapped-surface-default)', borderColor: 'var(--mapped-border-default)', color: 'var(--mapped-text-action)' }}>PRIVACY-FIRST SCANNING</p>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.2rem, 5vw, 3.6rem)', lineHeight: 0.95, letterSpacing: '-0.03em', color: 'var(--mapped-text-headings)', marginBottom: '0.7em' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.4rem, 5.2vw, 4rem)', lineHeight: 0.95, letterSpacing: '-0.04em', color: 'var(--mapped-text-headings)', marginBottom: '0.75em' }}>
                 Check links before<br />you trust them.
               </h1>
-              <p style={{ fontSize: '1.05em', lineHeight: 1.4, maxWidth: '26em', color: 'var(--mapped-text-body)', marginBottom: '1.8em' }}>
+              <p style={{ fontSize: '1.1em', lineHeight: 1.45, maxWidth: '28em', color: 'var(--mapped-text-body)', marginBottom: '2em' }}>
                 Fast phishing-risk analysis with clear results. No accounts. No tracking. Just scan.
               </p>
-              <form onSubmit={handleScan} id="scan" className="pc-scan-form" style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.5em', maxWidth: '42em' }}>
+              <form onSubmit={handleScan} id="scan" className="pc-scan-form" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.6em', maxWidth: '38em' }}>
                 <label htmlFor="url-input" style={{ position: 'absolute', overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', width: '1px', height: '1px' }}>URL to check</label>
-                <div style={{ position: 'relative' }}>
-                  <input ref={inputRef} id="url-input" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com" className="pc-input pc-placeholder" disabled={loading} aria-describedby="url-hint" style={{ paddingRight: url ? '2.2em' : undefined }} />
-                  {url && (
-                    <button type="button" onClick={() => setUrl('')} disabled={loading} aria-label="Clear URL" style={{ position: 'absolute', right: '0.6em', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '0.9em', padding: '0.3em', lineHeight: 1 }}>×</button>
-                  )}
+                <div style={{ display: 'flex', gap: '0.5em', flexWrap: 'wrap' }}>
+                  <div style={{ position: 'relative', flex: '1 1 auto', minWidth: '14em' }}>
+                    <input ref={inputRef} id="url-input" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com" className="pc-input pc-placeholder" disabled={loading} aria-describedby="url-hint" style={{ paddingRight: url ? '2.2em' : undefined }} />
+                    {url && (
+                      <button type="button" onClick={() => setUrl('')} disabled={loading} aria-label="Clear URL" style={{ position: 'absolute', right: '0.6em', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '0.9em', padding: '0.3em', lineHeight: 1 }}>×</button>
+                    )}
+                  </div>
+                  <select value={mode} onChange={e => setMode(e.target.value)} className="pc-select" disabled={loading || familyMode} aria-label="Scan mode" style={{ minWidth: '10em' }}>
+                    <option value="quick">Quick</option>
+                    <option value="standard">Standard</option>
+                    <option value="it">IT</option>
+                  </select>
+                  <button type="submit" disabled={loading} className="pc-btn-primary" style={{ whiteSpace: 'nowrap', minHeight: '44px' }}>
+                    {loading ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}><span className="pc-spinner" style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'pc-spin 0.8s linear infinite' }} />Scanning...</span>) : 'Scan'}
+                  </button>
                 </div>
-                <select value={mode} onChange={e => setMode(e.target.value)} className="pc-select" disabled={loading || familyMode} aria-label="Scan mode">
-                  <option value="quick">Quick — fast surface check</option>
-                  <option value="standard">Standard — balanced depth</option>
-                  <option value="it">IT — deep technical scan</option>
-                </select>
                 {mode && (
-                  <span id="url-hint" style={{ fontSize: '0.7em', color: 'var(--mapped-text-body)', padding: '0.4em 0' }}>
+                  <span id="url-hint" style={{ fontSize: '0.75em', color: 'var(--mapped-text-body)', padding: '0.2em 0' }}>
                     {mode === 'quick' ? 'Lightweight: headers, TLS, basic patterns.' : mode === 'standard' ? 'Balanced: headers, TLS, domain patterns, behavior.' : 'Deep: full header audit, TLS details, behavior, routing, extended intel.'}
                   </span>
                 )}
-                <button type="submit" disabled={loading} className="pc-btn-primary" style={{ whiteSpace: 'nowrap' }}>
-                  {loading ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}><span className="pc-spinner" style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'pc-spin 0.8s linear infinite' }} />Scanning...</span>) : 'Scan'}
-                </button>
               </form>
               <div style={{ marginTop: '0.8em', display: 'flex', alignItems: 'center', gap: '0.6em', flexWrap: 'wrap' }}>
                 <button type="button" onClick={() => setFamilyMode(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.85em', color: familyMode ? 'var(--mapped-text-on-action)' : 'var(--mapped-text-action)', background: familyMode ? 'var(--mapped-surface-action)' : 'transparent', border: '1px solid', borderColor: familyMode ? 'var(--mapped-surface-action)' : 'var(--mapped-border-default)' }}>
@@ -888,7 +890,7 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
                   <div>
                     <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)', margin: 0 }}>Recent scans</h2>
-                    <div style={{ fontSize: '0.75em', color: 'var(--mapped-text-body)', marginTop: '0.35em' }}>Results shown for [X hours], then cleared.</div>
+                    <div style={{ fontSize: '0.75em', color: 'var(--mapped-text-body)', marginTop: '0.35em' }}>Results are temporary and cleared over time.</div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.5em', flexWrap: 'wrap', alignItems: 'center' }}>
                     <input value={historySearch} onChange={e => setHistorySearch(e.target.value)} placeholder="Search domain, url, risk" className="pc-input" style={{ padding: '0.55em 0.7em', fontSize: '0.8em', minWidth: '14em' }} />
@@ -917,67 +919,44 @@ export default function App() {
                   </div>
                 )}
 
-                {history.length === 0 && <div className="pc-history-empty" aria-live="polite">No scans yet.</div>}
-                {history.length > 0 && visibleHistory.length === 0 && (
-                  <div className="pc-history-empty" aria-live="polite">No matching scans.</div>
-                )}
+                {history.length === 0 && <div className="pc-history-empty" aria-live="polite" style={{ padding: '1.2em', border: '1px dashed var(--mapped-border-default)', background: 'var(--mapped-surface-default)', color: 'var(--mapped-text-body)', fontSize: '0.9em', textAlign: 'center' }}>No scans yet.</div>}
+                {history.length > 0 && visibleHistory.length === 0 && <div className="pc-history-empty" aria-live="polite" style={{ padding: '1.2em', border: '1px dashed var(--mapped-border-default)', background: 'var(--mapped-surface-default)', color: 'var(--mapped-text-body)', fontSize: '0.9em', textAlign: 'center' }}>No matching scans.</div>}
+
                 {visibleHistory.length > 0 && (
-                  <div className="pc-history-wrap">
-                    <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap', marginBottom: '0.8em', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap' }}>
-                        {['all','high','suspicious','low'].map(f => (
-                          <button key={f} type="button" onClick={() => { setHistoryFilter(f); setHistoryPage(1); }} className="pc-btn-ghost" style={{ opacity: historyFilter === f ? 1 : 0.6 }}>{f === 'all' ? 'All' : f[0].toUpperCase() + f.slice(1)}</button>
-                        ))}
-                      </div>
-                      {historySearch && (
-                        <button type="button" onClick={() => setHistorySearch('')} className="pc-btn-ghost" style={{ fontSize: '0.7em' }}>Clear search</button>
-                      )}
-                    </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85em' }}>
-                      <thead>
-                        <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--mapped-border-default)', color: 'var(--mapped-text-body)' }}>
-                          <th style={{ padding: '0.6em 0.8em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', width: '2.5em' }}>Compare</th>
-                          <th style={{ padding: '0.6em 0.8em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Time</th>
-                          <th style={{ padding: '0.6em 0.8em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Domain</th>
-                          <th style={{ padding: '0.6em 0.8em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Risk</th>
-                          <th style={{ padding: '0.6em 0.8em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Score</th>
-                          <th style={{ padding: '0.6em 0.8em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Mode</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {visibleHistory.filter(h => historyFilter === 'all' || h.risk === historyFilter).map((h, i) => {
-                          const checked = compareIds.includes(h.id || '');
-                          return (
-                            <tr key={h.id || i} style={{ borderBottom: '1px solid var(--mapped-border-default)', background: checked ? 'var(--mapped-surface-default)' : 'transparent' }}>
-                              <td style={{ padding: '0.7em 0.8em' }}>
-                                <input type="checkbox" checked={checked} onChange={() => {
-                                  setCompareIds(prev => prev.includes(h.id || '') ? prev.filter(x => x !== h.id) : [...prev, h.id || ''].slice(0, 2));
-                                }} />
-                              </td>
-                              <td style={{ padding: '0.7em 0.8em', whiteSpace: 'nowrap', color: 'var(--mapped-text-body)', fontSize: '0.8em' }}>{relativeTime(h.started_at)}</td>
-                              <td style={{ padding: '0.7em 0.8em', wordBreak: 'break-all' }}>{h.domain}</td>
-                              <td style={{ padding: '0.7em 0.8em', textTransform: 'capitalize' }}>{h.risk}</td>
-                              <td style={{ padding: '0.7em 0.8em' }}>{h.score}</td>
-                              <td style={{ padding: '0.7em 0.8em', textTransform: 'capitalize' }}>{modeLabel(h.mode)}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.8em', fontSize: '0.8em', color: 'var(--mapped-text-body)' }}>
-                      <span>{history.length ? `Page ${historyPage}` : ''}</span>
-                      <div style={{ display: 'flex', gap: '0.4em' }}>
-                        <button disabled={historyPage <= 1} onClick={() => setHistoryPage(p => p - 1)} className="pc-btn-ghost">Prev</button>
-                        <button disabled={history.length < historyPageSize} onClick={() => setHistoryPage(p => p + 1)} className="pc-btn-ghost">Next</button>
-                      </div>
-                    </div>
+                  <div style={{ display: 'grid', gap: '0.6em' }}>
+                    {visibleHistory.slice(0, historyPageSize).map(h => {
+                      const badge = h.risk === 'high' ? 'pc-risk-high' : h.risk === 'suspicious' ? 'pc-risk-suspicious' : 'pc-risk-low';
+                      const itemScoreColor = scoreColor(h.score);
+                      return (
+                        <div key={h.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.6em', alignItems: 'center', padding: '0.9em 1em', background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)' }}>
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5em', marginBottom: '0.3em', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '0.8em', fontWeight: 700, color: 'var(--mapped-text-headings)', wordBreak: 'break-all' }}>{h.domain || h.url}</span>
+                              <span className={badge} style={{ fontSize: '0.65em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.25em 0.5em', borderRadius: '0.35em' }}>{h.risk}</span>
+                            </div>
+                            <div style={{ fontSize: '0.8em', color: 'var(--mapped-text-body)', display: 'flex', gap: '0.8em', flexWrap: 'wrap' }}>
+                              <span style={{ color: itemScoreColor, fontWeight: 600 }}>{h.score}/100</span>
+                              <span>{modeLabel(h.mode)}</span>
+                              <span>{h.duration_ms != null ? `${h.duration_ms} ms` : ''}</span>
+                              <span>{relativeTime(h.started_at)}</span>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.4em', justifyContent: 'flex-end' }}>
+                            <button className="pc-btn-ghost" style={{ fontSize: '0.7em', padding: '0.45em 0.7em' }} onClick={() => { setReportId(h.id); setReport(null); window.location.hash = `#/scan/${h.id}`; }}>View</button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
-                {compareIds.length === 2 && (
-                  <div style={{ marginTop: '1.2em', display: 'flex', justifyContent: 'flex-end' }}>
-                    <button onClick={() => setShowCompare(true)} className="pc-btn-primary" style={{ padding: '0.7em 1em' }}>Compare selected</button>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.8em', fontSize: '0.8em', color: 'var(--mapped-text-body)', flexWrap: 'wrap', gap: '0.5em' }}>
+                  <span>{history.length ? `Page ${historyPage}` : ''}</span>
+                  <div style={{ display: 'flex', gap: '0.4em' }}>
+                    <button disabled={historyPage <= 1} onClick={() => setHistoryPage(p => p - 1)} className="pc-btn-ghost">Prev</button>
+                    <button disabled={history.length < historyPageSize} onClick={() => setHistoryPage(p => p + 1)} className="pc-btn-ghost">Next</button>
                   </div>
-                )}
+                </div>
               </div>
             </section>
           )}
