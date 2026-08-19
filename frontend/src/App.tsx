@@ -529,58 +529,67 @@ export default function App() {
                 </div>
 
                 {awarenessMode === 'simple' && (
-                  <div style={{ fontSize: '1.05em', lineHeight: 1.7, color: 'var(--mapped-text-body)' }}>
-                    <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginBottom: '1em' }}>
-                      <p style={{ margin: 0, fontSize: '1.05em' }}>Phishing is when someone pretends to be a trusted person or brand.</p>
-                      <p style={{ margin: '0.6em 0 0', fontSize: '1.05em' }}>They want your password, OTP, or payment.</p>
-                      <p style={{ margin: '0.6em 0 0', fontSize: '1.05em' }}>New or unknown senders are the biggest warning sign.</p>
+                  <div style={{ fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
+                    <div style={{ padding: '1.2em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
+                      <p style={{ margin: 0, fontSize: '1.05em', color: 'var(--text-primary)' }}>Phishing is when someone pretends to be a trusted person or brand.</p>
+                      <p style={{ margin: '0.6em 0 0', fontSize: '1.05em', color: 'var(--text-primary)' }}>They want your password, OTP, or payment.</p>
+                      <p style={{ margin: '0.6em 0 0', fontSize: '1.05em', color: 'var(--text-primary)' }}>New or unknown senders are the biggest warning sign.</p>
                     </div>
 
-                    <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginBottom: '1em' }}>
-                      <h3 style={{ fontSize: '1em', fontWeight: 700, color: 'var(--mapped-text-headings)', margin: '0 0 0.6em' }}>Example 1: Fake bank text</h3>
-                      <div style={{ background: 'var(--bg)', border: '1px solid var(--mapped-border-default)', borderRadius: '0.6em', padding: '1em', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace', fontSize: '0.95em', lineHeight: 1.6 }}>
-                        <div style={{ color: 'var(--mapped-text-body)' }}>SMS: <strong style={{ color: '#fca5a5' }}>ALERT:</strong> Your bank account is locked.</div>
-                        <div style={{ color: 'var(--mapped-text-body)', marginTop: '0.4em' }}>Tap here to verify: <span style={{ color: '#93c5fd' }}>http://bank-secure.xyz/login</span></div>
-                        <div style={{ color: '#fca5a5', marginTop: '0.6em', fontWeight: 700 }}>Red flags:</div>
-                        <ul style={{ color: 'var(--mapped-text-body)', paddingLeft: '1.2em', marginTop: '0.3em' }}>
-                          <li>Creates fear with words like "locked" or "urgent"</li>
-                          <li>Uses a strange web address, not your bank's site</li>
-                          <li>Asks for login details by text</li>
-                        </ul>
+                    <div style={{ padding: '1.2em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
+                      <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
+                        <span aria-hidden="true">📱</span> Example 1: Fake bank text
+                      </h3>
+                      <div style={{ background: 'var(--bg-midnight)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '22em' }}>
+                        <div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>SMS</div>
+                        <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                          <strong style={{ color: '#fca5a5' }}>ALERT:</strong> Your bank account is locked.<br/>
+                          <span style={{ color: '#93c5fd' }}>Tap here to verify:</span><br/>
+                          <span style={{ color: 'var(--danger)', textDecoration: 'underline' }}>http://bank-secure.xyz/login</span>
+                        </div>
+                        <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '0.35em', fontSize: '0.85em', color: '#fca5a5' }}>
+                          ⚠ Red flags: fear words, strange address, asks for login by text
+                        </div>
                       </div>
                     </div>
 
-                    <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginBottom: '1em' }}>
-                      <h3 style={{ fontSize: '1em', fontWeight: 700, color: 'var(--mapped-text-headings)', margin: '0 0 0.6em' }}>Example 2: Fake delivery notification</h3>
-                      <div style={{ background: 'var(--bg)', border: '1px solid var(--mapped-border-default)', borderRadius: '0.6em', padding: '1em', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace', fontSize: '0.95em', lineHeight: 1.6 }}>
-                        <div style={{ color: 'var(--mapped-text-body)' }}>Email: <strong style={{ color: '#fca5a5' }}>Action required:</strong> Your parcel cannot be delivered.</div>
-                        <div style={{ color: 'var(--mapped-text-body)', marginTop: '0.4em' }}>Open the label here: <span style={{ color: '#93c5fd' }}>https://delivery-tracking.info/parcel</span></div>
-                        <div style={{ color: '#fca5a5', marginTop: '0.6em', fontWeight: 700 }}>Red flags:</div>
-                        <ul style={{ color: 'var(--mapped-text-body)', paddingLeft: '1.2em', marginTop: '0.3em' }}>
-                          <li>No tracking number from the real courier</li>
-                          <li>Link domain does not match the courier name</li>
-                          <li>Asks you to download or open an unexpected file</li>
-                        </ul>
+                    <div style={{ padding: '1.2em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
+                      <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
+                        <span aria-hidden="true">📧</span> Example 2: Fake delivery notification
+                      </h3>
+                      <div style={{ background: 'var(--bg-midnight)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '24em' }}>
+                        <div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Email</div>
+                        <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                          <strong style={{ color: '#fca5a5' }}>Action required:</strong> Your parcel cannot be delivered.<br/>
+                          Open the label: <span style={{ color: '#93c5fd' }}>https://delivery-tracking.info/parcel</span>
+                        </div>
+                        <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '0.35em', fontSize: '0.85em', color: '#fca5a5' }}>
+                          ⚠ Red flags: no tracking number, wrong domain, asks to download file
+                        </div>
                       </div>
                     </div>
 
-                    <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginBottom: '1em' }}>
-                      <h3 style={{ fontSize: '1em', fontWeight: 700, color: 'var(--mapped-text-headings)', margin: '0 0 0.6em' }}>Example 3: Fake account alert</h3>
-                      <div style={{ background: 'var(--bg)', border: '1px solid var(--mapped-border-default)', borderRadius: '0.6em', padding: '1em', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace', fontSize: '0.95em', lineHeight: 1.6 }}>
-                        <div style={{ color: 'var(--mapped-text-body)' }}>Email: <strong style={{ color: '#fca5a5' }}>Security notice:</strong> Someone logged into your account.</div>
-                        <div style={{ color: 'var(--mapped-text-body)', marginTop: '0.4em' }}>Secure it now: <span style={{ color: '#93c5fd' }}>https://account-security-alert.xyz/reset</span></div>
-                        <div style={{ color: '#fca5a5', marginTop: '0.6em', fontWeight: 700 }}>Red flags:</div>
-                        <ul style={{ color: 'var(--mapped-text-body)', paddingLeft: '1.2em', marginTop: '0.3em' }}>
-                          <li>No account name, service name, or location</li>
-                          <li>Asks you to reset password on a suspicious site</li>
-                          <li>Feels urgent even though it gives no real proof</li>
-                        </ul>
+                    <div style={{ padding: '1.2em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
+                      <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
+                        <span aria-hidden="true">🔐</span> Example 3: Fake account alert
+                      </h3>
+                      <div style={{ background: 'var(--bg-midnight)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '24em' }}>
+                        <div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Email</div>
+                        <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                          <strong style={{ color: '#fca5a5' }}>Security notice:</strong> Someone logged into your account.<br/>
+                          Secure it now: <span style={{ color: '#93c5fd' }}>https://account-security-alert.xyz/reset</span>
+                        </div>
+                        <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '0.35em', fontSize: '0.85em', color: '#fca5a5' }}>
+                          ⚠ Red flags: no account details, asks reset on unknown site, fake urgency
+                        </div>
                       </div>
                     </div>
 
-                    <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-                      <h3 style={{ fontSize: '1em', fontWeight: 700, color: 'var(--mapped-text-headings)', margin: '0 0 0.6em' }}>Quick checks</h3>
-                      <ul style={{ color: 'var(--mapped-text-body)', paddingLeft: '1.2em', display: 'grid', gap: '0.4em', fontSize: '1.05em' }}>
+                    <div style={{ padding: '1.2em', border: '1px solid var(--border-gold)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(212,175,55,0.03) 100%)', borderRadius: 'var(--r-lg)' }}>
+                      <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--gold)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
+                        <span aria-hidden="true">✅</span> Quick checks
+                      </h3>
+                      <ul style={{ color: 'var(--text-secondary)', paddingLeft: '1.2em', display: 'grid', gap: '0.5em', fontSize: '1.05em' }}>
                         <li>Hover over a link to see where it really goes.</li>
                         <li>Open the app or website directly instead of clicking the message.</li>
                         <li>Ask: did I expect this? Is it asking for secrets?</li>
