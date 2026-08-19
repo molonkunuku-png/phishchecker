@@ -671,69 +671,75 @@ export default function App() {
           )}
 
           {!reportId && result && (
-            <section className={`pc-animate-in ${familyMode ? 'pc-family-mode' : ''}`} style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+            <section className={`pc-animate-in ${familyMode ? 'pc-family-mode' : ''}`} style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
-                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '1.2em' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.8em', flexWrap: 'wrap' }}>
-                    <div style={{ position: 'relative', width: '3.2em', height: '3.2em' }}>
-                      <svg viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
-                        <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--brand-grey-200)" strokeWidth="3" />
-                        <circle cx="18" cy="18" r="15.5" fill="none" stroke={riskColor(currentRisk)} strokeWidth="3" strokeDasharray={`${(riskPct / 100) * 97.39} 97.39`} strokeLinecap="round" style={{ transition: 'stroke-dasharray 420ms ease, stroke 420ms ease' }} />
-                      </svg>
-                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75em', fontWeight: 700, color: 'var(--mapped-text-headings)', transform: 'none' }}>{currentScore ?? '—'}</div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>Risk score</div>
-                      <div style={{ fontSize: '0.85em', fontWeight: 600, color: riskColor(currentRisk) }}>{currentRisk ? currentRisk.toUpperCase() : '—'}</div>
-                      {confidence && (
-                        <div style={{ fontSize: '0.65em', color: confidence.color, fontWeight: 600 }}>{confidence.label}</div>
-                      )}
+                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '1.2em', alignItems: 'center', marginBottom: '1.4em' }}>
+                  <div className="pc-gauge" aria-hidden="true">
+                    <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
+                      <circle cx="50" cy="50" r="42" fill="none" stroke="var(--sapphire-muted)" strokeWidth="8" />
+                      <circle cx="50" cy="50" r="42" fill="none" stroke="var(--gold)" strokeWidth="8" strokeLinecap="round" strokeDasharray={`${(Math.max(0, Math.min(100, currentScore ?? 0)) / 100) * 264} 264`} style={{ transition: 'stroke-dasharray 1s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+                    </svg>
+                    <div className="pc-gauge-text">
+                      <div className="pc-gauge-score" style={{ color: currentScore != null && currentScore < 50 ? 'var(--danger)' : currentScore != null && currentScore < 80 ? 'var(--warning)' : 'var(--success)' }}>{currentScore ?? '—'}</div>
+                      <div className="pc-gauge-label">of 100</div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap' }}>
-                    <button onClick={copyScanLink} className="pc-btn-ghost">Copy link</button>
-                    <button onClick={copyScanJSON} className="pc-btn-ghost">Copy JSON</button>
-                    <button onClick={() => downloadExport('json')} className="pc-btn-ghost">Export JSON</button>
-                    <button onClick={() => downloadExport('csv')} className="pc-btn-ghost">Export CSV</button>
-                    <button onClick={() => window.print()} className="pc-btn-ghost">Print</button>
-                    <button onClick={() => result && downloadPDF(result)} className="pc-btn-ghost">Export report</button>
+                  <div>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.3em' }}>Risk score</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 700, color: currentRisk === 'high' ? 'var(--danger)' : currentRisk === 'suspicious' ? 'var(--warning)' : currentRisk === 'clean' ? 'var(--success)' : 'var(--text-primary)', marginBottom: '0.3em' }}>{currentRisk ? currentRisk.toUpperCase() : '—'}</div>
+                    {confidence && (
+                      <div style={{ fontSize: '0.75em', color: confidence.color, fontWeight: 600 }}>{confidence.label}</div>
+                    )}
                   </div>
                 </div>
 
                 {familyMode && result && (
-                  <div style={{ marginTop: '1em', padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', fontSize: '1.05em', lineHeight: 1.7, color: 'var(--mapped-text-body)' }}>
+                  <div style={{ marginBottom: '1.2em', padding: '1.1em', border: '1px solid var(--border-gold)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(212,175,55,0.04) 100%)', borderRadius: 'var(--r-lg)', fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: '0.4em' }}>
+                      <svg width="16" height="16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 12L16 19v11c0 12.5 8 22.8 16 26.5 8-3.7 16-14 16-26.5V19L32 12z" fill="currentColor"/><path d="M24 34l6 6 10-12" stroke="#0D1B2A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
+                      Family Mode
+                    </div>
                     {familySummary(result)}
                   </div>
                 )}
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1.2em', fontSize: '0.9em', lineHeight: 1.5, marginBottom: '1.4em' }} className="pc-mobile-stack">
-                  <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>URL</span>
-                    <p style={{ wordBreak: 'break-all' }}>{result.url}</p>
+                <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap', marginBottom: '1.2em' }}>
+                  <button onClick={copyScanLink} className="pc-btn-ghost">Copy link</button>
+                  <button onClick={copyScanJSON} className="pc-btn-ghost">Copy JSON</button>
+                  <button onClick={() => downloadExport('json')} className="pc-btn-ghost">Export JSON</button>
+                  <button onClick={() => downloadExport('csv')} className="pc-btn-ghost">Export CSV</button>
+                  <button onClick={() => window.print()} className="pc-btn-ghost">Print</button>
+                  <button onClick={() => result && downloadPDF(result)} className="pc-btn-ghost">Export report</button>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5, marginBottom: '1.2em' }} className="pc-mobile-stack">
+                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
+                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>URL</span>
+                    <p style={{ wordBreak: 'break-all', color: 'var(--text-primary)' }}>{result.url}</p>
                   </div>
-                  <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Domain</span>
-                    <p style={{ wordBreak: 'break-all' }}>{result.domain}</p>
+                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
+                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>Domain</span>
+                    <p style={{ wordBreak: 'break-all', color: 'var(--text-primary)' }}>{result.domain}</p>
                   </div>
-                  <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Mode</span>
-                    <p>{modeLabel(result.mode)}</p>
+                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
+                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>Mode</span>
+                    <p style={{ color: 'var(--text-primary)' }}>{modeLabel(result.mode)}</p>
                   </div>
-                  <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Started</span>
-                    <p>{result.started_at ? new Date(result.started_at).toLocaleString() : '—'}</p>
+                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
+                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>Started</span>
+                    <p style={{ color: 'var(--text-primary)' }}>{result.started_at ? new Date(result.started_at).toLocaleString() : '—'}</p>
                   </div>
-                  <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Domain age</span>
-                    <p>{(() => { const da = (result.details?.domain_age || {}) as any; const days = da?.age_days; const created = da?.created_at; if (days == null && !created) return '—'; const text = days != null ? `${days} days` : `created ${created || 'unknown'}`; const flagged = typeof days === 'number' && days < 30 ? ' - flagged' : ''; return <><span>{text}{flagged}</span><div style={{ fontSize: '0.75em', color: 'var(--mapped-text-body)', marginTop: '0.25em' }}>New domains are more likely to be used in short-lived phishing campaigns.</div></>; })()}</p>
+                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
+                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>Domain age</span>
+                    <p style={{ color: 'var(--text-primary)' }}>{(() => { const da = (result.details?.domain_age || {}) as any; const days = da?.age_days; const created = da?.created_at; if (days == null && !created) return '—'; const text = days != null ? `${days} days` : `created ${created || 'unknown'}`; const flagged = typeof days === 'number' && days < 30 ? ' - flagged' : ''; return <><span>{text}{flagged}</span><div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginTop: '0.25em' }}>New domains are more likely to be used in short-lived phishing campaigns.</div></>; })()}</p>
                   </div>
-                  <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Duration</span>
-                    <p>{result.duration_ms != null ? `${result.duration_ms} ms` : '—'}</p>
+                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
+                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>Duration</span>
+                    <p style={{ color: 'var(--text-primary)' }}>{result.duration_ms != null ? `${result.duration_ms} ms` : '—'}</p>
                   </div>
-                  <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>Certificate</span>
-                    <p style={{ wordBreak: 'break-all', display: 'flex', flexWrap: 'wrap', gap: '0.6em', alignItems: 'center' }}>{(() => { const ssl = (result.details?.ssl || {}) as any; const grade = sslGrade(result.details); const issuer = ssl?.issuer || '—'; const valid = ssl?.valid ? 'Valid' : 'Invalid or untrusted'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : ''; const text = `${valid}${grade && ssl?.valid ? ' · ' + grade.grade : ''}${age ? ' · ' + age : ''} · ${issuer}`; return (<><span style={{ flex: '1 1 auto', minWidth: '0' }}>{text}</span><button type="button" onClick={() => { navigator.clipboard.writeText(text).catch(() => {}); }} className="pc-btn-ghost" style={{ flex: '0 0 auto' }}>Copy</button></>); })()}</p>
+                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)', gridColumn: '1 / -1' }}>
+                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>Certificate</span>
+                    <p style={{ wordBreak: 'break-all', display: 'flex', flexWrap: 'wrap', gap: '0.6em', alignItems: 'center', color: 'var(--text-primary)' }}>{(() => { const ssl = (result.details?.ssl || {}) as any; const grade = sslGrade(result.details); const issuer = ssl?.issuer || '—'; const valid = ssl?.valid ? 'Valid' : 'Invalid or untrusted'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : ''; const text = `${valid}${grade && ssl?.valid ? ' · ' + grade.grade : ''}${age ? ' · ' + age : ''} · ${issuer}`; return <><span style={{ flex: '1 1 auto', minWidth: '0' }}>{text}</span><button type="button" onClick={() => { navigator.clipboard.writeText(text).catch(() => {}); }} className="pc-btn-ghost" style={{ flex: '0 0 auto' }}>Copy</button></>; })()}</p>
                   </div>
                 </div>
 
@@ -1047,22 +1053,11 @@ export default function App() {
             <span>Privacy-first scanning</span>
             <span>{status?.version ? `v${status.version}` : ''}</span>
           </div>
-          <div style={{ maxWidth: '56em', margin: '0 auto', padding: '0 1.5em 1.5em', display: 'flex', gap: '1em', flexWrap: 'wrap', fontSize: '0.7em', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>
-            <a href="/privacy" style={{ color: 'var(--mapped-text-action)', textDecoration: 'none' }}>Privacy</a>
-            <a href="/terms" style={{ color: 'var(--mapped-text-action)', textDecoration: 'none' }}>Terms</a>
-            <button type="button" onClick={() => document.getElementById('changelog')?.scrollIntoView({ behavior: 'smooth' })} style={{ background: 'none', border: 'none', color: 'var(--mapped-text-action)', cursor: 'pointer', padding: 0, font: 'inherit' }}>Changelog</button>
+          <div style={{ maxWidth: '56em', margin: '0 auto', padding: '0 1.5em 1.5em', display: 'flex', gap: '1em', flexWrap: 'wrap', fontSize: '0.7em', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+            <a href="/privacy" style={{ color: 'var(--gold)', textDecoration: 'none' }}>Privacy</a>
+            <a href="/terms" style={{ color: 'var(--gold)', textDecoration: 'none' }}>Terms</a>
+            <a href="/changelog" style={{ color: 'var(--gold)', textDecoration: 'none' }}>Changelog</a>
             <span>© {new Date().getFullYear()} PhishChecker</span>
-          </div>
-          <div id="changelog" style={{ maxWidth: '56em', margin: '0 auto', padding: '0 1.5em 1.5em', fontSize: '0.8em', color: 'var(--mapped-text-body)', lineHeight: 1.6 }}>
-            <details>
-              <summary style={{ cursor: 'pointer', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', fontSize: '0.75em' }}>Recent changes</summary>
-              <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', marginTop: '0.6em', display: 'grid', gap: '0.3em' }}>
-                <li>Score/risk alignment and live blocklist lookup</li>
-                <li>Findings filter chips and expand/collapse all</li>
-                <li>URL validation, mobile overlap fixes, and contrast improvements</li>
-                <li>Redirect chain visualization and score breakdown panels</li>
-              </ul>
-            </details>
           </div>
         </footer>
       </div>

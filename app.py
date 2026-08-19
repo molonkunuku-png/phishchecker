@@ -324,9 +324,13 @@ def create_app(config: dict | None = None) -> Flask:
     def terms():
         return send_file(Path(__file__).parent / "static" / "terms.html")
 
+    @app.get("/changelog")
+    def changelog():
+        return send_file(Path(__file__).parent / "static" / "changelog.html")
+
     @app.get("/security.txt")
     def security_txt() -> Response:
-        content = "Contact: mailto:molonkunuku@gmail.com\nPreferred-Languages: en, ja, es\n"
+        content = "Contact: mailto:security@phishchecker.example\nPreferred-Languages: en, ms, zh, ta\n"
         return Response(content, mimetype="text/plain", headers={"Cache-Control": "no-store"})
 
     @app.get("/robots.txt")
