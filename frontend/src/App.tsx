@@ -95,24 +95,40 @@ function findingSummary(r: string): string {
 }
 
 function scoreColor(score?: number | null): string {
-  if (score == null) return 'var(--mapped-text-body)';
-  if (score < 50) return 'var(--pc-risk-high)';
-  if (score < 80) return 'var(--pc-risk-suspicious)';
-  return 'var(--pc-risk-low)';
+  if (score == null) return 'var(--text-secondary)';
+  if (score < 50) return 'var(--risk-danger)';
+  if (score < 80) return 'var(--risk-caution)';
+  return 'var(--risk-safe)';
 }
 
 function riskColor(risk?: string): string {
-  if (risk === 'high') return 'var(--pc-risk-high)';
-  if (risk === 'suspicious') return 'var(--pc-risk-suspicious)';
-  if (risk === 'clean') return 'var(--pc-risk-low)';
-  return 'var(--mapped-text-body)';
+  if (risk === 'high') return 'var(--risk-danger)';
+  if (risk === 'suspicious') return 'var(--risk-caution)';
+  if (risk === 'clean') return 'var(--risk-safe)';
+  return 'var(--text-secondary)';
 }
 
 function confidenceMeta(score?: number | null): { label: string; color: string } | null {
   if (score == null) return null;
-  if (score < 50) return { label: 'High risk', color: 'var(--pc-risk-high)' };
-  if (score < 80) return { label: 'Elevated risk', color: 'var(--pc-risk-suspicious)' };
-  return { label: 'Low risk', color: 'var(--pc-risk-low)' };
+  if (score < 50) return { label: 'High risk', color: 'var(--risk-danger)' };
+  if (score < 80) return { label: 'Elevated risk', color: 'var(--risk-caution)' };
+  return { label: 'Low risk', color: 'var(--risk-safe)' };
+}
+
+function riskVerdict(risk?: string): { label: string; className: string } {
+  const r = (risk || '').toLowerCase();
+  if (r === 'high') return { label: 'Danger', className: 'pc-verdict-danger' };
+  if (r === 'suspicious') return { label: 'Caution', className: 'pc-verdict-caution' };
+  if (r === 'clean') return { label: 'Safe', className: 'pc-verdict-safe' };
+  return { label: 'Unknown', className: 'pc-verdict' };
+}
+
+function riskAction(result: ScanResult | null): string {
+  if (!result) return '';
+  const risk = (result.risk || '').toLowerCase();
+  if (risk === 'high') return "Don't enter your password or card details here.";
+  if (risk === 'suspicious') return 'Proceed with caution. Avoid signing in or sharing sensitive details.';
+  return 'No strong phishing indicators were detected in the checked URL.';
 }
 
 function sslGrade(details?: Record<string, unknown>): { grade: string; color: string } | null {
@@ -755,89 +771,84 @@ export default function App() {
           )}
 
           {!reportId && result && (
-            <section className={`pc-animate-in ${familyMode ? 'pc-family-mode' : ''}`} style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-surface)' }}>
+            <section className={`pc-animate-in ${familyMode ? 'pc-family-mode' : ''}`} style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '1.2em', alignItems: 'center', marginBottom: '1.4em' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1em', marginBottom: '1.6em' }}>
+                  <div className={`pc-verdict ${riskVerdict(currentRisk).className}`}>{riskVerdict(currentRisk).label}</div>
+                  <div style={{ fontSize: '0.95em', color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.6 }}>{riskAction(result)}</div>
                   <div className="pc-gauge" aria-hidden="true">
                     <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
-                      <circle cx="50" cy="50" r="42" fill="none" stroke="var(--sapphire-muted)" strokeWidth="8" />
-                      <circle cx="50" cy="50" r="42" fill="none" stroke="var(--gold)" strokeWidth="8" strokeLinecap="round" strokeDasharray={`${(Math.max(0, Math.min(100, currentScore ?? 0)) / 100) * 264} 264`} style={{ transition: 'stroke-dasharray 1s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+                      <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10" />
+                      <circle cx="50" cy="50" r="42" fill="none" stroke={scoreColor(currentScore)} strokeWidth="10" strokeLinecap="round" strokeDasharray={`${(Math.max(0, Math.min(100, currentScore ?? 0)) / 100) * 264} 264`} style={{ transition: 'stroke-dasharray 1s cubic-bezier(0.4, 0, 0.2, 1)' }} />
                     </svg>
                     <div className="pc-gauge-text">
-                      <div className="pc-gauge-score" style={{ color: currentScore != null && currentScore < 50 ? 'var(--danger)' : currentScore != null && currentScore < 80 ? 'var(--warning)' : 'var(--success)' }}>{currentScore ?? '—'}</div>
+                      <div className="pc-gauge-score" style={{ color: scoreColor(currentScore) }}>{currentScore ?? '—'}</div>
                       <div className="pc-gauge-label">of 100</div>
                     </div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.3em' }}>{t("riskScore")}</div>
-                    <div style={{ fontSize: '1.1rem', fontWeight: 700, color: currentRisk === 'high' ? 'var(--danger)' : currentRisk === 'suspicious' ? 'var(--warning)' : currentRisk === 'clean' ? 'var(--success)' : 'var(--text-primary)', marginBottom: '0.3em' }}>{currentRisk ? currentRisk.toUpperCase() : '—'}</div>
-                    {confidence && (
-                      <div style={{ fontSize: '0.75em', color: confidence.color, fontWeight: 600 }}>{confidence.label}</div>
-                    )}
                   </div>
                 </div>
 
                 {familyMode && result && (
-                  <div style={{ marginBottom: '1.2em', padding: '1.1em', border: '1px solid var(--border-gold)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(212,175,55,0.04) 100%)', borderRadius: 'var(--r-lg)', fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: '0.4em' }}>
-                      <svg width="16" height="16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 12L16 19v11c0 12.5 8 22.8 16 26.5 8-3.7 16-14 16-26.5V19L32 12z" fill="currentColor"/><path d="M24 34l6 6 10-12" stroke="#0D1B2A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
+                  <div style={{ marginBottom: '1.4em', padding: '1.2em', border: '1px solid var(--border-gold)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(227,174,55,0.04) 100%)', borderRadius: 'var(--r-lg)', fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--gold-500)', marginBottom: '0.4em' }}>
+                      <svg width="16" height="16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 12L16 19v11c0 12.5 8 22.8 16 26.5 8-3.7 16-14 16-26.5V19L32 12z" fill="currentColor"/><path d="M24 34l6 6 10-12" stroke="#0F1B2E" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
                       Family Mode
                     </div>
                     {familySummary(result)}
                   </div>
                 )}
 
-                <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap', marginBottom: '1.2em' }}>
-                  <button onClick={copyScanLink} className="pc-btn-ghost">{t("copyLink")}</button>
-                  <button onClick={copyScanJSON} className="pc-btn-ghost">{t("copyJson")}</button>
-                  <button onClick={() => downloadExport('json')} className="pc-btn-ghost">{t("exportJson")}</button>
-                  <button onClick={() => downloadExport('csv')} className="pc-btn-ghost">{t("exportCsv")}</button>
-                  <button onClick={() => window.print()} className="pc-btn-ghost">{t("print")}</button>
-                  <button onClick={() => result && downloadPDF(result)} className="pc-btn-ghost">{t("exportReport")}</button>
+                <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap', marginBottom: '1.4em', justifyContent: 'center' }}>
+                  <button onClick={copyScanLink} className="pc-btn-secondary">{t("copyLink")}</button>
+                  <button onClick={copyScanJSON} className="pc-btn-secondary">{t("copyJson")}</button>
+                  <button onClick={() => downloadExport('json')} className="pc-btn-secondary">{t("exportJson")}</button>
+                  <button onClick={() => downloadExport('csv')} className="pc-btn-secondary">{t("exportCsv")}</button>
+                  <button onClick={() => window.print()} className="pc-btn-secondary">{t("print")}</button>
+                  <button onClick={() => result && downloadPDF(result)} className="pc-btn-secondary">{t("exportReport")}</button>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5, marginBottom: '1.2em' }} className="pc-mobile-stack">
-                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
-                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>{t("fieldUrl")}</span>
-                    <p style={{ wordBreak: 'break-all', color: 'var(--text-primary)' }}>{result.url}</p>
+                  <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-hairline)', padding: '1.25em', borderRadius: 'var(--r-lg)' }}>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.4em' }}>{t("fieldUrl")}</span>
+                    <p style={{ wordBreak: 'break-all', color: 'var(--text-primary)', fontSize: '1.0625rem', fontWeight: 500 }}>{result.url}</p>
                   </div>
-                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
-                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>{t("fieldDomain")}</span>
-                    <p style={{ wordBreak: 'break-all', color: 'var(--text-primary)' }}>{result.domain}</p>
+                  <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-hairline)', padding: '1.25em', borderRadius: 'var(--r-lg)' }}>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.4em' }}>{t("fieldDomain")}</span>
+                    <p style={{ wordBreak: 'break-all', color: 'var(--text-primary)', fontSize: '1.0625rem', fontWeight: 500 }}>{result.domain}</p>
                   </div>
-                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
-                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>{t("fieldMode")}</span>
-                    <p style={{ color: 'var(--text-primary)' }}>{modeLabel(result.mode)}</p>
+                  <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-hairline)', padding: '1.25em', borderRadius: 'var(--r-lg)' }}>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.4em' }}>{t("fieldMode")}</span>
+                    <p style={{ color: 'var(--text-primary)', fontSize: '1.0625rem', fontWeight: 500 }}>{modeLabel(result.mode)}</p>
                   </div>
-                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
-                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>{t("fieldStarted")}</span>
-                    <p style={{ color: 'var(--text-primary)' }}>{result.started_at ? new Date(result.started_at).toLocaleString() : '—'}</p>
+                  <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-hairline)', padding: '1.25em', borderRadius: 'var(--r-lg)' }}>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.4em' }}>{t("fieldStarted")}</span>
+                    <p style={{ color: 'var(--text-primary)', fontSize: '1.0625rem', fontWeight: 500 }}>{result.started_at ? new Date(result.started_at).toLocaleString() : '—'}</p>
                   </div>
-                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
-                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>{t("fieldDomainAge")}</span>
-                    <p style={{ color: 'var(--text-primary)' }}>{(() => { const da = (result.details?.domain_age || {}) as any; const days = da?.age_days; const created = da?.created_at; if (days == null && !created) return '—'; const text = days != null ? `${days} days` : `created ${created || 'unknown'}`; const flagged = typeof days === 'number' && days < 30 ? ' - flagged' : ''; return <><span>{text}{flagged}</span><div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginTop: '0.25em' }}>{t("newDomainWarning")}</div></>; })()}</p>
+                  <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-hairline)', padding: '1.25em', borderRadius: 'var(--r-lg)' }}>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.4em' }}>{t("fieldDomainAge")}</span>
+                    <p style={{ color: 'var(--text-primary)', fontSize: '1.0625rem', fontWeight: 500 }}>{(() => { const da = (result.details?.domain_age || {}) as any; const days = da?.age_days; const created = da?.created_at; if (days == null && !created) return '—'; const text = days != null ? `${days} days` : `created ${created || 'unknown'}`; const flagged = typeof days === 'number' && days < 30 ? ' - flagged' : ''; return <><span>{text}{flagged}</span><div style={{ fontSize: '0.85em', color: 'var(--text-tertiary)', marginTop: '0.35em' }}>{t("newDomainWarning")}</div></>; })()}</p>
                   </div>
-                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)' }}>
-                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>{t("fieldDuration")}</span>
-                    <p style={{ color: 'var(--text-primary)' }}>{result.duration_ms != null ? `${result.duration_ms} ms` : '—'}</p>
+                  <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-hairline)', padding: '1.25em', borderRadius: 'var(--r-lg)' }}>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.4em' }}>{t("fieldDuration")}</span>
+                    <p style={{ color: 'var(--text-primary)', fontSize: '1.0625rem', fontWeight: 500 }}>{result.duration_ms != null ? `${result.duration_ms} ms` : '—'}</p>
                   </div>
-                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-subtle)', padding: '1em', borderRadius: 'var(--r-md)', gridColumn: '1 / -1' }}>
-                    <span style={{ display: 'block', fontSize: '0.65em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25em' }}>{t("fieldCertificate")}</span>
-                    <p style={{ wordBreak: 'break-all', display: 'flex', flexWrap: 'wrap', gap: '0.6em', alignItems: 'center', color: 'var(--text-primary)' }}>{(() => { const ssl = (result.details?.ssl || {}) as any; const grade = sslGrade(result.details); const issuer = ssl?.issuer || '—'; const valid = ssl?.valid ? 'Valid' : 'Invalid or untrusted'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : ''; const text = `${valid}${grade && ssl?.valid ? ' · ' + grade.grade : ''}${age ? ' · ' + age : ''} · ${issuer}`; return <><span style={{ flex: '1 1 auto', minWidth: '0' }}>{text}</span><button type="button" onClick={() => { navigator.clipboard.writeText(text).catch(() => {}); }} className="pc-btn-ghost" style={{ flex: '0 0 auto' }}>{t("copy")}</button></>; })()}</p>
+                  <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-hairline)', padding: '1.25em', borderRadius: 'var(--r-lg)', gridColumn: '1 / -1' }}>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.4em' }}>{t("fieldCertificate")}</span>
+                    <p style={{ wordBreak: 'break-all', display: 'flex', flexWrap: 'wrap', gap: '0.6em', alignItems: 'center', color: 'var(--text-primary)', fontSize: '1.0625rem', fontWeight: 500 }}>{(() => { const ssl = (result.details?.ssl || {}) as any; const grade = sslGrade(result.details); const issuer = ssl?.issuer || '—'; const valid = ssl?.valid ? 'Valid' : 'Invalid or untrusted'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : ''; const text = `${valid}${grade && ssl?.valid ? ' · ' + grade.grade : ''}${age ? ' · ' + age : ''} · ${issuer}`; return <><span style={{ flex: '1 1 auto', minWidth: '0' }}>{text}</span><button type="button" onClick={() => { navigator.clipboard.writeText(text).catch(() => {}); }} className="pc-btn-ghost" style={{ flex: '0 0 auto' }}>{t("copy")}</button></>; })()}</p>
                   </div>
                 </div>
 
                 {((result.details || {}) as any).score_math && (
                   <details style={{ marginTop: '1.2em', fontSize: '0.9em' }}>
-                    <summary style={{ cursor: 'pointer', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', fontSize: '0.8em' }}>{t("scoreBreakdown")}</summary>
-                    <div style={{ marginTop: '0.8em', padding: '1em', background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', fontSize: '0.85em', lineHeight: 1.6, color: 'var(--mapped-text-body)' }}>
+                    <summary style={{ cursor: 'pointer', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-primary)', fontSize: '0.8em' }}>{t("scoreBreakdown")}</summary>
+                    <div style={{ marginTop: '0.8em', padding: '1em', background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--r-lg)', fontSize: '0.85em', lineHeight: 1.6, color: 'var(--text-secondary)' }}>
                       <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.4em 1em', alignItems: 'center' }}>
                         <span>{t("baseScore")}</span><span style={{ fontWeight: 600 }}>100</span>
-                        <span>{t("headersPenalty")}</span><span style={{ color: 'var(--pc-risk-high)' }}>-{((result.details as any)?.score_math as any)?.header_penalty}</span>
-                        <span>{t("sslPenalty")}</span><span style={{ color: 'var(--pc-risk-high)' }}>-{((result.details as any)?.score_math as any)?.ssl_penalty}</span>
-                        <span>{t("threatIntelPenalty")}</span><span style={{ color: 'var(--pc-risk-high)' }}>-{((result.details as any)?.score_math as any)?.threat_intel_penalty}</span>
-                        <span>{t("domainShapePenalty")}</span><span style={{ color: 'var(--pc-risk-high)' }}>-{((result.details as any)?.score_math as any)?.domain_penalty}</span>
-                        <span style={{ fontWeight: 600, borderTop: '1px solid var(--mapped-border-default)', paddingTop: '0.4em' }}>{t("finalScore")}</span><span style={{ fontWeight: 700, color: scoreColor(currentScore) }}>{((result.details as any)?.score_math as any)?.final_score}</span>
+                        <span>{t("headersPenalty")}</span><span style={{ color: 'var(--risk-danger)' }}>-{((result.details as any)?.score_math as any)?.header_penalty}</span>
+                        <span>{t("sslPenalty")}</span><span style={{ color: 'var(--risk-danger)' }}>-{((result.details as any)?.score_math as any)?.ssl_penalty}</span>
+                        <span>{t("threatIntelPenalty")}</span><span style={{ color: 'var(--risk-danger)' }}>-{((result.details as any)?.score_math as any)?.threat_intel_penalty}</span>
+                        <span>{t("domainShapePenalty")}</span><span style={{ color: 'var(--risk-danger)' }}>-{((result.details as any)?.score_math as any)?.domain_penalty}</span>
+                        <span style={{ fontWeight: 600, borderTop: '1px solid var(--border-hairline)', paddingTop: '0.4em' }}>{t("finalScore")}</span><span style={{ fontWeight: 700, color: scoreColor(currentScore) }}>{((result.details as any)?.score_math as any)?.final_score}</span>
                       </div>
                     </div>
                   </details>
