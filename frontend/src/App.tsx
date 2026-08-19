@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ThemeContext, Theme } from './lib/ThemeContext';
-import { submitScan, fetchHistory, downloadExport, getStatus, fetchScanDetail, submitBulk } from './lib/api';
+import { submitScan, fetchHistory, downloadExport, getStatus, fetchScanDetail, submitBulk, submitScreenshotScan, submitQRScan, submitFlag, fetchFlags, createScheduledCheck, fetchScheduledChecks } from './lib/api';
 import type { ScanResult, HistoryItem, StatusResponse } from './lib/types';
 import { LANG, type Lang } from './lib/i18n';
 
@@ -438,6 +438,37 @@ export default function App() {
                   <div className="pc-skeleton" style={{ height: '4.5em' }} />
                 </div>
               )}
+              <div style={{ marginTop: '1em', display: 'grid', gap: '0.8em', maxWidth: '38em' }}>
+                <div style={{ fontSize: '0.75em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>More tools</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(12em, 1fr))', gap: '0.6em' }}>
+                  <label className="pc-card" style={{ padding: '1em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-md)', cursor: 'pointer', display: 'grid', gap: '0.4em' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Screenshot scan</span>
+                    <span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>{LANG[lang].screenshot.body}</span>
+                    <input type="file" accept="image/*" style={{ fontSize: '0.7em' }} onChange={async (e) => { const file = e.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = async () => { setError(null); setResult(null); setLoading(true); try { const data = await submitScreenshotScan(reader.result as string); setResult(data as any); } catch (err: any) { setError(err?.message || 'scan failed'); } finally { setLoading(false); } }; reader.readAsDataURL(file); }} />
+                  </label>
+                  <label className="pc-card" style={{ padding: '1em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-md)', cursor: 'pointer', display: 'grid', gap: '0.4em' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>QR scan</span>
+                    <span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>{LANG[lang].qr.body}</span>
+                    <input type="file" accept="image/*" style={{ fontSize: '0.7em' }} onChange={async (e) => { const file = e.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = async () => { setError(null); setResult(null); setLoading(true); try { const data = await submitQRScan(reader.result as string); setResult(data as any); } catch (err: any) { setError(err?.message || 'scan failed'); } finally { setLoading(false); } }; reader.readAsDataURL(file); }} />
+                  </label>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '1.2em', display: 'grid', gap: '0.8em', maxWidth: '38em' }}>
+                <div style={{ fontSize: '0.75em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Community</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(12em, 1fr))', gap: '0.6em' }}>
+                  <div className="pc-card" style={{ padding: '1em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-md)', display: 'grid', gap: '0.4em' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Flag suspicious link</span>
+                    <span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>Report a suspicious URL to help protect others.</span>
+                    <button type="button" className="pc-btn-secondary" style={{ fontSize: '0.8em', padding: '0.5em 0.7em' }} onClick={async () => { const url = prompt('Suspicious URL'); if (!url) return; const notes = prompt('Notes', '') || ''; setLoading(true); try { const data = await submitFlag({ url: url.trim(), domain: new URL(url.trim()).hostname, notes }); alert('Flagged: ' + JSON.stringify(data)); } catch (err: any) { setError(err?.message || 'failed'); } finally { setLoading(false); } }}>Report URL</button>
+                  </div>
+                  <div className="pc-card" style={{ padding: '1em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-md)', display: 'grid', gap: '0.4em' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Scheduled rechecks</span>
+                    <span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>Monitor a link over time for new risk signals.</span>
+                    <button type="button" className="pc-btn-secondary" style={{ fontSize: '0.8em', padding: '0.5em 0.7em' }} onClick={async () => { const url = prompt('URL to monitor'); if (!url) return; const mins = prompt('Repeat every (minutes):', '1440'); if (!mins) return; const hours = Math.max(1, Math.round(Number(mins) / 60)); setLoading(true); try { const data = await createScheduledCheck({ url: url.trim(), cadence_hours: hours }); alert('Scheduled: ' + JSON.stringify(data)); } catch (err: any) { setError(err?.message || 'failed'); } finally { setLoading(false); } }}>Create monitor</button>
+                  </div>
+                </div>
+              </div>
               {!loading && !result && !error && (
                 <div aria-live="polite" style={{ marginTop: '1.2em', padding: '1.6em', border: '1px dashed var(--border-subtle)', background: 'var(--bg-surface-raised)', color: 'var(--text-muted)', fontSize: '0.95em', textAlign: 'center', borderRadius: 'var(--r-lg)' }}>
                   <div style={{ fontSize: '2.4em', marginBottom: '0.6em', opacity: 0.9 }} aria-hidden="true">🛡️</div>
@@ -714,7 +745,7 @@ export default function App() {
                 <div style={{ marginTop: '1.2em', padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', fontSize: '0.85em', color: 'var(--mapped-text-body)', lineHeight: 1.6 }}>
                   Scanner availability: use the form above for direct scans. This panel shows service health and access mode only.
                   <div style={{ marginTop: '0.6em' }}>
-                    <strong>API access:</strong> {status.features?.publicScanning ? 'Open' : 'Restricted'} — contact <a href="mailto:molonkunuku@gmail.com" style={{ color: 'var(--mapped-text-action)', textDecoration: 'underline' }}>molonkunuku@gmail.com</a> to request access.
+                    <strong>Support:</strong> use the in-app contact or <a href="/security.txt" style={{ color: 'var(--mapped-text-action)', textDecoration: 'underline' }}>security contact</a>.
                   </div>
                 </div>
               </div>
