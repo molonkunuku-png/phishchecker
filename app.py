@@ -74,7 +74,7 @@ def create_app(config: dict | None = None) -> Flask:
     Base.metadata.bind = SessionFactory(app.config["SQLALCHEMY_DATABASE_URI"])
     Base.metadata.create_all(get_engine())
 
-    CORS(app, supports_credentials=True)
+    CORS(app, supports_credentials=True, origins=["https://phishchecker.onrender.com", "http://localhost:5173", "http://localhost:3000"])
 
     try:
         from middleware.sentry_integration import init_sentry
@@ -113,6 +113,7 @@ def create_app(config: dict | None = None) -> Flask:
         return jsonify({"csrf_token": secrets.token_hex(16)}), 200
 
     @app.get("/api/v2/scans/history")
+    @require_api_key
     def api_history() -> Response:
         page = max(1, int(request.args.get("page", 1)))
         size = min(100, max(1, int(request.args.get("page_size", 20))))
@@ -223,6 +224,7 @@ def create_app(config: dict | None = None) -> Flask:
         return jsonify({"ok": True, "token": token}), 201
 
     @app.get("/api/v2/community/flags")
+    @require_api_key
     def api_community_flags() -> tuple[Response, int]:
         from models import CommunityFlag
         from services.db import SessionFactory
@@ -255,6 +257,7 @@ def create_app(config: dict | None = None) -> Flask:
         return jsonify({"ok": True, "token": token, "domain": domain, "cadence_hours": max(1, min(720, cadence_hours))}), 201
 
     @app.get("/api/v2/scheduled")
+    @require_api_key
     def api_scheduled_list() -> tuple[Response, int]:
         from models import ScheduledCheck
         from services.db import SessionFactory
@@ -348,6 +351,7 @@ def create_app(config: dict | None = None) -> Flask:
         return jsonify(payload_out), 202
 
     @app.get("/api/v2/scans/export")
+    @require_api_key
     def api_export() -> Response:
         fmt = request.args.get("format", "json")
         repo = ScanService()
@@ -368,7 +372,7 @@ def create_app(config: dict | None = None) -> Flask:
         return jsonify({"queued": 0, "processing": 0}), 200
 
     @app.get("/metrics")
-    @rate_limit
+    @require_api_key
     def metrics() -> tuple[Response, int]:
         return jsonify(snapshot()), 200
 

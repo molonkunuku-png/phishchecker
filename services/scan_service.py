@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import secrets
 from datetime import datetime, timezone
 from typing import Any
 from models import Base, Scan
@@ -29,7 +30,7 @@ class ScanService:
             started = datetime.fromisoformat(result.get("started_at", "")) if result.get("started_at") else None
             finished = datetime.fromisoformat(result.get("finished_at", "")) if result.get("finished_at") else None
             scan = Scan(
-                id=result.get("id") or f"{int(datetime.now(timezone.utc).timestamp()*1000)}",
+                id=result.get("id") or secrets.token_hex(16),
                 url=result.get("url", ""),
                 domain=result.get("domain", ""),
                 risk=result.get("risk", "unknown"),
