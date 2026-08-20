@@ -365,7 +365,7 @@ export default function App() {
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
       <div className="min-h-screen" style={{ background: 'var(--bg-canvas)', color: 'var(--text-secondary)' }}>
-        <nav className={`pc-nav ${navShadow ? 'pc-nav-scrolled' : ''}`} style={{ overflow: 'visible' }}>
+        <nav className={`pc-nav ${navShadow ? 'pc-nav-scrolled' : ''}`}>
           <a href="#main" className="pc-skip-link">{t("skipToContent")}</a>
           <a href="/" className="pc-nav-brand" aria-label={t("ariaHome")}>
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

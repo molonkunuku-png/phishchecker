@@ -659,6 +659,11 @@ a:hover {
   .pc-section { padding-left: 1em !important; padding-right: 1em !important; }
   .pc-mobile-stack { grid-template-columns: 1fr !important; }
   .pc-history-grid { grid-template-columns: 1fr !important; }
+  .pc-nav { height: auto; min-height: 4.5rem; }
+  .pc-nav-cta { width: 100%; text-align: center; margin-left: 0; }
+  main { padding-top: 5.5rem !important; }
+  #main { scroll-margin-top: 5.5rem; }
+  .pc-nav-inner { flex-wrap: wrap; row-gap: 0.5rem; }
 }
 
 /* Print */
