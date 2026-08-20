@@ -133,13 +133,13 @@ function riskAction(result: ScanResult | null): string {
 
 function sslGrade(details?: Record<string, unknown>): { grade: string; color: string } | null {
   const ssl = (details?.ssl || {}) as any;
-  if (!ssl || !ssl.valid) return { grade: 'F', color: 'var(--pc-risk-high)' };
+  if (!ssl || !ssl.valid) return { grade: 'F', color: 'var(--risk-danger)' };
   const age = ssl.age_days as number | undefined;
-  if (age == null) return { grade: 'A', color: 'var(--pc-risk-low)' };
-  if (age < 30) return { grade: 'A+', color: 'var(--pc-risk-low)' };
-  if (age < 180) return { grade: 'A', color: 'var(--pc-risk-low)' };
-  if (age < 365) return { grade: 'B', color: 'var(--pc-risk-suspicious)' };
-  return { grade: 'C', color: 'var(--pc-risk-high)' };
+  if (age == null) return { grade: 'A', color: 'var(--risk-safe)' };
+  if (age < 30) return { grade: 'A+', color: 'var(--risk-safe)' };
+  if (age < 180) return { grade: 'A', color: 'var(--risk-safe)' };
+  if (age < 365) return { grade: 'B', color: 'var(--risk-caution)' };
+  return { grade: 'C', color: 'var(--risk-danger)' };
 }
 
 type Severity = 'high' | 'medium' | 'low';
@@ -154,9 +154,9 @@ function severityOf(reason: string): Severity {
 }
 
 function severityStyle(s: Severity): { bg: string; text: string } {
-  if (s === 'high') return { bg: 'var(--pc-risk-high)', text: 'var(--pc-risk-on)' };
-  if (s === 'medium') return { bg: 'var(--pc-risk-suspicious)', text: 'var(--pc-risk-on)' };
-  return { bg: 'var(--pc-risk-low)', text: 'var(--pc-risk-on)' };
+  if (s === 'high') return { bg: 'var(--risk-danger)', text: '#0B1220' };
+  if (s === 'medium') return { bg: 'var(--risk-caution)', text: '#0B1220' };
+  return { bg: 'var(--risk-safe)', text: '#0B1220' };
 }
 
 export default function App() {
@@ -364,7 +364,7 @@ export default function App() {
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
-      <div className="min-h-screen" style={{ background: 'var(--mapped-surface-page)', color: 'var(--mapped-text-body)' }}>
+      <div className="min-h-screen" style={{ background: 'var(--bg-canvas)', color: 'var(--text-secondary)' }}>
         <nav className={`pc-nav ${navShadow ? 'pc-nav-scrolled' : ''}`} style={{ overflow: 'visible' }}>
           <a href="#main" className="pc-skip-link">{t("skipToContent")}</a>
           <a href="/" className="pc-nav-brand" aria-label={t("ariaHome")}>
@@ -430,17 +430,17 @@ export default function App() {
                   </button>
                 </div>
                 {mode && (
-                  <span id="url-hint" style={{ fontSize: '0.75em', color: 'var(--mapped-text-body)', padding: '0.2em 0' }}>
+                  <span id="url-hint" style={{ fontSize: '0.75em', color: 'var(--text-secondary)', padding: '0.2em 0' }}>
                     {LANG[lang].urlHint[mode]}
                   </span>
                 )}
               </form>
               <div style={{ marginTop: '0.8em', display: 'flex', alignItems: 'center', gap: '0.6em', flexWrap: 'wrap' }}>
-                <button type="button" onClick={() => setFamilyMode(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.85em', color: familyMode ? 'var(--mapped-text-on-action)' : 'var(--mapped-text-action)', background: familyMode ? 'var(--mapped-surface-action)' : 'transparent', border: '1px solid', borderColor: familyMode ? 'var(--mapped-surface-action)' : 'var(--mapped-border-default)' }}>
+                <button type="button" onClick={() => setFamilyMode(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.85em', color: familyMode ? '#0B1220' : 'var(--gold-500)', background: familyMode ? 'var(--gold-500)' : 'transparent', border: '1px solid', borderColor: familyMode ? 'var(--gold-500)' : 'var(--border-hairline)' }}>
                   {familyMode ? LANG[lang].familyMode.on : LANG[lang].familyMode.off}
                 </button>
                 {familyMode && (
-                  <span style={{ fontSize: '0.8em', color: 'var(--mapped-text-body)' }}>{LANG[lang].familyMode.helper}</span>
+                  <span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>{LANG[lang].familyMode.helper}</span>
                 )}
               </div>
               {loading && (
@@ -457,7 +457,7 @@ export default function App() {
                 </div>
               )}
               <div style={{ marginTop: '1em', display: 'grid', gap: '0.8em', maxWidth: '38em' }}>
-                <div style={{ fontSize: '0.75em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>{t("moreTools")}</div>
+                <div style={{ fontSize: '0.75em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>{t("moreTools")}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(12em, 1fr))', gap: '0.6em' }}>
                   <label className="pc-card" style={{ padding: '1em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-md)', cursor: 'pointer', display: 'grid', gap: '0.4em' }}>
                     <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{t("screenshotTitle")}</span>
@@ -473,7 +473,7 @@ export default function App() {
               </div>
 
               <div style={{ marginTop: '1.2em', display: 'grid', gap: '0.8em', maxWidth: '38em' }}>
-                <div style={{ fontSize: '0.75em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>{t("communityTitle")}</div>
+                <div style={{ fontSize: '0.75em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>{t("communityTitle")}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(12em, 1fr))', gap: '0.6em' }}>
                   <div className="pc-card" style={{ padding: '1em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-md)', display: 'grid', gap: '0.4em' }}>
                     <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{t("flagTitle")}</span>
@@ -488,7 +488,7 @@ export default function App() {
                 </div>
               </div>
               {!loading && !result && !error && (
-                <div aria-live="polite" style={{ marginTop: '1.2em', padding: '1.6em', border: '1px dashed var(--border-subtle)', background: 'var(--bg-surface-raised)', color: 'var(--text-muted)', fontSize: '0.95em', textAlign: 'center', borderRadius: 'var(--r-lg)' }}>
+                <div aria-live="polite" style={{ marginTop: '1.2em', padding: '1.6em', border: '1px dashed var(--border-subtle)', background: 'var(--bg-surface-raised)', color: 'var(--text-tertiary)', fontSize: '0.95em', textAlign: 'center', borderRadius: 'var(--r-lg)' }}>
                   <div style={{ fontSize: '2.4em', marginBottom: '0.6em', opacity: 0.9 }} aria-hidden="true">🛡️</div>
                   <div style={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.3em' }}>{t("noScansTitle")}</div>
                   <div>{t("noScansBody")}</div>
@@ -496,7 +496,7 @@ export default function App() {
                 </div>
               )}
 
-              <div style={{ marginTop: '2em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(8em, 1fr))', gap: '0.6em', fontSize: '0.8em', color: 'var(--text-muted)', textAlign: 'center' }} aria-label={t("serviceStats")}>
+              <div style={{ marginTop: '2em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(8em, 1fr))', gap: '0.6em', fontSize: '0.8em', color: 'var(--text-tertiary)', textAlign: 'center' }} aria-label={t("serviceStats")}>
                 <div>
                   <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold)', fontFamily: 'var(--font-display)' }}>100%</div>
                   <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("uptime")}</div>
@@ -510,12 +510,12 @@ export default function App() {
                   <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("forever")}</div>
                 </div>
               </div>
-              <div style={{ marginTop: '0.8em', display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+              <div style={{ marginTop: '0.8em', display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 <span>{t("noPersonalData")}</span>
               </div>
               {error && (
-                <div role="alert" aria-live="assertive" style={{ position: 'fixed', top: '1em', left: '50%', transform: 'translateX(-50%)', zIndex: 200, background: 'var(--pc-risk-high)', color: 'var(--pc-risk-on)', padding: '0.8em 1.2em', borderRadius: '0.4em', fontSize: '0.85em', boxShadow: '0 6px 20px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', gap: '0.6em', maxWidth: '92vw' }}>
+                <div role="alert" aria-live="assertive" style={{ position: 'fixed', top: '1em', left: '50%', transform: 'translateX(-50%)', zIndex: 200, background: 'var(--risk-danger)', color: '#0B1220', padding: '0.8em 1.2em', borderRadius: '0.4em', fontSize: '0.85em', boxShadow: '0 6px 20px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', gap: '0.6em', maxWidth: '92vw' }}>
                   <span style={{ fontWeight: 600 }}>{t("errorTitle")}</span>
                   <span>{error}</span>
                   <button type="button" onClick={doScan} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderColor: 'rgba(255,255,255,0.35)', color: 'inherit' }}>{t("retry")}</button>
@@ -524,10 +524,10 @@ export default function App() {
             </div>
           </section>
 
-          <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+          <section style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
             <div style={{ maxWidth: '56em', margin: '0 auto', padding: '1.6em 1.5em' }} className="pc-section">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.8em', flexWrap: 'wrap' }}>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--mapped-text-headings)' }}>{t("batchTitle")}</h2>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)' }}>{t("batchTitle")}</h2>
                 <button type="button" onClick={() => { setBatchMode(v => !v); setBatchResults(null); setBatchError(null); }} className="pc-btn-ghost" style={{ fontSize: '0.7em' }}>{batchMode ? 'Close batch' : 'Open batch'}</button>
               </div>
               {batchMode && (
@@ -538,10 +538,10 @@ export default function App() {
                     <button type="submit" disabled={batchRunning} className="pc-btn-primary" style={{ whiteSpace: 'nowrap' }}>
                       {batchRunning ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}><span className="pc-spinner" style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'pc-spin 0.8s linear infinite' }} />{t("scanning")}</span>) : 'Scan batch'}
                     </button>
-                    <span style={{ fontSize: '0.7em', color: 'var(--mapped-text-body)', alignSelf: 'center' }}>{t("maxUrls")}</span>
+                    <span style={{ fontSize: '0.7em', color: 'var(--text-secondary)', alignSelf: 'center' }}>{t("maxUrls")}</span>
                   </div>
                   {batchError && (
-                    <p style={{ color: 'var(--pc-risk-high)', marginTop: '0.4em', fontSize: '0.85em', display: 'flex', alignItems: 'center', gap: '0.5em', flexWrap: 'wrap' }}>
+                    <p style={{ color: 'var(--risk-danger)', marginTop: '0.4em', fontSize: '0.85em', display: 'flex', alignItems: 'center', gap: '0.5em', flexWrap: 'wrap' }}>
                       {batchError}
                       <button type="button" onClick={() => setBatchError(null)} className="pc-btn-ghost" style={{ fontSize: '0.8em' }}>{t("retry")}</button>
                     </p>
@@ -549,14 +549,14 @@ export default function App() {
                   {batchResults && (
                     <div style={{ marginTop: '0.8em', display: 'grid', gap: '0.6em' }}>
                       {batchResults.map(r => (
-                        <div key={r.id || r.url} style={{ border: '1px solid var(--mapped-border-default)', padding: '0.8em', background: 'var(--mapped-surface-default)' }}>
+                        <div key={r.id || r.url} style={{ border: '1px solid var(--border-hairline)', padding: '0.8em', background: 'var(--bg-surface)' }}>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5em', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '0.75em', fontWeight: 600, color: 'var(--mapped-text-headings)', wordBreak: 'break-all' }}>{r.domain || r.url}</span>
+                            <span style={{ fontSize: '0.75em', fontWeight: 600, color: 'var(--text-primary)', wordBreak: 'break-all' }}>{r.domain || r.url}</span>
                             <span className={`${r.risk === 'high' ? 'pc-risk-high' : r.risk === 'suspicious' ? 'pc-risk-suspicious' : 'pc-risk-low'}`}>{r.risk}</span>
                           </div>
-                          <div style={{ fontSize: '0.8em', color: 'var(--mapped-text-body)', marginTop: '0.3em' }}>{r.score}/100 · {modeLabel(r.mode)} · {r.duration_ms != null ? `${r.duration_ms} ms` : '—'}</div>
+                          <div style={{ fontSize: '0.8em', color: 'var(--text-secondary)', marginTop: '0.3em' }}>{r.score}/100 · {modeLabel(r.mode)} · {r.duration_ms != null ? `${r.duration_ms} ms` : '—'}</div>
                           {r.reasons?.length ? (
-                            <ul style={{ listStyle: 'disc', paddingLeft: '1.1em', marginTop: '0.4em', fontSize: '0.8em', color: 'var(--mapped-text-body)', display: 'grid', gap: '0.2em' }}>
+                            <ul style={{ listStyle: 'disc', paddingLeft: '1.1em', marginTop: '0.4em', fontSize: '0.8em', color: 'var(--text-secondary)', display: 'grid', gap: '0.2em' }}>
                               {r.reasons.map((x, i) => <li key={i}>{x}</li>)}
                             </ul>
                           ) : null}
@@ -570,15 +570,15 @@ export default function App() {
           </section>
 
           {!result && !loading && !reportId && (
-            <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '1.6em 1.5em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em' }} className="pc-section">
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+              <div style={{ maxWidth: '72em', margin: '0 auto', padding: '1.8em 1.5em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em' }} className="pc-section">
                 {history.slice(0, 3).map((h) => (
-                  <div key={h.id} style={{ border: '1px solid var(--mapped-border-default)', padding: '1em', background: 'var(--mapped-surface-default)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5em', gap: '0.5em' }}>
-                      <span style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>{h.domain}</span>
-                      <span className={`${h.risk === 'high' ? 'pc-risk-high' : h.risk === 'suspicious' ? 'pc-risk-suspicious' : 'pc-risk-low'}`}>{h.risk}</span>
+                  <div key={h.id} className="pc-panel" style={{ padding: '1.1em' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6em', gap: '0.6em' }}>
+                      <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>{h.domain}</span>
+                      <span className={`pc-badge ${h.risk === 'high' ? 'pc-badge-high' : h.risk === 'suspicious' ? 'pc-badge-suspicious' : 'pc-badge-low'}`}>{h.risk}</span>
                     </div>
-                    <div style={{ fontSize: '0.8em', color: 'var(--mapped-text-body)' }}>{h.score}/100</div>
+                    <div style={{ fontSize: '1.0625rem', color: 'var(--text-primary)', fontWeight: 600 }}>{h.score}/100</div>
                   </div>
                 ))}
               </div>
@@ -586,75 +586,75 @@ export default function App() {
           )}
 
           {showAwareness && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.8em', flexWrap: 'wrap' }}>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)', margin: 0 }}>{t("awarenessTitle")}</h2>
-                  <div style={{ display: 'inline-flex', gap: '0.4em', background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '0.3em', borderRadius: '999px' }}>
-                    <button type="button" onClick={() => setAwarenessMode('simple')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: '999px', background: awarenessMode === 'simple' ? 'var(--mapped-surface-action)' : 'transparent', color: awarenessMode === 'simple' ? 'var(--mapped-text-on-action)' : 'var(--mapped-text-body)' }}>{t("simpleMode")}</button>
-                    <button type="button" onClick={() => setAwarenessMode('detailed')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: '999px', background: awarenessMode === 'detailed' ? 'var(--mapped-surface-action)' : 'transparent', color: awarenessMode === 'detailed' ? 'var(--mapped-text-on-action)' : 'var(--mapped-text-body)' }}>{t("detailedMode")}</button>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', margin: 0 }}>{t("awarenessTitle")}</h2>
+                  <div style={{ display: 'inline-flex', gap: '0.4em', background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '0.3em', borderRadius: 'var(--r-pill)' }}>
+                    <button type="button" onClick={() => setAwarenessMode('simple')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: 'var(--r-pill)', background: awarenessMode === 'simple' ? 'var(--gold-500)' : 'transparent', color: awarenessMode === 'simple' ? '#0B1220' : 'var(--text-secondary)' }}>{t("simpleMode")}</button>
+                    <button type="button" onClick={() => setAwarenessMode('detailed')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: 'var(--r-pill)', background: awarenessMode === 'detailed' ? 'var(--gold-500)' : 'transparent', color: awarenessMode === 'detailed' ? '#0B1220' : 'var(--text-secondary)' }}>{t("detailedMode")}</button>
                   </div>
                 </div>
 
                 {awarenessMode === 'simple' && (
                   <div style={{ fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
-                    <div style={{ padding: '1.2em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
+                    <div style={{ padding: '1.2em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
                       <p style={{ margin: 0, fontSize: '1.05em', color: 'var(--text-primary)' }}>{t("awarenessLead")}</p>
                       <p style={{ margin: '0.6em 0 0', fontSize: '1.05em', color: 'var(--text-primary)' }}>They want your password, OTP, or payment.</p>
                       <p style={{ margin: '0.6em 0 0', fontSize: '1.05em', color: 'var(--text-primary)' }}>{t("awarenessLine2")}</p>
                     </div>
 
-                    <div style={{ padding: '1.2em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
+                    <div style={{ padding: '1.2em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
                       <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
                         <span aria-hidden="true">📱</span> Example 1: Fake bank text
                       </h3>
-                      <div style={{ background: 'var(--bg-midnight)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '22em' }}>
-                        <div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("smsLabel")}</div>
+                      <div style={{ background: 'var(--bg-canvas)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '22em' }}>
+                        <div style={{ fontSize: '0.75em', color: 'var(--text-tertiary)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("smsLabel")}</div>
                         <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                           <strong style={{ color: '#fca5a5' }}>{t("alertLabel")}</strong> Your bank account is locked.<br/>
                           <span style={{ color: '#93c5fd' }}>{t("tapHere")}</span><br/>
-                          <span style={{ color: 'var(--danger)', textDecoration: 'underline' }}>http://bank-secure.xyz/login</span>
+                          <span style={{ color: 'var(--risk-danger)', textDecoration: 'underline' }}>http://bank-secure.xyz/login</span>
                         </div>
-                        <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '0.35em', fontSize: '0.85em', color: '#fca5a5' }}>
+                        <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(229,72,77,0.1)', border: '1px solid rgba(229,72,77,0.25)', borderRadius: 'var(--r-md)', fontSize: '0.85em', color: '#fca5a5' }}>
                           ⚠ Red flags: fear words, strange address, asks for login by text
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ padding: '1.2em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
+                    <div style={{ padding: '1.2em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
                       <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
                         <span aria-hidden="true">📧</span> Example 2: Fake delivery notification
                       </h3>
-                      <div style={{ background: 'var(--bg-midnight)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '24em' }}>
-                        <div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("emailLabel")}</div>
+                      <div style={{ background: 'var(--bg-canvas)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '24em' }}>
+                        <div style={{ fontSize: '0.75em', color: 'var(--text-tertiary)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("emailLabel")}</div>
                         <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                           <strong style={{ color: '#fca5a5' }}>{t("actionRequired")}</strong> Your parcel cannot be delivered.<br/>
                           Open the label: <span style={{ color: '#93c5fd' }}>https://delivery-tracking.info/parcel</span>
                         </div>
-                        <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '0.35em', fontSize: '0.85em', color: '#fca5a5' }}>
+                        <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(229,72,77,0.1)', border: '1px solid rgba(229,72,77,0.25)', borderRadius: 'var(--r-md)', fontSize: '0.85em', color: '#fca5a5' }}>
                           ⚠ Red flags: no tracking number, wrong domain, asks to download file
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ padding: '1.2em', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
+                    <div style={{ padding: '1.2em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
                       <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
                         <span aria-hidden="true">🔐</span> Example 3: Fake account alert
                       </h3>
-                      <div style={{ background: 'var(--bg-midnight)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '24em' }}>
-                        <div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("emailLabel")}</div>
+                      <div style={{ background: 'var(--bg-canvas)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '24em' }}>
+                        <div style={{ fontSize: '0.75em', color: 'var(--text-tertiary)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("emailLabel")}</div>
                         <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                           <strong style={{ color: '#fca5a5' }}>{t("securityNotice")}</strong> Someone logged into your account.<br/>
                           Secure it now: <span style={{ color: '#93c5fd' }}>https://account-security-alert.xyz/reset</span>
                         </div>
-                        <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '0.35em', fontSize: '0.85em', color: '#fca5a5' }}>
+                        <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(229,72,77,0.1)', border: '1px solid rgba(229,72,77,0.25)', borderRadius: 'var(--r-md)', fontSize: '0.85em', color: '#fca5a5' }}>
                           ⚠ Red flags: no account details, asks reset on unknown site, fake urgency
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ padding: '1.2em', border: '1px solid var(--border-gold)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(212,175,55,0.03) 100%)', borderRadius: 'var(--r-lg)' }}>
-                      <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--gold)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
+                    <div style={{ padding: '1.2em', border: '1px solid var(--border-gold)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(227,174,55,0.03) 100%)', borderRadius: 'var(--r-lg)' }}>
+                      <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--gold-500)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
                         <span aria-hidden="true">✅</span> Quick checks
                       </h3>
                       <ul style={{ color: 'var(--text-secondary)', paddingLeft: '1.2em', display: 'grid', gap: '0.5em', fontSize: '1.05em' }}>
@@ -668,9 +668,9 @@ export default function App() {
                 )}
 
                 {awarenessMode === 'detailed' && (
-                  <div style={{ fontSize: '0.9em', lineHeight: 1.6, color: 'var(--mapped-text-body)' }}>
-                    <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginBottom: '1em' }}>
-                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>{t("redFlags")}</h3>
+                  <div style={{ fontSize: '0.9em', lineHeight: 1.6, color: 'var(--text-secondary)' }}>
+                    <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', marginBottom: '1em' }}>
+                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-primary)', marginBottom: '0.4em' }}>{t("redFlags")}</h3>
                       <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.35em' }}>
                         <li>{t("detailUnexpected")}</li>
                         <li>{t("detailImpersonate")}</li>
@@ -678,8 +678,8 @@ export default function App() {
                         <li>{t("detailShortened")}</li>
                       </ul>
                     </div>
-                    <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginBottom: '1em' }}>
-                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>{t("howToCheck")}</h3>
+                    <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', marginBottom: '1em' }}>
+                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-primary)', marginBottom: '0.4em' }}>{t("howToCheck")}</h3>
                       <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.35em' }}>
                         <li>{t("howHover")}</li>
                         <li>{t("howScanner")}</li>
@@ -687,8 +687,8 @@ export default function App() {
                         <li>{t("howOfficial")}</li>
                       </ul>
                     </div>
-                    <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>{t("understandingRisk")}</h3>
+                    <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)' }}>
+                      <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-primary)', marginBottom: '0.4em' }}>{t("understandingRisk")}</h3>
                       <p>{t("riskHigh")} {t("riskSuspicious")} {t("riskClean")}</p>
                     </div>
                   </div>
@@ -698,39 +698,39 @@ export default function App() {
           )}
 
           {showApi && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)', marginBottom: '0.8em' }}>{t("apiTitle")}</h2>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', marginBottom: '0.8em' }}>{t("apiTitle")}</h2>
                 <div style={{ display: 'grid', gap: '1em', fontSize: '0.9em', lineHeight: 1.6 }}>
-                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+                  <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6em', marginBottom: '0.4em', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>POST</span>
-                      <code style={{ background: 'var(--brand-grey-200)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/scans</code>
+                      <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>POST</span>
+                      <code style={{ background: 'var(--bg-canvas)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/scans</code>
                     </div>
                     <p>{t("apiScanPost")} <code>/api/csrf</code>.</p>
-                    <pre style={{ marginTop: '0.6em', whiteSpace: 'pre-wrap', wordBreak: 'break-word', padding: '1em', background: 'var(--mapped-surface-default)', fontSize: '0.8em', lineHeight: 1.6, border: '1px solid var(--mapped-border-default)' }}>{`{
+                    <pre style={{ marginTop: '0.6em', whiteSpace: 'pre-wrap', wordBreak: 'break-word', padding: '1em', background: 'var(--bg-surface)', fontSize: '0.8em', lineHeight: 1.6, border: '1px solid var(--border-hairline)' }}>{`{
   "url": "https://example.com",
   "mode": "standard"
 }`}</pre>
                   </div>
-                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+                  <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6em', marginBottom: '0.4em', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>GET</span>
-                      <code style={{ background: 'var(--brand-grey-200)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/scans/history</code>
+                      <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>GET</span>
+                      <code style={{ background: 'var(--bg-canvas)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/scans/history</code>
                     </div>
                     <p>{t("apiHistory")} <code>page</code> {t("and")} <code>page_size</code> {t("queryParams")}.</p>
                   </div>
-                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+                  <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6em', marginBottom: '0.4em', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>GET</span>
-                      <code style={{ background: 'var(--brand-grey-200)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/status</code>
+                      <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>GET</span>
+                      <code style={{ background: 'var(--bg-canvas)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/status</code>
                     </div>
-                    <p>Service health, version, and feature flags.</p>
+                    <p>{t("apiStatus")}</p>
                   </div>
-                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+                  <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6em', marginBottom: '0.4em', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>GET</span>
-                      <code style={{ background: 'var(--brand-grey-200)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/scans/export</code>
+                      <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>GET</span>
+                      <code style={{ background: 'var(--bg-canvas)', padding: '0.2em 0.4em', fontSize: '0.85em' }}>/api/v2/scans/export</code>
                     </div>
                     <p>{t("apiExport")} <code>?format=json</code> {t("or")} <code>?format=csv</code>.</p>
                   </div>
@@ -740,30 +740,30 @@ export default function App() {
           )}
 
           {showStatus && status && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>{t("statusTitle")}</h2>
-                  <span className="pc-chip" style={{ background: 'var(--pc-ok)', color: '#fff', borderColor: 'var(--pc-ok)' }}>{t("operational")}</span>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)' }}>{t("statusTitle")}</h2>
+                  <span className="pc-badge pc-badge-low">{t("operational")}</span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5 }}>
-                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("statusService")}</div>
-                    <div style={{ color: 'var(--mapped-text-headings)', fontWeight: 600 }}>{status.service || 'PhishChecker'}</div>
+                  <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)' }}>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("statusService")}</div>
+                    <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{status.service || 'PhishChecker'}</div>
                   </div>
-                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("statusVersion")}</div>
-                    <div style={{ color: 'var(--mapped-text-headings)', fontWeight: 600 }}>{status.version || '—'}</div>
+                  <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)' }}>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("statusVersion")}</div>
+                    <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{status.version || '—'}</div>
                   </div>
-                  <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("apiAccess")}</div>
-                    <div style={{ color: 'var(--mapped-text-headings)', fontWeight: 600 }}>{status.features?.publicScanning ? 'Open' : 'Restricted'}</div>
+                  <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)' }}>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("apiAccess")}</div>
+                    <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{status.features?.publicScanning ? 'Open' : 'Restricted'}</div>
                   </div>
                 </div>
-                <div style={{ marginTop: '1.2em', padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', fontSize: '0.85em', color: 'var(--mapped-text-body)', lineHeight: 1.6 }}>
+                <div style={{ marginTop: '1.2em', padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', fontSize: '0.85em', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                   Scanner availability: use the form above for direct scans. This panel shows service health and access mode only.
                   <div style={{ marginTop: '0.6em' }}>
-                    <strong>{t("supportText")}</strong> use the in-app contact or <a href="/security.txt" style={{ color: 'var(--mapped-text-action)', textDecoration: 'underline' }}>{t("securityContact")}</a>.
+                    <strong>{t("supportText")}</strong> use the in-app contact or <a href="/security.txt" style={{ color: 'var(--gold-500)', textDecoration: 'underline' }}>{t("securityContact")}</a>.
                   </div>
                 </div>
               </div>
@@ -856,13 +856,13 @@ export default function App() {
 
                 {(((result.details || {}) as any).redirect_chain?.length || 0) > 1 && (
                   <div style={{ marginTop: '1.2em', fontSize: '0.9em' }}>
-                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.4em' }}>{t("redirectChain")}</div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.4em', color: 'var(--mapped-text-body)', lineHeight: 1.6, wordBreak: 'break-all' }}>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.4em' }}>{t("redirectChain")}</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.4em', color: 'var(--text-secondary)', lineHeight: 1.6, wordBreak: 'break-all' }}>
                       {(((result.details || {}) as any).redirect_chain as string[]).map((u: string, i: number, arr: string[]) => (
                         <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em' }}>
-                          <span style={{ fontSize: '0.8em', fontWeight: 600, color: 'var(--mapped-text-action)' }}>{i + 1}</span>
+                          <span style={{ fontSize: '0.8em', fontWeight: 600, color: 'var(--gold-500)' }}>{i + 1}</span>
                           <span>{u}</span>
-                          {i < arr.length - 1 && <span style={{ color: 'var(--mapped-text-body)', opacity: 0.7 }}>→</span>}
+                          {i < arr.length - 1 && <span style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>→</span>}
                         </span>
                       ))}
                     </div>
@@ -870,32 +870,32 @@ export default function App() {
                 )}
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1.2em', marginBottom: '1.4em' }}>
-                  <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
+                  <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-hairline)', padding: '1.2em' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6em' }}>
-                      <span style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>{t("riskLevel")}</span>
+                      <span style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>{t("riskLevel")}</span>
                       <span style={{ fontSize: '0.7em', fontWeight: 600, color: riskColor(currentRisk) }}>{currentRisk || '—'}</span>
                     </div>
-                    <div style={{ height: '6px', background: 'var(--brand-grey-200)', overflow: 'hidden' }}>
+                    <div style={{ height: '6px', background: 'var(--bg-canvas)', overflow: 'hidden' }}>
                       <div style={{ height: '100%', width: `${riskPct}%`, background: riskColor(currentRisk), transition: 'width 420ms ease' }} />
                     </div>
                   </div>
-                  <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
+                  <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-hairline)', padding: '1.2em' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6em' }}>
-                      <span style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>{t("scoreLabel")}</span>
-                      <span style={{ fontSize: '0.7em', fontWeight: 600, color: 'var(--mapped-text-headings)' }}>{currentScore ?? '—'}/100</span>
+                      <span style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>{t("scoreLabel")}</span>
+                      <span style={{ fontSize: '0.7em', fontWeight: 600, color: 'var(--text-primary)' }}>{currentScore ?? '—'}/100</span>
                     </div>
-                    <div style={{ height: '6px', background: 'var(--brand-grey-200)', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${Math.max(0, Math.min(100, currentScore ?? 0))}%`, background: 'var(--mapped-text-action)', transition: 'width 420ms ease' }} />
+                    <div style={{ height: '6px', background: 'var(--bg-canvas)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${Math.max(0, Math.min(100, currentScore ?? 0))}%`, background: 'var(--gold-500)', transition: 'width 420ms ease' }} />
                     </div>
                   </div>
                 </div>
 
                 {result.reasons && result.reasons.length > 0 && (
                   <div className="pc-divider" style={{ marginTop: '1.4em', paddingTop: '1.2em' }}>
-                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.6em' }}>{t("findings")}</h3>
+                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.6em' }}>{t("findings")}</h3>
                     <div style={{ display: 'flex', gap: '0.4em', marginBottom: '0.6em', flexWrap: 'wrap' }}>
                       {['all', 'high', 'medium', 'low'].map(f => (
-                        <button key={f} onClick={() => setFindingFilter(f)} className="pc-btn-ghost" style={{ fontSize: '0.7em', textTransform: 'capitalize', background: findingFilter === f ? 'var(--mapped-surface-action)' : undefined, color: findingFilter === f ? 'var(--mapped-text-on-action)' : undefined }}>{f === 'all' ? 'All' : f}</button>
+                        <button key={f} onClick={() => setFindingFilter(f)} className="pc-btn-ghost" style={{ fontSize: '0.7em', textTransform: 'capitalize', background: findingFilter === f ? 'var(--gold-500)' : undefined, color: findingFilter === f ? '#0B1220' : undefined }}>{f === 'all' ? 'All' : f}</button>
                       ))}
                     </div>
                     <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.45em', fontSize: '0.9em', lineHeight: 1.5 }}>
@@ -905,11 +905,11 @@ export default function App() {
                         return (
                           <li key={i} style={{ paddingLeft: '0.3em' }}>
                             <details style={{ display: 'inline-block', width: '100%' }}>
-                              <summary style={{ cursor: 'pointer', fontWeight: 600, color: 'var(--mapped-text-headings)', listStyle: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.4em', flexWrap: 'wrap' }}>
+                              <summary style={{ cursor: 'pointer', fontWeight: 600, color: 'var(--text-primary)', listStyle: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.4em', flexWrap: 'wrap' }}>
                                 <span style={{ fontSize: '0.65em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', background: st.bg, color: st.text, padding: '0.2em 0.45em', borderRadius: '0.25em' }}>{sev}</span>
                                 <span>{r}</span>
                               </summary>
-                              <div style={{ marginTop: '0.5em', padding: '0.8em', background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', fontSize: '0.85em', lineHeight: 1.6, color: 'var(--mapped-text-body)' }}>
+                              <div style={{ marginTop: '0.5em', padding: '0.8em', background: 'var(--bg-surface)', border: '1px solid var(--border-hairline)', fontSize: '0.85em', lineHeight: 1.6, color: 'var(--text-secondary)' }}>
                                 {findingSummary(r)}
                               </div>
                             </details>
@@ -922,8 +922,8 @@ export default function App() {
 
                 {result.details && (
                   <details style={{ marginTop: '1.2em', fontSize: '0.9em' }}>
-                    <summary style={{ cursor: 'pointer', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', fontSize: '0.8em' }}>{t("rawDetails")}</summary>
-                    <pre style={{ marginTop: '0.8em', whiteSpace: 'pre-wrap', wordBreak: 'break-word', padding: '1em', background: 'var(--mapped-surface-default)', fontSize: '0.8em', lineHeight: 1.6, border: '1px solid var(--mapped-border-default)' }}>{JSON.stringify(result.details, null, 2)}</pre>
+                    <summary style={{ cursor: 'pointer', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-secondary)', fontSize: '0.8em' }}>{t("rawDetails")}</summary>
+                    <pre style={{ marginTop: '0.8em', whiteSpace: 'pre-wrap', wordBreak: 'break-word', padding: '1em', background: 'var(--bg-surface)', fontSize: '0.8em', lineHeight: 1.6, border: '1px solid var(--border-hairline)' }}>{JSON.stringify(result.details, null, 2)}</pre>
                   </details>
                 )}
               </div>
@@ -931,22 +931,22 @@ export default function App() {
           )}
 
           {reportId && report && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>{t("scanReport")}</h2>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>{t("scanReport")}</h2>
                   <button onClick={() => { setReportId(null); setReport(null); window.location.hash = ''; }} className="pc-btn-ghost">{t("back")}</button>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8em', marginBottom: '1.2em', flexWrap: 'wrap' }}>
                   <div style={{ position: 'relative', width: '3.2em', height: '3.2em' }}>
                     <svg viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
-                      <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--brand-grey-200)" strokeWidth="3" />
+                      <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--bg-canvas)" strokeWidth="3" />
                       <circle cx="18" cy="18" r="15.5" fill="none" stroke={riskColor(report.risk)} strokeWidth="3" strokeDasharray={`${riskPercent(report.risk) / 100 * 97.39} 97.39`} strokeLinecap="round" style={{ transition: 'stroke-dasharray 420ms ease, stroke 420ms ease' }} />
                     </svg>
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75em', fontWeight: 700, color: 'var(--mapped-text-headings)', transform: 'none' }}>{report.score ?? '—'}</div>
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75em', fontWeight: 700, color: 'var(--text-primary)', transform: 'none' }}>{report.score ?? '—'}</div>
                   </div>
                   <div>
-                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>{t("riskScore")}</div>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.2em' }}>{t("riskScore")}</div>
                     <div style={{ fontSize: '0.85em', fontWeight: 600, color: riskColor(report.risk) }}>{report.risk ? report.risk.toUpperCase() : '—'}</div>
                     {confidence && (
                       <div style={{ fontSize: '0.65em', color: confidence.color, fontWeight: 600 }}>{confidence.label}</div>
@@ -955,38 +955,38 @@ export default function App() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1.2em', fontSize: '0.9em', lineHeight: 1.5 }}>
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("fieldUrl")}</span>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.3em' }}>{t("fieldUrl")}</span>
                     <p style={{ wordBreak: 'break-all' }}>{report.url}</p>
                   </div>
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("fieldDomain")}</span>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.3em' }}>{t("fieldDomain")}</span>
                     <p style={{ wordBreak: 'break-all' }}>{report.domain}</p>
                   </div>
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("fieldMode")}</span>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.3em' }}>{t("fieldMode")}</span>
                     <p>{modeLabel(report.mode)}</p>
                   </div>
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("fieldStarted")}</span>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.3em' }}>{t("fieldStarted")}</span>
                     <p>{report.started_at ? new Date(report.started_at).toLocaleString() : '—'}</p>
                   </div>
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("fieldDomainAge")}</span>
-                    <p>{(() => { const da = (report.details?.domain_age || {}) as any; const days = da?.age_days; const created = da?.created_at; if (days == null && !created) return '—'; const text = days != null ? `${days} days` : `created ${created || 'unknown'}`; const flagged = typeof days === 'number' && days < 30 ? ' - flagged' : ''; return <><span>{text}{flagged}</span><div style={{ fontSize: '0.75em', color: 'var(--mapped-text-body)', marginTop: '0.25em' }}>{t("newDomainWarning")}</div></>; })()}</p>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.3em' }}>{t("fieldDomainAge")}</span>
+                    <p>{(() => { const da = (report.details?.domain_age || {}) as any; const days = da?.age_days; const created = da?.created_at; if (days == null && !created) return '—'; const text = days != null ? `${days} days` : `created ${created || 'unknown'}`; const flagged = typeof days === 'number' && days < 30 ? ' - flagged' : ''; return <><span>{text}{flagged}</span><div style={{ fontSize: '0.75em', color: 'var(--text-secondary)', marginTop: '0.25em' }}>{t("newDomainWarning")}</div></>; })()}</p>
                   </div>
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("fieldDuration")}</span>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.3em' }}>{t("fieldDuration")}</span>
                     <p>{report.duration_ms != null ? `${report.duration_ms} ms` : '—'}</p>
                   </div>
                   <div>
-                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("fieldCertificate")}</span>
+                    <span style={{ display: 'block', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.3em' }}>{t("fieldCertificate")}</span>
                     <p style={{ wordBreak: 'break-all', display: 'flex', flexWrap: 'wrap', gap: '0.6em', alignItems: 'center' }}>{(() => { const ssl = (report.details?.ssl || {}) as any; const grade = sslGrade(report.details); const issuer = ssl?.issuer || '—'; const valid = ssl?.valid ? 'Valid' : 'Invalid or untrusted'; const age = ssl?.age_days != null ? `${ssl.age_days} days` : ''; const text = `${valid}${grade && ssl?.valid ? ' · ' + grade.grade : ''}${age ? ' · ' + age : ''} · ${issuer}`; return (<><span style={{ flex: '1 1 auto', minWidth: '0' }}>{text}</span><button type="button" onClick={() => { navigator.clipboard.writeText(text).catch(() => {}); }} className="pc-btn-ghost" style={{ flex: '0 0 auto' }}>{t("copy")}</button></>); })()}</p>
                   </div>
                 </div>
 
                 {report.reasons && report.reasons.length > 0 && (
                   <div className="pc-divider" style={{ marginTop: '1.4em', paddingTop: '1.2em' }}>
-                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.6em' }}>{t("findings")}</h3>
+                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.6em' }}>{t("findings")}</h3>
                     <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.35em', fontSize: '0.9em', lineHeight: 1.5 }}>
                       {report.reasons.map((r, i) => <li key={i}>{r}</li>)}
                     </ul>
@@ -997,42 +997,42 @@ export default function App() {
           )}
 
           {reportId && !report && (
-            <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em', color: 'var(--mapped-text-body)' }}>{t("loadingReport")}</div>
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em', color: 'var(--text-secondary)' }}>{t("loadingReport")}</div>
             </section>
           )}
 
           {showHistory && (
-            <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
                   <div>
-                    <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)', margin: 0 }}>{t("recentScans")}</h2>
-                    <div style={{ fontSize: '0.75em', color: 'var(--mapped-text-body)', marginTop: '0.35em' }}>{t("historyNote")}</div>
+                    <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', margin: 0 }}>{t("recentScans")}</h2>
+                    <div style={{ fontSize: '0.75em', color: 'var(--text-tertiary)', marginTop: '0.35em' }}>{t("historyNote")}</div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.5em', flexWrap: 'wrap', alignItems: 'center' }}>
                     <input value={historySearch} onChange={e => setHistorySearch(e.target.value)} placeholder={t("historySearchPlaceholder")} className="pc-input" style={{ padding: '0.55em 0.7em', fontSize: '0.8em', minWidth: '14em' }} />
-                    <button onClick={() => loadHistory()} className="pc-btn-ghost" style={{ color: 'var(--mapped-text-action)' }}>{t("refresh")}</button>
+                    <button onClick={() => loadHistory()} className="pc-btn-ghost" style={{ color: 'var(--gold-500)' }}>{t("refresh")}</button>
                   </div>
                 </div>
 
                 {history.length > 0 && (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(12em, 1fr))', gap: '0.8em', marginBottom: '1.2em' }}>
-                    <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
-                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("total")}</div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--mapped-text-headings)' }}>{historyStats.total}</div>
+                    <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
+                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("total")}</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-primary)' }}>{historyStats.total}</div>
                     </div>
-                    <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
-                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("high")}</div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--pc-risk-high)' }}>{historyStats.high}</div>
+                    <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
+                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("high")}</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--risk-danger)' }}>{historyStats.high}</div>
                     </div>
-                    <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
-                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("suspicious")}</div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--pc-risk-suspicious)' }}>{historyStats.suspicious}</div>
+                    <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
+                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("suspicious")}</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--risk-caution)' }}>{historyStats.suspicious}</div>
                     </div>
-                    <div style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1em' }}>
-                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("low")}</div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--pc-risk-low)' }}>{historyStats.low}</div>
+                    <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
+                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("low")}</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--risk-safe)' }}>{historyStats.low}</div>
                     </div>
                   </div>
                 )}
@@ -1043,16 +1043,16 @@ export default function App() {
                 {visibleHistory.length > 0 && (
                   <div style={{ display: 'grid', gap: '0.6em' }}>
                     {visibleHistory.slice(0, historyPageSize).map(h => {
-                      const badge = h.risk === 'high' ? 'pc-risk-high' : h.risk === 'suspicious' ? 'pc-risk-suspicious' : 'pc-risk-low';
+                      const badge = h.risk === 'high' ? 'pc-badge-high' : h.risk === 'suspicious' ? 'pc-badge-suspicious' : 'pc-badge-low';
                       const itemScoreColor = scoreColor(h.score);
                       return (
-                        <div key={h.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.6em', alignItems: 'center', padding: '0.9em 1em', background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)' }}>
+                        <div key={h.id} className="pc-panel" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.6em', alignItems: 'center', padding: '0.9em 1em' }}>
                           <div style={{ minWidth: 0 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5em', marginBottom: '0.3em', flexWrap: 'wrap' }}>
-                              <span style={{ fontSize: '0.8em', fontWeight: 700, color: 'var(--mapped-text-headings)', wordBreak: 'break-all' }}>{h.domain || h.url}</span>
-                              <span className={badge} style={{ fontSize: '0.65em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.25em 0.5em', borderRadius: '0.35em' }}>{h.risk}</span>
+                              <span style={{ fontSize: '0.85em', fontWeight: 700, color: 'var(--text-primary)', wordBreak: 'break-all' }}>{h.domain || h.url}</span>
+                              <span className={badge} style={{ fontSize: '0.65em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.25em 0.5em' }}>{h.risk}</span>
                             </div>
-                            <div style={{ fontSize: '0.8em', color: 'var(--mapped-text-body)', display: 'flex', gap: '0.8em', flexWrap: 'wrap' }}>
+                            <div style={{ fontSize: '0.8em', color: 'var(--text-secondary)', display: 'flex', gap: '0.8em', flexWrap: 'wrap' }}>
                               <span style={{ color: itemScoreColor, fontWeight: 600 }}>{h.score}/100</span>
                               <span>{modeLabel(h.mode)}</span>
                               <span>{h.duration_ms != null ? `${h.duration_ms} ms` : ''}</span>
@@ -1060,7 +1060,7 @@ export default function App() {
                             </div>
                           </div>
                           <div style={{ display: 'flex', gap: '0.4em', justifyContent: 'flex-end' }}>
-                            <button className="pc-btn-ghost" style={{ fontSize: '0.7em', padding: '0.45em 0.7em' }} onClick={() => { setReportId(h.id); setReport(null); window.location.hash = `#/scan/${h.id}`; }}>{t("view")}</button>
+                            <button className="pc-btn-secondary" style={{ fontSize: '0.7em', padding: '0.45em 0.7em', minHeight: '32px' }} onClick={() => { setReportId(h.id); setReport(null); window.location.hash = `#/scan/${h.id}`; }}>{t("view")}</button>
                           </div>
                         </div>
                       );
@@ -1068,7 +1068,7 @@ export default function App() {
                   </div>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.8em', fontSize: '0.8em', color: 'var(--mapped-text-body)', flexWrap: 'wrap', gap: '0.5em' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.8em', fontSize: '0.8em', color: 'var(--text-tertiary)', flexWrap: 'wrap', gap: '0.5em' }}>
                   <span>{history.length ? `Page ${historyPage}` : ''}</span>
                   <div style={{ display: 'flex', gap: '0.4em' }}>
                     <button disabled={historyPage <= 1} onClick={() => setHistoryPage(p => p - 1)} className="pc-btn-ghost">{t("prev")}</button>
@@ -1080,10 +1080,10 @@ export default function App() {
           )}
 
           {showCompare && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--mapped-text-headings)' }}>{t("comparison")}</h2>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)' }}>{t("comparison")}</h2>
                   <button onClick={() => setShowCompare(false)} className="pc-btn-ghost">{t("close")}</button>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1.2em' }}>
@@ -1092,25 +1092,25 @@ export default function App() {
                     if (!item) return null;
                     const riskColorVal = riskColor(item.risk);
                     return (
-                      <div key={id} style={{ background: 'var(--mapped-surface-default)', border: '1px solid var(--mapped-border-default)', padding: '1.2em' }}>
-                        <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.3em' }}>{t("fieldDomain")}</div>
-                        <div style={{ wordBreak: 'break-all', marginBottom: '1em' }}>{item.domain}</div>
+                      <div key={id} style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1.2em', borderRadius: 'var(--r-lg)' }}>
+                        <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("fieldDomain")}</div>
+                        <div style={{ wordBreak: 'break-all', marginBottom: '1em', color: 'var(--text-primary)', fontWeight: 500 }}>{item.domain}</div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6em', fontSize: '0.85em' }}>
                           <div>
-                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>{t("riskLevel")}</div>
+                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.2em' }}>{t("riskLevel")}</div>
                             <div style={{ color: riskColorVal, fontWeight: 600 }}>{item.risk}</div>
                           </div>
                           <div>
-                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>{t("scoreLabel")}</div>
-                            <div style={{ fontWeight: 600 }}>{item.score}/100</div>
+                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.2em' }}>{t("scoreLabel")}</div>
+                            <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.score}/100</div>
                           </div>
                           <div>
-                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>{t("fieldMode")}</div>
-                            <div style={{ textTransform: 'capitalize' }}>{modeLabel(item.mode)}</div>
+                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.2em' }}>{t("fieldMode")}</div>
+                            <div style={{ textTransform: 'capitalize', color: 'var(--text-primary)' }}>{modeLabel(item.mode)}</div>
                           </div>
                           <div>
-                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mapped-text-body)', marginBottom: '0.2em' }}>{t("fieldDuration")}</div>
-                            <div>{item.duration_ms != null ? `${item.duration_ms} ms` : '—'}</div>
+                            <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.2em' }}>{t("fieldDuration")}</div>
+                            <div style={{ color: 'var(--text-primary)' }}>{item.duration_ms != null ? `${item.duration_ms} ms` : '—'}</div>
                           </div>
                         </div>
                       </div>
@@ -1121,38 +1121,38 @@ export default function App() {
             </section>
           )}
 
-          <section style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
+          <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)', marginTop: '2em' }}>
             <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--mapped-text-headings)', marginBottom: '0.8em' }}>{t("howItWorks")}</h2>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', marginBottom: '0.8em' }}>{t("howItWorks")}</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5 }} className="pc-section pc-mobile-stack">
-                <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-action)', marginBottom: '0.4em' }}>01 — Paste</div>
-                  <p style={{ color: 'var(--mapped-text-body)' }}>{t("stepPasteBody")}</p>
+                <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--gold-500)', marginBottom: '0.4em' }}>01 — {t("stepPaste")}</div>
+                  <p style={{ color: 'var(--text-secondary)' }}>{t("stepPasteBody")}</p>
                 </div>
-                <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-action)', marginBottom: '0.4em' }}>02 — Analyze</div>
-                  <p style={{ color: 'var(--mapped-text-body)' }}>{t("stepAnalyzeBody")}</p>
+                <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--gold-500)', marginBottom: '0.4em' }}>02 — {t("stepAnalyze")}</div>
+                  <p style={{ color: 'var(--text-secondary)' }}>{t("stepAnalyzeBody")}</p>
                 </div>
-                <div style={{ padding: '1em', border: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)' }}>
-                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--mapped-text-action)', marginBottom: '0.4em' }}>03 — Decide</div>
-                  <p style={{ color: 'var(--mapped-text-body)' }}>{t("stepDecideBody")}</p>
+                <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--gold-500)', marginBottom: '0.4em' }}>03 — {t("stepDecide")}</div>
+                  <p style={{ color: 'var(--text-secondary)' }}>{t("stepDecideBody")}</p>
                 </div>
               </div>
             </div>
           </section>
         </main>
 
-        <footer style={{ borderTop: '1px solid var(--mapped-border-default)', background: 'var(--mapped-surface-default)', marginTop: '2em' }}>
-          <div style={{ maxWidth: '56em', margin: '0 auto', padding: '1.5em', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5em', fontSize: '0.75em', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mapped-text-body)' }}>
-            <span>PhishChecker</span>
+        <footer style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)', marginTop: '2em' }}>
+          <div style={{ maxWidth: '56em', margin: '0 auto', padding: '1.5em', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5em', fontSize: '0.75em', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+            <span>{t("brand")}</span>
             <span>{t("privacyBadge")}</span>
             <span>{status?.version ? `v${status.version}` : ''}</span>
           </div>
-          <div style={{ maxWidth: '56em', margin: '0 auto', padding: '0 1.5em 1.5em', display: 'flex', gap: '1em', flexWrap: 'wrap', fontSize: '0.7em', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-            <a href="/privacy" style={{ color: 'var(--gold)', textDecoration: 'none' }}>{t("privacy")}</a>
-            <a href="/terms" style={{ color: 'var(--gold)', textDecoration: 'none' }}>{t("terms")}</a>
-            <a href="/changelog" style={{ color: 'var(--gold)', textDecoration: 'none' }}>{t("changelog")}</a>
-            <span>© {new Date().getFullYear()} PhishChecker</span>
+          <div style={{ maxWidth: '56em', margin: '0 auto', padding: '0 1.5em 1.5em', display: 'flex', gap: '1em', flexWrap: 'wrap', fontSize: '0.7em', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>
+            <a href="/privacy" style={{ color: 'var(--gold-500)', textDecoration: 'none' }}>{t("privacy")}</a>
+            <a href="/terms" style={{ color: 'var(--gold-500)', textDecoration: 'none' }}>{t("terms")}</a>
+            <a href="/changelog" style={{ color: 'var(--gold-500)', textDecoration: 'none' }}>{t("changelog")}</a>
+            <span>© {new Date().getFullYear()} {t("brand")}</span>
           </div>
         </footer>
       </div>
