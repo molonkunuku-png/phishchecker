@@ -72,7 +72,10 @@ def create_app(config: dict | None = None) -> Flask:
     _validate_config(app.config)
 
     Base.metadata.bind = SessionFactory(app.config["SQLALCHEMY_DATABASE_URI"])
-    Base.metadata.create_all(get_engine())
+    try:
+        Base.metadata.create_all(get_engine())
+    except Exception as exc:
+        logger.warning("schema init failed at startup: %s", exc)
 
     CORS(app, supports_credentials=True, origins=["https://phishchecker.onrender.com", "http://localhost:5173", "http://localhost:3000"])
 
@@ -227,10 +230,14 @@ def create_app(config: dict | None = None) -> Flask:
     @require_api_key
     def api_community_flags() -> tuple[Response, int]:
         from models import CommunityFlag
-        from services.db import SessionFactory
+        from services.db import SessionFactory, init_db
+        init_db(app.config["SQLALCHEMY_DATABASE_URI"])
         session = SessionFactory(app.config["SQLALCHEMY_DATABASE_URI"])()
         try:
             rows = session.query(CommunityFlag).order_by(CommunityFlag.created_at.desc()).limit(200).all()
+        except Exception as exc:
+            logger.exception("flags list failed")
+            return jsonify({"error": "flags unavailable"}), 500
         finally:
             session.close()
         return jsonify({"flags": [{"url": r.url, "domain": r.domain, "category": r.category, "notes": r.notes, "created_at": r.created_at.isoformat() if r.created_at else None} for r in rows]}), 200
@@ -260,10 +267,14 @@ def create_app(config: dict | None = None) -> Flask:
     @require_api_key
     def api_scheduled_list() -> tuple[Response, int]:
         from models import ScheduledCheck
-        from services.db import SessionFactory
+        from services.db import SessionFactory, init_db
+        init_db(app.config["SQLALCHEMY_DATABASE_URI"])
         session = SessionFactory(app.config["SQLALCHEMY_DATABASE_URI"])()
         try:
             rows = session.query(ScheduledCheck).filter_by(active=True).limit(200).all()
+        except Exception as exc:
+            logger.exception("scheduled list failed")
+            return jsonify({"error": "scheduled unavailable"}), 500
         finally:
             session.close()
         return jsonify({"scheduled": [{"domain": r.domain, "url": r.url, "cadence_hours": r.cadence_hours, "last_score": r.last_score, "last_risk": r.last_risk, "last_checked_at": r.last_checked_at.isoformat() if r.last_checked_at else None} for r in rows]}), 200
