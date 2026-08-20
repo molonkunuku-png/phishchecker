@@ -19,7 +19,7 @@
   /* Text */
   --text-primary: #F5DEB3;
   --text-secondary: rgba(245, 222, 179, 0.72);
-  --text-tertiary: rgba(245, 222, 179, 0.52);
+  --text-tertiary: rgba(245, 222, 179, 0.68);
   --text-inverse: #1c1c1c;
 
   /* Brand gold */
@@ -668,7 +668,7 @@ a:hover {
   .pc-mobile-stack { grid-template-columns: 1fr !important; }
   .pc-history-grid { grid-template-columns: 1fr !important; }
   .pc-nav { height: auto; min-height: 4.5rem; }
-  .pc-nav-cta { width: 100%; text-align: center; margin-left: 0; }
+  .pc-nav-cta { display: none; }
   main { padding-top: 5.5rem !important; }
   #main { scroll-margin-top: 5.5rem; }
   .pc-nav-inner { flex-wrap: wrap; row-gap: 0.5rem; }

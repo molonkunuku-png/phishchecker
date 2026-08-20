@@ -368,7 +368,8 @@ export default function App() {
       <div className="min-h-screen" style={{ background: 'var(--bg-canvas)', color: 'var(--text-secondary)' }}>
         <nav className={`pc-nav ${navShadow ? 'pc-nav-scrolled' : ''}`}>
           <a href="#main" className="pc-skip-link">{t("skipToContent")}</a>
-          <a href="/" className="pc-nav-brand" aria-label={t("ariaHome")}>
+          <div className="pc-nav-inner">
+            <a href="/" className="pc-nav-brand" aria-label={t("ariaHome")}>
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path d="M32 4L8 14v14c0 16 10.4 28.8 24 34 13.6-5.2 24-18 24-34V14L32 4z" fill="url(#shieldGrad)" opacity="0.15"/>
               <path d="M32 8L12 16.5V30c0 14.3 9.2 26 20 30.5C42.8 56 52 44.3 52 30V16.5L32 8z" fill="url(#shieldGrad)" opacity="0.25"/>
@@ -397,6 +398,7 @@ export default function App() {
             </span>
           </div>
           <button onClick={() => { document.getElementById('scan')?.scrollIntoView({ behavior: 'smooth' }); }} className="pc-nav-cta" style={{ marginLeft: 'auto', flexShrink: 0 }}>{t("scanNow")}</button>
+          </div>
         </nav>
 
         <main id="main" style={{ paddingTop: '4.5em' }}>
@@ -426,7 +428,7 @@ export default function App() {
                     <option value="standard">{t("standard")}</option>
                     <option value="it">{t("itMode")}</option>
                   </select>
-                  <button type="submit" disabled={loading} className="pc-btn-primary" style={{ whiteSpace: 'nowrap', minHeight: '44px' }}>
+                  <button type="submit" disabled={loading} className="pc-btn-primary" style={{ whiteSpace: 'nowrap', minHeight: '44px', borderRadius: 'var(--r-md)' }}>
                     {loading ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}><span className="pc-spinner" style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'pc-spin 0.8s linear infinite' }} />{LANG[lang].scanning}</span>) : LANG[lang].scan}
                   </button>
                 </div>
