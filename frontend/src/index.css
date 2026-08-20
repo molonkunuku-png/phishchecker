@@ -23,6 +23,7 @@
   --text-inverse: #1c1c1c;
 
   /* Brand gold */
+  --gold: var(--gold-500);
   --gold-600: #d4a853;
   --gold-500: #F5DEB3;
   --gold-300: #f9eccb;
@@ -358,6 +359,18 @@ a:hover {
   border-radius: var(--r-lg);
   padding: var(--sp-6);
   transition: box-shadow 250ms ease, border-color 250ms ease;
+}
+
+.pc-card .pc-btn-secondary {
+  color: var(--text-primary);
+  border-color: var(--border-gold);
+  background: var(--gold-muted);
+}
+
+.pc-card .pc-btn-secondary:hover {
+  background: var(--sapphire-muted);
+  border-color: var(--gold-500);
+  color: var(--text-primary);
 }
 
 .pc-panel:hover {

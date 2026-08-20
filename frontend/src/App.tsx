@@ -500,15 +500,15 @@ export default function App() {
 
               <div style={{ marginTop: '2em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(8em, 1fr))', gap: '0.6em', fontSize: '0.8em', color: 'var(--text-tertiary)', textAlign: 'center' }} aria-label={t("serviceStats")}>
                 <div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold)', fontFamily: 'var(--font-display)' }}>100%</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold-500)', fontFamily: 'var(--font-display)' }}>100%</div>
                   <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("uptime")}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold)', fontFamily: 'var(--font-display)' }}>0</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold-500)', fontFamily: 'var(--font-display)' }}>0</div>
                   <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("scansBlocked")}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold)', fontFamily: 'var(--font-display)' }}>{t("free")}</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold-500)', fontFamily: 'var(--font-display)' }}>{t("free")}</div>
                   <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("forever")}</div>
                 </div>
               </div>
@@ -550,7 +550,7 @@ export default function App() {
                   )}
                   {batchResults && (
                     <div style={{ marginTop: '0.8em', display: 'grid', gap: '0.6em' }}>
-                      {batchResults.map(r => (
+                      {batchResults.filter((r, i, arr) => arr.findIndex(x => (x.domain || x.url) === (r.domain || r.url)) === i).map(r => (
                         <div key={r.id || r.url} style={{ border: '1px solid var(--border-hairline)', padding: '0.8em', background: 'var(--bg-surface)' }}>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5em', flexWrap: 'wrap' }}>
                             <span style={{ fontSize: '0.75em', fontWeight: 600, color: 'var(--text-primary)', wordBreak: 'break-all' }}>{r.domain || r.url}</span>
