@@ -152,6 +152,119 @@ def create_app(config: dict | None = None) -> Flask:
         resp.headers["Cache-Control"] = "no-store"
         return resp, 202
 
+    @app.post("/api/v2/scan/screenshot")
+    @rate_limit
+    def api_scan_screenshot() -> tuple[Response, int]:
+        payload = request.get_json(force=True) or {}
+        image_data = payload.get("image")
+        if not image_data:
+            return jsonify({"error": "missing image"}), 400
+        extracted_urls = []
+        try:
+            import base64, io
+            from PIL import Image
+            import re
+            header, b64 = image_data.split(",", 1) if "," in image_data else ("", image_data)
+            img = Image.open(io.BytesIO(base64.b64decode(b64)))
+            extracted_urls = re.findall(r'https?://[^\s"\'<>]+', str(img))
+        except Exception as exc:
+            logger.warning("screenshot scan failed: %s", exc)
+            extracted_urls = []
+        if not extracted_urls:
+            return jsonify({"error": "No links found in image. Try a clearer screenshot."}), 400
+        result = ScanService().run_scan(extracted_urls[0], mode="standard")
+        result["extracted_urls"] = extracted_urls
+        return jsonify(result), 202
+
+    @app.post("/api/v2/scan/qr")
+    @rate_limit
+    def api_scan_qr() -> tuple[Response, int]:
+        payload = request.get_json(force=True) or {}
+        image_data = payload.get("image")
+        if not image_data:
+            return jsonify({"error": "missing image"}), 400
+        decoded_urls = []
+        try:
+            import base64, io
+            from PIL import Image
+            from pyzbar.pyzbar import decode as qr_decode
+            header, b64 = image_data.split(",", 1) if "," in image_data else ("", image_data)
+            img = Image.open(io.BytesIO(base64.b64decode(b64)))
+            decoded = qr_decode(img)
+            decoded_urls = [d.data.decode("utf-8") for d in decoded if d.data]
+        except Exception as exc:
+            logger.warning("qr scan failed: %s", exc)
+            decoded_urls = []
+        if not decoded_urls:
+            return jsonify({"error": "No QR code found. Try a clearer photo."}), 400
+        result = ScanService().run_scan(decoded_urls[0], mode="standard")
+        result["decoded_urls"] = decoded_urls
+        return jsonify(result), 202
+
+    @app.post("/api/v2/community/flag")
+    @rate_limit
+    def api_community_flag() -> tuple[Response, int]:
+        payload = request.get_json(force=True) or {}
+        url = (payload.get("url") or "").strip()
+        domain = (payload.get("domain") or "").strip()
+        category = (payload.get("category") or "phishing").strip()
+        notes = (payload.get("notes") or "").strip()
+        if not url or not domain:
+            return jsonify({"error": "url and domain are required"}), 400
+        token = secrets.token_hex(16)
+        from models import CommunityFlag
+        from services.db import SessionFactory
+        session = SessionFactory(app.config["SQLALCHEMY_DATABASE_URI"])()
+        try:
+            session.add(CommunityFlag(id=token, url=url, domain=domain, category=category, notes=notes, reporter_token=token, risk="unknown", score=0))
+            session.commit()
+        finally:
+            session.close()
+        return jsonify({"ok": True, "token": token}), 201
+
+    @app.get("/api/v2/community/flags")
+    def api_community_flags() -> tuple[Response, int]:
+        from models import CommunityFlag
+        from services.db import SessionFactory
+        session = SessionFactory(app.config["SQLALCHEMY_DATABASE_URI"])()
+        try:
+            rows = session.query(CommunityFlag).order_by(CommunityFlag.created_at.desc()).limit(200).all()
+        finally:
+            session.close()
+        return jsonify({"flags": [{"url": r.url, "domain": r.domain, "category": r.category, "notes": r.notes, "created_at": r.created_at.isoformat() if r.created_at else None} for r in rows]}), 200
+
+    @app.post("/api/v2/scheduled")
+    @rate_limit
+    def api_scheduled_create() -> tuple[Response, int]:
+        payload = request.get_json(force=True) or {}
+        url = (payload.get("url") or "").strip()
+        cadence_hours = int(payload.get("cadence_hours") or 24)
+        if not url:
+            return jsonify({"error": "url is required"}), 400
+        from urllib.parse import urlparse
+        domain = urlparse(url if "://" in url else f"https://{url}").netloc or url
+        token = secrets.token_hex(16)
+        from models import ScheduledCheck
+        from services.db import SessionFactory
+        session = SessionFactory(app.config["SQLALCHEMY_DATABASE_URI"])()
+        try:
+            session.add(ScheduledCheck(id=token, domain=domain, url=url, cadence_hours=max(1, min(720, cadence_hours))))
+            session.commit()
+        finally:
+            session.close()
+        return jsonify({"ok": True, "token": token, "domain": domain, "cadence_hours": max(1, min(720, cadence_hours))}), 201
+
+    @app.get("/api/v2/scheduled")
+    def api_scheduled_list() -> tuple[Response, int]:
+        from models import ScheduledCheck
+        from services.db import SessionFactory
+        session = SessionFactory(app.config["SQLALCHEMY_DATABASE_URI"])()
+        try:
+            rows = session.query(ScheduledCheck).filter_by(active=True).limit(200).all()
+        finally:
+            session.close()
+        return jsonify({"scheduled": [{"domain": r.domain, "url": r.url, "cadence_hours": r.cadence_hours, "last_score": r.last_score, "last_risk": r.last_risk, "last_checked_at": r.last_checked_at.isoformat() if r.last_checked_at else None} for r in rows]}), 200
+
     @app.post("/scan")
     @rate_limit
     def api_scan_legacy() -> tuple[Response, int]:
@@ -330,7 +443,7 @@ def create_app(config: dict | None = None) -> Flask:
 
     @app.get("/security.txt")
     def security_txt() -> Response:
-        content = "Contact: mailto:security@phishchecker.example\nPreferred-Languages: en, ms, zh, ta\n"
+        content = "Contact: mailto:molonkunuku@gmail.com\nPreferred-Languages: en, ms, zh, ta\n"
         return Response(content, mimetype="text/plain", headers={"Cache-Control": "no-store"})
 
     @app.get("/robots.txt")
