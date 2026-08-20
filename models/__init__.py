@@ -34,3 +34,31 @@ class Scan(Base):
             return dict(__import__("json").loads(self.details or "{}"))
         except Exception:
             return {"raw": self.details}
+
+
+class CommunityFlag(Base):
+    __tablename__ = "community_flags"
+
+    id = Column(String(64), primary_key=True)
+    url = Column(Text, nullable=False)
+    domain = Column(String(255), nullable=False)
+    category = Column(String(64), nullable=False, default="phishing")
+    notes = Column(Text, nullable=False, default="")
+    reporter_token = Column(String(32), nullable=False)
+    risk = Column(String(32), nullable=False, default="unknown")
+    score = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+
+class ScheduledCheck(Base):
+    __tablename__ = "scheduled_checks"
+
+    id = Column(String(64), primary_key=True)
+    domain = Column(String(255), nullable=False)
+    url = Column(Text, nullable=False)
+    cadence_hours = Column(Integer, nullable=False, default=24)
+    active = Column(Boolean, nullable=False, default=True)
+    last_score = Column(Integer, nullable=True)
+    last_risk = Column(String(32), nullable=False, default="unknown")
+    last_checked_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
