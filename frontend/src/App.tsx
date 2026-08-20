@@ -179,6 +179,7 @@ export default function App() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [showCompare, setShowCompare] = useState(false);
   const [historyFilter, setHistoryFilter] = useState<string>('all');
+  const [exportOpen, setExportOpen] = useState(false);
   const [historyPage, setHistoryPage] = useState(1);
   const [historyPageSize] = useState(10);
   const [historySearch, setHistorySearch] = useState('');
@@ -798,13 +799,35 @@ export default function App() {
                   </div>
                 )}
 
-                <div style={{ display: 'flex', gap: '0.4em', flexWrap: 'wrap', marginBottom: '1.4em', justifyContent: 'center' }}>
-                  <button onClick={copyScanLink} className="pc-btn-secondary">{t("copyLink")}</button>
-                  <button onClick={copyScanJSON} className="pc-btn-secondary">{t("copyJson")}</button>
-                  <button onClick={() => downloadExport('json')} className="pc-btn-secondary">{t("exportJson")}</button>
-                  <button onClick={() => downloadExport('csv')} className="pc-btn-secondary">{t("exportCsv")}</button>
-                  <button onClick={() => window.print()} className="pc-btn-secondary">{t("print")}</button>
-                  <button onClick={() => result && downloadPDF(result)} className="pc-btn-secondary">{t("exportReport")}</button>
+                <div style={{ display: 'flex', gap: '0.6em', flexWrap: 'wrap', marginBottom: '1.4em', justifyContent: 'center', alignItems: 'center' }}>
+                  <button onClick={copyScanLink} className="pc-btn-primary" style={{ boxShadow: '0 4px 18px rgba(227,174,55,.25)' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45em' }}>
+                      <svg width="16" height="16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M48 14c6 6 10 13 10 22s-4 16-10 22c-6-6-10-13-10-22s4-16 10-22z" stroke="currentColor" strokeWidth="5" strokeLinecap="round"/><path d="M16 14c6 6 10 13 10 22s-4 16-10 22c-6-6-10-13-10-22s4-16 10-22z" stroke="currentColor" strokeWidth="5" strokeLinecap="round"/><path d="M26 26h22v22H26z" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      {t("copyLink")}
+                    </span>
+                  </button>
+
+                  <div style={{ position: 'relative', display: 'inline-flex' }}>
+                    <button onClick={() => setExportOpen(v => !v)} className="pc-btn-secondary" style={{ padding: '14px 20px', borderRadius: 'var(--r-lg)' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45em' }}>
+                        <svg width="16" height="16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 12v28" stroke="currentColor" strokeWidth="5" strokeLinecap="round"/><path d="M22 22l10 10 10-10" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 36h40v14H12z" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        {t("exportMenu")}
+                        <span style={{ fontSize: '0.7em', opacity: 0.7 }}>▾</span>
+                      </span>
+                    </button>
+                    {exportOpen && (
+                      <div style={{ position: 'absolute', top: 'calc(100% + 0.4em)', right: 0, background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--r-lg)', boxShadow: '0 8px 24px rgba(0,0,0,.35)', minWidth: '14em', zIndex: 50, overflow: 'hidden' }} className="pc-animate-in">
+                        <button onClick={() => { downloadExport('json'); setExportOpen(false); }} className="pc-btn-ghost" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.75em 1em', borderRadius: 0, borderBottom: '1px solid var(--border-hairline)' }}>{t("exportJson")}</button>
+                        <button onClick={() => { downloadExport('csv'); setExportOpen(false); }} className="pc-btn-ghost" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.75em 1em', borderRadius: 0, borderBottom: '1px solid var(--border-hairline)' }}>{t("exportCsv")}</button>
+                        <button onClick={() => { copyScanJSON(); setExportOpen(false); }} className="pc-btn-ghost" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.75em 1em', borderRadius: 0, borderBottom: '1px solid var(--border-hairline)' }}>{t("copyJson")}</button>
+                        <button onClick={() => { result && downloadPDF(result); setExportOpen(false); }} className="pc-btn-ghost" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.75em 1em', borderRadius: 0 }}>{t("exportReport")}</button>
+                      </div>
+                    )}
+                  </div>
+
+                  <button onClick={() => window.print()} className="pc-btn-secondary" style={{ padding: '14px 14px', borderRadius: 'var(--r-lg)', minWidth: '44px', minHeight: '44px' }} aria-label={t("print")}>
+                    <svg width="18" height="18" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 38v10h40v-10" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/><path d="M20 38V22h24v16" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/><rect x="12" y="26" width="40" height="18" rx="2" stroke="currentColor" strokeWidth="5"/><path d="M22 26V14h20v12" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </button>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5, marginBottom: '1.2em' }} className="pc-mobile-stack">
