@@ -917,7 +917,7 @@ export default function App() {
                     <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.6em' }}>{t("findings")}</h3>
                     <div style={{ display: 'flex', gap: '0.4em', marginBottom: '0.6em', flexWrap: 'wrap' }}>
                       {['all', 'high', 'medium', 'low'].map(f => (
-                        <button key={f} onClick={() => setFindingFilter(f)} className="pc-btn-ghost" style={{ fontSize: '0.7em', textTransform: 'capitalize', background: findingFilter === f ? 'var(--gold-500)' : undefined, color: findingFilter === f ? '#0B1220' : undefined }}>{f === 'all' ? 'All' : f}</button>
+                        <button key={f} onClick={() => setFindingFilter(f)} className="pc-btn-ghost" style={{ fontSize: '0.7em', textTransform: 'capitalize', background: findingFilter === f ? 'var(--gold-500)' : undefined, color: findingFilter === f ? 'var(--text-inverse)' : undefined }}>{f === 'all' ? 'All' : f}</button>
                       ))}
                     </div>
                     <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.45em', fontSize: '0.9em', lineHeight: 1.5 }}>
