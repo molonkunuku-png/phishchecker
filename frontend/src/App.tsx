@@ -154,9 +154,9 @@ function severityOf(reason: string): Severity {
 }
 
 function severityStyle(s: Severity): { bg: string; text: string } {
-  if (s === 'high') return { bg: 'var(--risk-danger)', text: '#0B1220' };
-  if (s === 'medium') return { bg: 'var(--risk-caution)', text: '#0B1220' };
-  return { bg: 'var(--risk-safe)', text: '#0B1220' };
+  if (s === 'high') return { bg: 'var(--risk-danger)', text: 'var(--text-inverse)' };
+  if (s === 'medium') return { bg: 'var(--risk-caution)', text: 'var(--text-inverse)' };
+  return { bg: 'var(--risk-safe)', text: 'var(--text-inverse)' };
 }
 
 export default function App() {
@@ -437,9 +437,8 @@ export default function App() {
                 )}
               </form>
               <div style={{ marginTop: '0.8em', display: 'flex', alignItems: 'center', gap: '0.6em', flexWrap: 'wrap' }}>
-                <button type="button" onClick={() => setFamilyMode(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.85em', color: familyMode ? '#0B1220' : 'var(--gold-500)', background: familyMode ? 'var(--gold-500)' : 'transparent', border: '1px solid', borderColor: familyMode ? 'var(--gold-500)' : 'var(--border-hairline)' }}>
-                  {familyMode ? LANG[lang].familyMode.on : LANG[lang].familyMode.off}
-                </button>
+                <button type="button" onClick={() => setFamilyMode(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.85em', color: familyMode ? 'var(--text-inverse)' : 'var(--gold-500)', background: familyMode ? 'var(--gold-500)' : 'transparent', border: '1px solid', borderColor: familyMode ? 'var(--gold-500)' : 'var(--border-hairline)' }}>{t("familyMode")}</button>
+                {familyMode ? LANG[lang].familyMode.on : LANG[lang].familyMode.off}
                 {familyMode && (
                   <span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>{LANG[lang].familyMode.helper}</span>
                 )}
@@ -516,7 +515,7 @@ export default function App() {
                 <span>{t("noPersonalData")}</span>
               </div>
               {error && (
-                <div role="alert" aria-live="assertive" style={{ position: 'fixed', top: '1em', left: '50%', transform: 'translateX(-50%)', zIndex: 200, background: 'var(--risk-danger)', color: '#0B1220', padding: '0.8em 1.2em', borderRadius: '0.4em', fontSize: '0.85em', boxShadow: '0 6px 20px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', gap: '0.6em', maxWidth: '92vw' }}>
+                <div role="alert" aria-live="assertive" style={{ position: 'fixed', top: '1em', left: '50%', transform: 'translateX(-50%)', zIndex: 200, background: 'var(--risk-danger)', color: 'var(--text-inverse)', padding: '0.8em 1.2em', borderRadius: '0.4em', fontSize: '0.85em', boxShadow: '0 6px 20px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', gap: '0.6em', maxWidth: '92vw' }}>
                   <span style={{ fontWeight: 600 }}>{t("errorTitle")}</span>
                   <span>{error}</span>
                   <button type="button" onClick={doScan} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderColor: 'rgba(255,255,255,0.35)', color: 'inherit' }}>{t("retry")}</button>
@@ -592,8 +591,8 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.8em', flexWrap: 'wrap' }}>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', margin: 0 }}>{t("awarenessTitle")}</h2>
                   <div style={{ display: 'inline-flex', gap: '0.4em', background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '0.3em', borderRadius: 'var(--r-pill)' }}>
-                    <button type="button" onClick={() => setAwarenessMode('simple')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: 'var(--r-pill)', background: awarenessMode === 'simple' ? 'var(--gold-500)' : 'transparent', color: awarenessMode === 'simple' ? '#0B1220' : 'var(--text-secondary)' }}>{t("simpleMode")}</button>
-                    <button type="button" onClick={() => setAwarenessMode('detailed')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: 'var(--r-pill)', background: awarenessMode === 'detailed' ? 'var(--gold-500)' : 'transparent', color: awarenessMode === 'detailed' ? '#0B1220' : 'var(--text-secondary)' }}>{t("detailedMode")}</button>
+                    <button type="button" onClick={() => setAwarenessMode('simple')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: 'var(--r-pill)', background: awarenessMode === 'simple' ? 'var(--gold-500)' : 'transparent', color: awarenessMode === 'simple' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{t("simpleMode")}</button>
+                    <button type="button" onClick={() => setAwarenessMode('detailed')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: 'var(--r-pill)', background: awarenessMode === 'detailed' ? 'var(--gold-500)' : 'transparent', color: awarenessMode === 'detailed' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{t("detailedMode")}</button>
                   </div>
                 </div>
 
@@ -792,7 +791,7 @@ export default function App() {
                 {familyMode && result && (
                   <div style={{ marginBottom: '1.4em', padding: '1.2em', border: '1px solid var(--border-gold)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(227,174,55,0.04) 100%)', borderRadius: 'var(--r-lg)', fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--gold-500)', marginBottom: '0.4em' }}>
-                      <svg width="16" height="16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 12L16 19v11c0 12.5 8 22.8 16 26.5 8-3.7 16-14 16-26.5V19L32 12z" fill="currentColor"/><path d="M24 34l6 6 10-12" stroke="#0F1B2E" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
+                      <svg width="16" height="16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 12L16 19v11c0 12.5 8 22.8 16 26.5 8-3.7 16-14 16-26.5V19L32 12z" fill="currentColor"/><path d="M24 34l6 6 10-12" stroke="var(--text-inverse)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
                       Family Mode
                     </div>
                     {familySummary(result)}
