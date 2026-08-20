@@ -763,7 +763,7 @@ export default function App() {
                 <div style={{ marginTop: '1.2em', padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', fontSize: '0.85em', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                   Scanner availability: use the form above for direct scans. This panel shows service health and access mode only.
                   <div style={{ marginTop: '0.6em' }}>
-                    <strong>{t("supportText")}</strong> use the in-app contact or <a href="/security.txt" style={{ color: 'var(--gold-500)', textDecoration: 'underline' }}>{t("securityContact")}</a>.
+                    <strong>{t("supportText")}</strong> use the in-app contact or <a href="mailto:molonkunuku@gmail.com" style={{ color: 'var(--gold-500)', textDecoration: 'underline' }}>molonkunuku@gmail.com</a>.
                   </div>
                 </div>
               </div>
