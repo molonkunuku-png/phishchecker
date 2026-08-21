@@ -172,6 +172,9 @@ export default function App() {
   const [showAwareness, setShowAwareness] = useState(false);
   const [awarenessMode, setAwarenessMode] = useState<'simple' | 'detailed'>('simple');
   const [showApi, setShowApi] = useState(false);
+  const [showFeatures, setShowFeatures] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
+  const [showBlog, setShowBlog] = useState(false);
   const [reportId, setReportId] = useState<string | null>(null);
   const [report, setReport] = useState<ScanResult | null>(null);
   const [status, setStatus] = useState<StatusResponse | null>(null);
@@ -387,8 +390,10 @@ export default function App() {
           <button onClick={() => { const items = document.getElementById('pc-nav-items'); if (items) items.classList.toggle('pc-nav-open'); }} className="pc-nav-hamburger" aria-label={t("toggleNav")} style={{ display: 'none', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 1em', fontSize: '1.2em', lineHeight: 1 }}>☰</button>
           <div id="pc-nav-items" className="pc-nav-links">
             <button onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }} className={`pc-nav-link ${showHistory ? 'pc-nav-item-active' : ''}`}>{LANG[lang].nav.history}</button>
+            <button onClick={() => { setShowFeatures(v => !v); }} className={`pc-nav-link ${showFeatures ? 'pc-nav-item-active' : ''}`}>{showFeatures ? LANG[lang].scan : 'Features'}</button>
             <button onClick={() => { setShowAwareness(v => !v); }} className={`pc-nav-link ${showAwareness ? 'pc-nav-item-active' : ''}`}>{showAwareness ? LANG[lang].scan : LANG[lang].nav.awareness}</button>
-            <button onClick={() => { setShowApi(v => !v); }} className={`pc-nav-link ${showApi ? 'pc-nav-item-active' : ''}`}>{showApi ? LANG[lang].scan : LANG[lang].nav.api}</button>
+            <button onClick={() => { setShowApi(v => !v); }} className={`pc-nav-link ${showApi ? 'pc-nav-item-active' : ''}`}>{showApi ? LANG[lang].scan : 'API'}</button>
+            <button onClick={() => { setShowAbout(v => !v); }} className={`pc-nav-link ${showAbout ? 'pc-nav-item-active' : ''}`}>{showAbout ? LANG[lang].scan : 'About'}</button>
             <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className={`pc-nav-link ${showStatus ? 'pc-nav-item-active' : ''}`}>{showStatus ? LANG[lang].scan : LANG[lang].nav.status}</button>
             <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className={`pc-nav-link ${theme === 'dark' ? 'pc-nav-item-active' : ''}`} aria-label={t("toggleTheme")}>{theme === 'dark' ? '☀ Light' : '☾ Dark'}</button>
             <span style={{ display: 'inline-flex', gap: '0.3em', alignItems: 'center', marginLeft: '0.4em' }}>
@@ -499,18 +504,37 @@ export default function App() {
               )}
 
               <div style={{ marginTop: '2em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(8em, 1fr))', gap: '0.6em', fontSize: '0.8em', color: 'var(--text-tertiary)', textAlign: 'center' }} aria-label={t("serviceStats")}>
-                <div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold-500)', fontFamily: 'var(--font-display)' }}>100%</div>
-                  <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("uptime")}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold-500)', fontFamily: 'var(--font-display)' }}>0</div>
-                  <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("scansBlocked")}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold-500)', fontFamily: 'var(--font-display)' }}>{t("free")}</div>
-                  <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("forever")}</div>
-                </div>
+                {(showHistory && historyStats.total != null) ? (
+                  <>
+                    <div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold-500)', fontFamily: 'var(--font-display)' }}>{historyStats.total}</div>
+                      <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("total")}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--risk-danger)', fontFamily: 'var(--font-display)' }}>{historyStats.high}</div>
+                      <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("high")}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--risk-safe)', fontFamily: 'var(--font-display)' }}>{historyStats.low}</div>
+                      <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("low")}</div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold-500)', fontFamily: 'var(--font-display)' }}>Free</div>
+                      <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Now</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold-500)', fontFamily: 'var(--font-display)' }}>No account</div>
+                      <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Required</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold-500)', fontFamily: 'var(--font-display)' }}>No tracking</div>
+                      <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>By design</div>
+                    </div>
+                  </>
+                )}
               </div>
               <div style={{ marginTop: '0.8em', display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -1140,6 +1164,100 @@ export default function App() {
                       </div>
                     );
                   })}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {showAbout && (
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', marginBottom: '0.8em' }}>About</h2>
+                <div style={{ display: 'grid', gap: '1em', fontSize: '0.95em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
+                  <p>PhishChecker is a free, privacy-first URL risk checker built to help everyday users — especially elderly or less tech-literate people — spot suspicious links before they tap or click.</p>
+                  <p>It does not require accounts, does not track users, and does not store scanned URLs longer than necessary. The goal is simple: make phishing detection understandable, fast, and available to everyone.</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', marginTop: '0.6em' }}>
+                    <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                      <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.3em' }}>Mission</div>
+                      <p style={{ margin: 0 }}>Reduce phishing harm through plain-language results, not jargon.</p>
+                    </div>
+                    <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                      <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.3em' }}>Privacy</div>
+                      <p style={{ margin: 0 }}>No accounts, no ad tracking, no unnecessary data retention.</p>
+                    </div>
+                    <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                      <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.3em' }}>Accessibility</div>
+                      <p style={{ margin: 0 }}>High-contrast UI, multilingual support, and simple-mode guidance.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {showBlog && (
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', marginBottom: '0.8em' }}>Blog</h2>
+                <div style={{ display: 'grid', gap: '1em' }}>
+                  <article style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                    <div style={{ fontSize: '0.75em', color: 'var(--text-tertiary)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.4em' }}>Guide</div>
+                    <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.4em' }}>How to spot a fake bank link in 30 seconds</h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95em' }}>Look for mismatched domains, urgency tactics, and login forms on unfamiliar sites. When unsure, open the official app instead of tapping the link.</p>
+                  </article>
+                  <article style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                    <div style={{ fontSize: '0.75em', color: 'var(--text-tertiary)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.4em' }}>Education</div>
+                    <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.4em' }}>Why QR code phishing is rising</h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95em' }}>QR codes hide the destination URL until after you scan. Treat unexpected QR stickers or messages with the same caution as any unknown link.</p>
+                  </article>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {showFeatures && (
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+              <div style={{ maxWidth: '72em', margin: '0 auto', padding: '2em 1.5em' }}>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', marginBottom: '0.8em' }}>Features</h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1em', fontSize: '0.95em', lineHeight: 1.6 }} className="pc-mobile-stack">
+                  <div style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>🔎 Real-Time URL Scanner</div>
+                    <p style={{ color: 'var(--text-secondary)' }}>Checks URLs quickly and returns a plain-language risk result you can act on.</p>
+                  </div>
+                  <div style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>🧭 Preview & Analysis</div>
+                    <p style={{ color: 'var(--text-secondary)' }}>Domain age, SSL status, reputation, and one-line explanations for non-technical users.</p>
+                  </div>
+                  <div style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>🎓 Phishing Education</div>
+                    <p style={{ color: 'var(--text-secondary)' }}>Simple and detailed awareness content, with multilingual support.</p>
+                  </div>
+                  <div style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>📋 Scan History</div>
+                    <p style={{ color: 'var(--text-secondary)' }}>Review recent scans locally with clear risk labels, scores, and timestamps.</p>
+                  </div>
+                  <div style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>🖼️ Screenscan & QR</div>
+                    <p style={{ color: 'var(--text-secondary)' }}>Upload a screenshot or QR image to extract and check links automatically.</p>
+                  </div>
+                  <div style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>🔒 Privacy First</div>
+                    <p style={{ color: 'var(--text-secondary)' }}>No accounts, no tracking, and no personal data collection by design.</p>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1em', marginTop: '1em', fontSize: '0.95em', lineHeight: 1.6 }} className="pc-mobile-stack">
+                  <div style={{ padding: '1.1em', border: '1px dashed var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>🧩 Browser Extension</div>
+                    <p style={{ color: 'var(--text-tertiary)' }}>Coming soon. In-browser checks without leaving the page.</p>
+                  </div>
+                  <div style={{ padding: '1.1em', border: '1px dashed var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>⚡ API Access</div>
+                    <p style={{ color: 'var(--text-tertiary)' }}>Coming soon. Programmatic scanning for teams and integrations.</p>
+                  </div>
+                  <div style={{ padding: '1.1em', border: '1px dashed var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>🌍 Community Reports</div>
+                    <p style={{ color: 'var(--text-tertiary)' }}>Coming soon. Community signals with moderation and transparency.</p>
+                  </div>
                 </div>
               </div>
             </section>
