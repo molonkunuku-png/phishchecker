@@ -164,6 +164,9 @@ export default function App() {
   const [url, setUrl] = useState('');
   const [mode, setMode] = useState<'quick' | 'standard' | 'it'>('standard');
   const [familyMode, setFamilyMode] = useState(false);
+  const [simpleMode, setSimpleMode] = useState<boolean>(() => {
+    try { const v = localStorage.getItem('phishchecker-simple'); return v === '1'; } catch { return false; }
+  });
   const [result, setResult] = useState<ScanResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -222,6 +225,10 @@ export default function App() {
   useEffect(() => {
     try { localStorage.setItem('phishchecker-lang', lang); } catch { }
   }, [lang]);
+
+  useEffect(() => {
+    try { localStorage.setItem('phishchecker-simple', simpleMode ? '1' : '0'); } catch { }
+  }, [simpleMode]);
 
   useEffect(() => {
     const onScroll = () => setNavShadow(window.scrollY > 10);
@@ -396,6 +403,7 @@ export default function App() {
             <button onClick={() => { setShowAbout(v => !v); }} className={`pc-nav-link ${showAbout ? 'pc-nav-item-active' : ''}`}>{showAbout ? LANG[lang].scan : 'About'}</button>
             <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className={`pc-nav-link ${showStatus ? 'pc-nav-item-active' : ''}`}>{showStatus ? LANG[lang].scan : LANG[lang].nav.status}</button>
             <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className={`pc-nav-link ${theme === 'dark' ? 'pc-nav-item-active' : ''}`} aria-label={t("toggleTheme")}>{theme === 'dark' ? '☀ Light' : '☾ Dark'}</button>
+            <button onClick={() => setSimpleMode(v => !v)} className={`pc-nav-link ${simpleMode ? 'pc-nav-item-active' : ''}`} aria-label="Simple mode">{simpleMode ? 'Simple: ON' : 'Simple: OFF'}</button>
             <span style={{ display: 'inline-flex', gap: '0.3em', alignItems: 'center', marginLeft: '0.4em' }}>
               {(Object.keys(LANG) as Lang[]).map(k => (
                 <button key={k} onClick={changeLang(k)} aria-label={k} className={`pc-nav-link ${lang === k ? 'pc-nav-item-active' : ''}`} style={{ padding: '0.3em 0.5em', fontSize: '0.75em', borderRadius: '999px' }}>{k.toUpperCase()}</button>
@@ -821,6 +829,19 @@ export default function App() {
                       Family Mode
                     </div>
                     {familySummary(result)}
+                  </div>
+                )}
+
+                {simpleMode && result && (
+                  <div style={{ marginBottom: '1.4em', padding: '1.2em', border: '1px solid var(--border-gold)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(227,174,55,0.04) 100%)', borderRadius: 'var(--r-lg)', fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--gold-500)', marginBottom: '0.4em' }}>
+                      <svg width="16" height="16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 12L16 19v11c0 12.5 8 22.8 16 26.5 8-3.7 16-14 16-26.5V19L32 12z" fill="currentColor"/><path d="M24 34l6 6 10-12" stroke="var(--text-inverse)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
+                      Simple Mode
+                    </div>
+                    {familySummary(result)}
+                    <div style={{ marginTop: '0.6em', fontSize: '0.95em', color: 'var(--text-secondary)' }}>
+                      {currentRisk === 'high' ? 'Avoid this site. Do not enter passwords, OTPs, or card details.' : currentRisk === 'suspicious' ? 'Be careful here. If something feels off, close the page and open the official app or website instead.' : 'No strong danger signs were found, but always double-check before trusting any site.'}
+                    </div>
                   </div>
                 )}
 
