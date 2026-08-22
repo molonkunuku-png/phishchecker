@@ -14,7 +14,7 @@
   --navy-muted: #111827;
   --electric: #3B62F6;
   --purple: #6B5CF6;
-  --teal: #10B981;
+  --teal: #0B8560;
   --soft-gray: #E2E8F0;
   --white: #FFFFFF;
   --danger: #EF4444;
@@ -42,9 +42,9 @@
   --border-gold: rgba(59, 98, 246, 0.35);
 
   /* Risk semantic */
-  --risk-safe: #10B981;
-  --risk-caution: #F59E0B;
-  --risk-danger: #EF4444;
+  --risk-safe: #0B8560;
+  --risk-caution: #D97706;
+  --risk-danger: #DC2626;
 
   /* Legacy aliases */
   --bg-midnight: var(--bg-canvas);
