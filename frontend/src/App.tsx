@@ -197,6 +197,7 @@ export default function App() {
   const [batchResults, setBatchResults] = useState<ScanResult[] | null>(null);
   const [batchRunning, setBatchRunning] = useState(false);
   const [batchError, setBatchError] = useState<string | null>(null);
+  const [showDashboard, setShowDashboard] = useState(false);
   const [lang, setLang] = useState<Lang>(() => {
     try {
       const stored = localStorage.getItem('phishchecker-lang');
@@ -397,6 +398,7 @@ export default function App() {
           <button onClick={() => { const items = document.getElementById('pc-nav-items'); if (items) items.classList.toggle('pc-nav-open'); }} className="pc-nav-hamburger" aria-label={t("toggleNav")} style={{ display: 'none', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 1em', fontSize: '1.2em', lineHeight: 1 }}>☰</button>
           <div id="pc-nav-items" className="pc-nav-links">
             <button onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }} className={`pc-nav-link ${showHistory ? 'pc-nav-item-active' : ''}`}>{LANG[lang].nav.history}</button>
+            <button onClick={() => { setShowDashboard(v => !v); }} className={`pc-nav-link ${showDashboard ? 'pc-nav-item-active' : ''}`}>{showDashboard ? LANG[lang].scan : 'Dashboard'}</button>
             <button onClick={() => { setShowFeatures(v => !v); }} className={`pc-nav-link ${showFeatures ? 'pc-nav-item-active' : ''}`}>{showFeatures ? LANG[lang].scan : 'Features'}</button>
             <button onClick={() => { setShowAwareness(v => !v); }} className={`pc-nav-link ${showAwareness ? 'pc-nav-item-active' : ''}`}>{showAwareness ? LANG[lang].scan : LANG[lang].nav.awareness}</button>
             <button onClick={() => { setShowApi(v => !v); }} className={`pc-nav-link ${showApi ? 'pc-nav-item-active' : ''}`}>{showApi ? LANG[lang].scan : 'API'}</button>
@@ -799,6 +801,38 @@ export default function App() {
                   <div style={{ marginTop: '0.6em' }}>
                     <strong>{t("supportText")}</strong> use the in-app contact or <a href="mailto:molonkunuku@gmail.com" style={{ color: 'var(--gold-500)', textDecoration: 'underline' }}>molonkunuku@gmail.com</a>.
                   </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {showDashboard && (
+            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)' }}>Dashboard</h2>
+                  <span className="pc-badge pc-badge-low">Local only</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5, marginBottom: '1.2em' }}>
+                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("total")}</div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-primary)' }}>{historyStats.total}</div>
+                  </div>
+                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("high")}</div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--risk-danger)' }}>{historyStats.high}</div>
+                  </div>
+                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("suspicious")}</div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--risk-caution)' }}>{historyStats.suspicious}</div>
+                  </div>
+                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("low")}</div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--risk-safe)' }}>{historyStats.low}</div>
+                  </div>
+                </div>
+                <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em', borderRadius: 'var(--r-lg)', fontSize: '0.85em', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                  This dashboard reflects your current local scan history for this browser. It is not an account and is not synced remotely.
                 </div>
               </div>
             </section>
