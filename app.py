@@ -231,15 +231,17 @@ def create_app(config: dict | None = None) -> Flask:
     def api_community_flags() -> tuple[Response, int]:
         from models import CommunityFlag
         from services.db import SessionFactory, init_db
-        init_db(app.config["SQLALCHEMY_DATABASE_URI"])
-        session = SessionFactory(app.config["SQLALCHEMY_DATABASE_URI"])()
+        session = None
         try:
+            init_db(app.config["SQLALCHEMY_DATABASE_URI"])
+            session = SessionFactory(app.config["SQLALCHEMY_DATABASE_URI"])()
             rows = session.query(CommunityFlag).order_by(CommunityFlag.created_at.desc()).limit(200).all()
         except Exception as exc:
             logger.exception("flags list failed")
             return jsonify({"error": "flags unavailable"}), 500
         finally:
-            session.close()
+            if session is not None:
+                session.close()
         return jsonify({"flags": [{"url": r.url, "domain": r.domain, "category": r.category, "notes": r.notes, "created_at": r.created_at.isoformat() if r.created_at else None} for r in rows]}), 200
 
     @app.post("/api/v2/scheduled")
@@ -268,15 +270,17 @@ def create_app(config: dict | None = None) -> Flask:
     def api_scheduled_list() -> tuple[Response, int]:
         from models import ScheduledCheck
         from services.db import SessionFactory, init_db
-        init_db(app.config["SQLALCHEMY_DATABASE_URI"])
-        session = SessionFactory(app.config["SQLALCHEMY_DATABASE_URI"])()
+        session = None
         try:
+            init_db(app.config["SQLALCHEMY_DATABASE_URI"])
+            session = SessionFactory(app.config["SQLALCHEMY_DATABASE_URI"])()
             rows = session.query(ScheduledCheck).filter_by(active=True).limit(200).all()
         except Exception as exc:
             logger.exception("scheduled list failed")
             return jsonify({"error": "scheduled unavailable"}), 500
         finally:
-            session.close()
+            if session is not None:
+                session.close()
         return jsonify({"scheduled": [{"domain": r.domain, "url": r.url, "cadence_hours": r.cadence_hours, "last_score": r.last_score, "last_risk": r.last_risk, "last_checked_at": r.last_checked_at.isoformat() if r.last_checked_at else None} for r in rows]}), 200
 
     @app.post("/scan")
