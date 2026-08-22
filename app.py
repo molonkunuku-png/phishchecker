@@ -96,7 +96,7 @@ def create_app(config: dict | None = None) -> Flask:
 
     @app.get("/health")
     def health() -> Response:
-        return jsonify({"ok": True, "service": "phishchecker", "version": "1.0.0"}), 200
+        return jsonify({"ok": True, "service": "phishchecker", "version": "1.1.0"}), 200
 
     @app.get("/health/deep")
     def health_deep() -> tuple[Response, int]:
@@ -423,7 +423,7 @@ def create_app(config: dict | None = None) -> Flask:
     def api_status() -> tuple[Response, int]:
         return jsonify({
             "service": "phishchecker",
-            "version": "1.0.0",
+            "version": "1.1.0",
             "features": {
                 "public_scanning": True,
                 "api_access": True,
