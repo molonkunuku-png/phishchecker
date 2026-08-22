@@ -367,6 +367,7 @@ export default function App() {
     high: visibleHistory.filter(h => h.risk === 'high').length,
     suspicious: visibleHistory.filter(h => h.risk === 'suspicious').length,
     low: visibleHistory.filter(h => h.risk === 'low').length,
+    clean: visibleHistory.filter(h => h.risk === 'clean').length,
   };
 
   const currentScore = result?.score ?? report?.score ?? null;
@@ -525,8 +526,16 @@ export default function App() {
                       <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("high")}</div>
                     </div>
                     <div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--risk-caution)', fontFamily: 'var(--font-display)' }}>{historyStats.suspicious}</div>
+                      <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("suspicious")}</div>
+                    </div>
+                    <div>
                       <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--risk-safe)', fontFamily: 'var(--font-display)' }}>{historyStats.low}</div>
                       <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("low")}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>{historyStats.clean}</div>
+                      <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Clean</div>
                     </div>
                   </>
                 ) : (
@@ -829,6 +838,10 @@ export default function App() {
                   <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
                     <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("low")}</div>
                     <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--risk-safe)' }}>{historyStats.low}</div>
+                  </div>
+                  <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>Clean</div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-primary)' }}>{historyStats.clean}</div>
                   </div>
                 </div>
                 <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em', borderRadius: 'var(--r-lg)', fontSize: '0.85em', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
@@ -1136,6 +1149,10 @@ export default function App() {
                     <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
                       <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("low")}</div>
                       <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--risk-safe)' }}>{historyStats.low}</div>
+                    </div>
+                    <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
+                      <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>Clean</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-primary)' }}>{historyStats.clean}</div>
                     </div>
                   </div>
                 )}
