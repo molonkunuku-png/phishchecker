@@ -18,6 +18,13 @@ import requests
 
 _THREAT_INTEL_CACHE: dict[str, tuple[float, dict[str, Any]]] = {}
 
+_SCAM_TLDS = {
+    'sbs', 'top', 'xyz', 'cfd', 'icu', 'shop', 'work', 'click',
+    'buzz', 'cam', 'quest', 'dfr.sbs', 'monster', 'boutique',
+    'biz', 'info', 'pro', 'site', 'online', 'club', 'store',
+    'cyou', 'vip', 'fun', 'icu', 'top', 'buzz', 'cfd',
+}
+
 _LOCAL_BRAND_PATTERNS = [
     ('maybank', 'Maybank'),
     ('cimb', 'CIMB'),
@@ -42,6 +49,27 @@ _LOCAL_BRAND_PATTERNS = [
     ('mof', 'MOF'),
     ('eservices', 'MyGov'),
     ('mygov', 'MyGov'),
+    ('allegro', 'Allegro'),
+    ('lazada', 'Lazada'),
+    ('shopee', 'Shopee'),
+    ('tokopedia', 'Tokopedia'),
+    ('ebay', 'eBay'),
+    ('amazon', 'Amazon'),
+    ('google', 'Google'),
+    ('microsoft', 'Microsoft'),
+    ('apple', 'Apple'),
+    ('facebook', 'Facebook'),
+    ('instagram', 'Instagram'),
+    ('whatsapp', 'WhatsApp'),
+    ('telegram', 'Telegram'),
+    ('twitch', 'Twitch'),
+    ('youtube', 'YouTube'),
+    ('netflix', 'Netflix'),
+    ('spotify', 'Spotify'),
+    ('paypal', 'PayPal'),
+    ('stripe', 'Stripe'),
+    ('wise', 'Wise'),
+    ('revolut', 'Revolut'),
 ]
 
 
@@ -119,15 +147,17 @@ def _check_headers(url: str, mode: str = "standard") -> tuple[list[str], int, li
         resp = requests.get(url, timeout=timeout, allow_redirects=True, headers={"User-Agent": "PhishChecker/1.0"})
         headers = {k.lower(): v for k, v in resp.headers.items()}
         required = ["strict-transport-security", "content-security-policy", "x-frame-options", "x-content-type-options", "referrer-policy", "permissions-policy"]
-        weights = {"strict-transport-security": 20, "content-security-policy": 15, "x-frame-options": 10, "x-content-type-options": 10, "referrer-policy": 5, "permissions-policy": 5}
+        weights = {"strict-transport-security": 5, "content-security-policy": 4, "x-frame-options": 2, "x-content-type-options": 2, "referrer-policy": 1, "permissions-policy": 1}
         if mode == "quick":
             required = ["strict-transport-security", "content-security-policy", "x-frame-options"]
-            weights = {"strict-transport-security": 20, "content-security-policy": 15, "x-frame-options": 10}
+            weights = {"strict-transport-security": 10, "content-security-policy": 8, "x-frame-options": 5}
         elif mode == "it":
             weights = {k: v * 2 for k, v in weights.items()}
+        entry_response = resp.history[0] if resp.history else resp
+        entry_headers = {k.lower(): v for k, v in entry_response.headers.items()}
         for h in required:
             label = h.replace("-", " ").title().replace(" ", "-")
-            if headers.get(h):
+            if entry_headers.get(h):
                 continue
             reasons.append(f"Missing {label}")
             penalty += weights.get(h, 5)
@@ -138,12 +168,10 @@ def _check_headers(url: str, mode: str = "standard") -> tuple[list[str], int, li
         return reasons, 15 if mode != "it" else 20, []
 
 
-def _check_ssl(url: str) -> tuple[dict[str, Any], int]:
+def _check_ssl(host: str) -> tuple[dict[str, Any], int]:
     info: dict[str, Any] = {"valid": False}
     penalty = 0
     try:
-        parsed = urlparse(url)
-        host = parsed.netloc or parsed.path
         ctx = ssl.create_default_context()
         with socket.create_connection((host, 443), timeout=5) as sock:
             with ctx.wrap_socket(sock, server_hostname=host) as ssock:
@@ -278,6 +306,39 @@ def _check_local_brand_patterns(domain: str) -> dict[str, Any]:
     }
 
 
+def _check_entry_domain_signals(domain: str, redirect_chain: list[str] | None = None) -> dict[str, Any]:
+    low = domain.lower()
+    host_parts = low.split(".")
+    tld = host_parts[-1] if host_parts else ""
+    brand = _check_local_brand_patterns(low)
+    scam_tld = tld in _SCAM_TLDS
+
+    entry_apex = ".".join(host_parts[-2:]) if len(host_parts) >= 2 else low
+    final_apex = ""
+    if redirect_chain:
+        final_url = redirect_chain[-1]
+        final_host = (urlparse(final_url).netloc or urlparse("https://" + final_url).netloc or "").lower()
+        final_parts = final_host.split(".")
+        final_apex = ".".join(final_parts[-2:]) if len(final_parts) >= 2 else final_host
+
+    brand_mimicry = False
+    if brand.get("hit") and brand.get("matched"):
+        if entry_apex != final_apex:
+            brand_mimicry = True
+        elif final_apex and brand.get("matched", "").lower() not in final_apex:
+            brand_mimicry = True
+
+    return {
+        "enabled": True,
+        "tld": tld,
+        "scam_tld": scam_tld,
+        "brand_mimicry": brand,
+        "brand_mimicry_flagged": brand_mimicry,
+        "entry_apex": entry_apex,
+        "final_apex": final_apex or None,
+    }
+
+
 def _domain_age_days(domain: str) -> dict[str, Any]:
     created_at = None
     age_days = None
@@ -320,6 +381,16 @@ def _score(result: ScanResult, penalty: int = 0) -> None:
     ti = result.threat_intel
     penalty += int(ti.get("penalty", 0))
     domain = result.domain
+
+    entry = result.details.get("entry_domain_signals") or {}
+    if entry.get("scam_tld"):
+        penalty += 20
+        reasons.append(f"Scam-prone TLD: .{entry.get('tld')}")
+    if entry.get("brand_mimicry_flagged"):
+        matched = (entry.get("brand_mimicry") or {}).get("matched")
+        penalty += 25
+        reasons.append(f"Possible brand mimicry: {matched}")
+
     if len(domain.split(".")) <= 2 and len(domain) < 25:
         penalty += 5
         reasons.append("Short or unusual domain shape")
@@ -382,7 +453,7 @@ def run_scan(url: str | None, mode: str = "standard", family_mode: bool = False)
     details["redirect_chain"] = chain
     details["headers"] = {r.split("Missing ")[-1]: False for r in hdr_reasons if r.startswith("Missing ")}
 
-    ssl_info, ssl_penalty = _check_ssl(url)
+    ssl_info, ssl_penalty = _check_ssl(domain)
     details["ssl"] = ssl_info
     if not ssl_info.get("valid"):
         reasons.append("SSL validation issue")
@@ -402,6 +473,7 @@ def run_scan(url: str | None, mode: str = "standard", family_mode: bool = False)
         duration_ms=int((datetime.now(timezone.utc) - started).total_seconds() * 1000),
         threat_intel=ti,
     )
+    result.details["entry_domain_signals"] = _check_entry_domain_signals(domain, chain)
     if mode == 'it':
         result.details.setdefault('headers', {})['IT review'] = False
         result.reasons.append('IT review not available')
