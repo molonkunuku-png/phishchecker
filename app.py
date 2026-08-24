@@ -1,4 +1,5 @@
-"""PhishChecker - privacy-first URL phishing risk scanner."""
+"""PhishChecker - privacy-first URL phishing risk scanner."""from api.controllers.team_controller import team_api
+
 
 from __future__ import annotations
 

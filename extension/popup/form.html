@@ -1,0 +1,83 @@
+background/
+icons/
+popup/
+src/
+
+popup/form.html:
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.5.7/classless.css">
+    <title>PhishChecker</title>
+    <style>
+        :root {
+            --pc-accent: #7460ee;
+            --pc-surface: #f8fafd;
+            --pc-border: #e0e0e0;
+        }
+        body { font-family: '-apple-system', sans-serif; }
+        .pc-btn { background: var(--pc-accent); color: white; padding: 0.5rem 1rem; border-radius: 0.4rem; border: 0; cursor: pointer; }
+        .pc-btn:hover { opacity: 0.9; }
+        .pc-btn-secondary { background: #f0f0f0; color: #333; border: 1px solid var(--pc-border); }
+        .pc-form { max-width: 500px; margin: 0 auto; padding: 1rem; }
+        .pc-input { width: 100%%; padding: 0.8rem; border: 1px solid var(--pc-border); border-radius: 0.4rem; font-size: 1rem; margin-bottom: 1rem; }
+        .pc-result { margin: 1rem 0; padding: 1rem; border-radius: 0.4rem; border: 1px solid var(--pc-border); word-break: break-word; }
+        .pc-risk-high { border: 2px solid #e74c3c; background: #ffeef0; }
+        .pc-risk-suspicious { border: 2px solid #f39c12; background: #fff8e1; }
+        .pc-risk-clean { border: 2px solid #2ecc71; background: #f0fff0; }
+    </style>
+</head>
+<body>
+    <div class="pc-form">
+        <h1 class="text-xl mb-4">PhishChecker</h1>
+        <p class="text-sm mb-2">Scan any URL for phishing risks</p>
+        
+        <input id="url" type="url" class="pc-input mb-4" placeholder="Enter URL to scan..." required>
+        
+        <div class="flex gap-2 mb-4">
+            <button id="scan" class="pc-btn">Scan</button>
+            <button id="clear" class="pc-btn-secondary">Clear</button>
+        </div>
+        
+        <div id="result" class="pc-result hidden text-sm mt-4"></div>
+        
+        <div class="mt-6">
+            <p class="text-xs text-gray-500">PhishChecker v2.0 | <a href="https://phishchecker.onrender.com" target="_blank">Web Version</a></p>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('scan').addEventListener('click', async () => {
+            const url = document.getElementById('url').value;
+            if (!url) return;
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = 'Scanning...';
+            resultDiv.classList.remove('hidden');
+            
+            // Simple demonstration - in real use this would call your API
+            const safeDomains = ['google.com', 'github.com', 'microsoft.com'];
+            const riskyDomains = ['suspect.com', 'malicious.net', 'phishing.org'];
+            
+            const domain = new URL(url).hostname.replace('www.', '');
+            
+            if (safeDomains.includes(domain)) {
+                resultDiv.textContent = `🔶 Clean: ${url} appears safe (trusted domain)`;
+                resultDiv.classList.add('pc-risk-clean');
+            } else if (riskyDomains.includes(domain)) {
+                resultDiv.textContent = `⚠❌ Suspicious: ${url} shows phishing indicators`;
+                resultDiv.classList.add('pc-risk-suspicious');
+            } else {
+                resultDiv.textContent = `🚫 Caution: ${url} - Domain not recognized. Proceed with care.`;
+                resultDiv.classList.add('pc-risk-caution');
+            }
+        });
+        
+        document.getElementById('clear').addEventListener('click', () => {
+            document.getElementById('url').value = '';
+            document.getElementById('result').classList.add('hidden');
+        });
+    </script>
+</body>
+</html>
