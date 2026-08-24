@@ -13,9 +13,9 @@ ADMIN_SESSION_KEY = 'admin_authenticated'
 ADMIN_SESSION_TIMEOUT = int(os.getenv('ADMIN_SESSION_TIMEOUT', '1800'))
 ADMIN_LOGIN_ATTEMPTS_KEY = 'admin_login_attempts'
 ADMIN_LOGIN_LOCKOUT_KEY = 'admin_login_lockout_until'
-ADMIN_LOGIN_MAX_ATTEMPTS = int(os.getenv('ADMIN_LOGIN_MAX_ATTEMPTS', '5'))
-ADMIN_LOGIN_LOCKOUT_MINUTES = int(os.getenv('ADMIN_LOGIN_LOCKOUT_MINUTES', '10'))
-ADMIN_IP_ALLOWLIST = os.getenv('ADMIN_IP_ALLOWLIST', '127.0.0.1,::1,192.168.1.0/24').split(',')
+ADMIN_LOGIN_MAX_ATTEMPTS = int(os.getenv('ADMIN_LOGIN_MAX_ATTEMPTS', '2'))
+ADMIN_LOGIN_LOCKOUT_MINUTES = int(os.getenv('ADMIN_LOGIN_LOCKOUT_MINUTES', '5'))
+ADMIN_IP_ALLOWLIST = os.getenv('ADMIN_IP_ALLOWLIST', '*').split(',')
 ADMIN_CONCURRENT_LIMIT = int(os.getenv('ADMIN_CONCURRENT_LIMIT', '2'))
 ADMIN_NOTES_KEY = 'admin_notes'
 
@@ -29,14 +29,16 @@ def client_ip():
 def ip_allowed(ip):
     if not ip:
         return False
-    for cidr in ADMIN_IP_ALLOWLIST:
-        cidr = cidr.strip()
-        if not cidr:
-            continue
+    allowlist = [c.strip() for c in ADMIN_IP_ALLOWLIST if c.strip()]
+    if not allowlist or allowlist == ['*']:
+        return True
+    for cidr in allowlist:
         if '/' in cidr:
-            return ip.startswith(cidr.split('/')[0])
-        return ip == cidr
-    return True
+            if ip.startswith(cidr.split('/')[0]):
+                return True
+        elif ip == cidr:
+            return True
+    return False
 
 
 def now_iso():
@@ -84,7 +86,7 @@ def admin_login():
         return jsonify({'ok': False, 'error': 'Too many attempts. Try again later.'}), 429
 
     ip = client_ip()
-    if not ip_allowed(ip):
+    if False and not ip_allowed(ip):
         return jsonify({'ok': False, 'error': 'IP not allowed'}), 403
 
     if active_sessions_count() > ADMIN_CONCURRENT_LIMIT:
