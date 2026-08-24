@@ -26,7 +26,8 @@ type IconName =
   | 'smartphone'
   | 'search'
   | 'zap'
-  | 'globe';
+  | 'globe'
+  | 'alert-triangle';
 
 const icons: Record<IconName, (props: { size?: number; className?: string }) => ReactNode> = {
   'shield': ({ size = 24, className = '' }) => (
@@ -190,6 +191,13 @@ const icons: Record<IconName, (props: { size?: number; className?: string }) => 
     <svg width={size} height={size} viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
       <circle cx="32" cy="32" r="24" />
       <path d="M32 8v48M8 32h48M16 16c8 8 8 24 0 32M48 16c-8 8-8 24 0 32" />
+    </svg>
+  ),
+  'alert-triangle': ({ size = 24, className = '' }) => (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M32 14l20 36H12l20-36z" />
+      <path d="M32 22v14" />
+      <circle cx="32" cy="46" r="1.5" fill="currentColor" stroke="none" />
     </svg>
   ),
 };

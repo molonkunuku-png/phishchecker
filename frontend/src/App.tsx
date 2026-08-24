@@ -407,18 +407,18 @@ export default function App() {
               <Icon name="menu" size={22} />
             </button>
           <div id="pc-nav-items" className="pc-nav-links">
-            <button onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }} className={`pc-nav-link ${showHistory ? 'pc-nav-item-active' : ''}`}>{LANG[lang].nav.history}</button>
-            <button onClick={() => { setShowDashboard(v => !v); }} className={`pc-nav-link ${showDashboard ? 'pc-nav-item-active' : ''}`}>{showDashboard ? LANG[lang].scan : 'Dashboard'}</button>
-            <button onClick={() => { setShowFeatures(v => !v); }} className={`pc-nav-link ${showFeatures ? 'pc-nav-item-active' : ''}`}>{showFeatures ? LANG[lang].scan : 'Features'}</button>
-            <button onClick={() => { setShowAwareness(v => !v); }} className={`pc-nav-link ${showAwareness ? 'pc-nav-item-active' : ''}`}>{showAwareness ? LANG[lang].scan : LANG[lang].nav.awareness}</button>
-            <button onClick={() => { setShowApi(v => !v); }} className={`pc-nav-link ${showApi ? 'pc-nav-item-active' : ''}`}>{showApi ? LANG[lang].scan : 'API'}</button>
-            <button onClick={() => { setShowAbout(v => !v); }} className={`pc-nav-link ${showAbout ? 'pc-nav-item-active' : ''}`}>{showAbout ? LANG[lang].scan : 'About'}</button>
-            <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className={`pc-nav-link ${showStatus ? 'pc-nav-item-active' : ''}`}>{showStatus ? LANG[lang].scan : LANG[lang].nav.status}</button>
-            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className={`pc-nav-link ${theme === 'dark' ? 'pc-nav-item-active' : ''}`} aria-label={t("toggleTheme")}>{theme === 'dark' ? '☀ Light' : '☾ Dark'}</button>
-            <button onClick={() => setSimpleMode(v => !v)} className={`pc-nav-link ${simpleMode ? 'pc-nav-item-active' : ''}`} aria-label="Simple mode">{simpleMode ? 'Simple: ON' : 'Simple: OFF'}</button>
+            <button onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }} className={`pc-nav-link ${showHistory ? 'pc-nav-item-active' : ''} `}>{LANG[lang].nav.history}</button>
+            <button onClick={() => { setShowDashboard(v => !v); }} className={`pc-nav-link ${showDashboard ? 'pc-nav-item-active' : ''} `}>{showDashboard ? LANG[lang].scan : 'Dashboard'}</button>
+            <button onClick={() => { setShowFeatures(v => !v); }} className={`pc-nav-link ${showFeatures ? 'pc-nav-item-active' : ''} `}>{showFeatures ? LANG[lang].scan : 'Features'}</button>
+            <button onClick={() => { setShowAwareness(v => !v); }} className={`pc-nav-link ${showAwareness ? 'pc-nav-item-active' : ''} `}>{showAwareness ? LANG[lang].scan : LANG[lang].nav.awareness}</button>
+            <button onClick={() => { setShowApi(v => !v); }} className={`pc-nav-link ${showApi ? 'pc-nav-item-active' : ''} `}>{showApi ? LANG[lang].scan : 'API'}</button>
+            <button onClick={() => { setShowAbout(v => !v); }} className={`pc-nav-link ${showAbout ? 'pc-nav-item-active' : ''} `}>{showAbout ? LANG[lang].scan : 'About'}</button>
+            <button onClick={() => { setShowStatus(v => !v); if (!showStatus) getStatus().then(setStatus).catch(() => setStatus(null)); }} className={`pc-nav-link ${showStatus ? 'pc-nav-item-active' : ''} `}>{showStatus ? LANG[lang].scan : LANG[lang].nav.status}</button>
+            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className={`pc-nav-link ${theme === 'dark' ? 'pc-nav-item-active' : ''}`} aria-current={theme === 'dark' ? 'page' : undefined} aria-label={t("toggleTheme")}>{theme === 'dark' ? '☀ Light' : '☾ Dark'}</button>
+            <button onClick={() => setSimpleMode(v => !v)} className={`pc-nav-link ${simpleMode ? 'pc-nav-item-active' : ''} `} aria-label="Simple mode">{simpleMode ? 'Simple: ON' : 'Simple: OFF'}</button>
             <span style={{ display: 'inline-flex', gap: '0.3em', alignItems: 'center', marginLeft: '0.4em' }}>
               {(Object.keys(LANG) as Lang[]).map(k => (
-                <button key={k} onClick={changeLang(k)} aria-label={k} className={`pc-nav-link ${lang === k ? 'pc-nav-item-active' : ''}`} style={{ padding: '0.3em 0.5em', fontSize: '0.75em', borderRadius: '999px' }}>{k.toUpperCase()}</button>
+                <button key={k} onClick={changeLang(k)} aria-label={k} className={`pc-nav-link ${lang === k ? 'pc-nav-item-active' : ''}`} aria-current={lang === k ? 'page' : undefined} style={{ padding: '0.3em 0.5em', fontSize: '0.75em', borderRadius: '999px' }}>{k.toUpperCase()}</button>
               ))}
             </span>
           </div>
@@ -668,7 +668,7 @@ export default function App() {
                           <span style={{ color: 'var(--risk-danger)', textDecoration: 'underline' }}>http://bank-secure.xyz/login</span>
                         </div>
                         <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(229,72,77,0.1)', border: '1px solid rgba(229,72,77,0.25)', borderRadius: 'var(--r-md)', fontSize: '0.85em', color: '#fca5a5' }}>
-                          ⚠ Red flags: fear words, strange address, asks for login by text
+                          <Icon name="alert-triangle" size={14} /> Red flags: fear words, strange address, asks for login by text
                         </div>
                       </div>
                     </div>
@@ -684,7 +684,7 @@ export default function App() {
                           Open the label: <span style={{ color: '#93c5fd' }}>https://delivery-tracking.info/parcel</span>
                         </div>
                         <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(229,72,77,0.1)', border: '1px solid rgba(229,72,77,0.25)', borderRadius: 'var(--r-md)', fontSize: '0.85em', color: '#fca5a5' }}>
-                          ⚠ Red flags: no tracking number, wrong domain, asks to download file
+                          <Icon name="alert-triangle" size={14} /> Red flags: no tracking number, wrong domain, asks to download file
                         </div>
                       </div>
                     </div>
@@ -700,7 +700,7 @@ export default function App() {
                           Secure it now: <span style={{ color: '#93c5fd' }}>https://account-security-alert.xyz/reset</span>
                         </div>
                         <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(229,72,77,0.1)', border: '1px solid rgba(229,72,77,0.25)', borderRadius: 'var(--r-md)', fontSize: '0.85em', color: '#fca5a5' }}>
-                          ⚠ Red flags: no account details, asks reset on unknown site, fake urgency
+                          <Icon name="alert-triangle" size={14} /> Red flags: no account details, asks reset on unknown site, fake urgency
                         </div>
                       </div>
                     </div>
@@ -912,7 +912,7 @@ export default function App() {
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45em' }}>
                         <Icon name="download" size={16} />
                         {t("exportMenu")}
-                        <span style={{ fontSize: '0.7em', opacity: 0.7 }}>▾</span>
+                        <Icon name="chevron-down" size={16} />
                       </span>
                     </button>
                     {exportOpen && (
