@@ -2,8 +2,12 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, "Noto Sans SC", "Noto Sans Tamil", sans-ui, Apple Color Emoji, Segoe UI Emoji;
-  --font-display: "Source Serif 4", "Lora", ui-serif, Georgia, serif;
+  --font-display: "Fraunces", "Source Serif 4", ui-serif, Georgia, serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-mono-data: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --font-feature-sans: "cv02" "cv03" "tnum";
+  --font-feature-mono: "tnum" "cv01";
 }
 
 :root, .dark {
@@ -152,6 +156,7 @@ html, body, #root {
 
 body {
   font-family: var(--font-sans);
+  font-feature-settings: var(--font-feature-sans);
   font-size: var(--text-body);
   line-height: 1.6;
   background: var(--bg-canvas);
@@ -488,6 +493,11 @@ a:hover {
 .pc-panel-gold {
   border-color: var(--border-brand);
   background: linear-gradient(135deg, var(--bg-surface) 0%, var(--brand-muted) 100%);
+}
+
+/* Hero panel */
+.pc-hero {
+  background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-midnight) 70%, color-mix(in srgb, var(--brand-500) 3%, var(--bg-midnight)) 100%);
 }
 
 /* Inputs */

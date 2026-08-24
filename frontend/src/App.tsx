@@ -4,6 +4,24 @@ import { submitScan, fetchHistory, downloadExport, getStatus, fetchScanDetail, s
 import type { ScanResult, HistoryItem, StatusResponse } from './lib/types';
 import { LANG, type Lang } from './lib/i18n';
 import { UI } from './lib/ui-i18n';
+import { Icon } from './lib/icons';
+
+function ShieldLogo({ size = 26 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="shieldGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#D4AF37" />
+          <stop offset="100%" stopColor="#bfa030" />
+        </linearGradient>
+      </defs>
+      <path d="M32 4L8 14v14c0 16 10.4 28.8 24 34 13.6-5.2 24-18 24-34V14L32 4z" fill="url(#shieldGrad)" opacity="0.15" />
+      <path d="M32 8L12 16.5V30c0 14.3 9.2 26 20 30.5C42.8 56 52 44.3 52 30V16.5L32 8z" fill="url(#shieldGrad)" opacity="0.25" />
+      <path d="M32 12L16 19v11c0 12.5 8 22.8 16 26.5 8-3.7 16-14 16-26.5V19L32 12z" fill="url(#shieldGrad)" />
+      <path d="M24 34l6 6 10-12" stroke="#0D1B2A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
+  );
+}
 
 function downloadPDF(result: ScanResult) {
   const lines = [
@@ -382,21 +400,12 @@ export default function App() {
           <a href="#main" className="pc-skip-link">{t("skipToContent")}</a>
           <div className="pc-nav-inner">
             <a href="/" className="pc-nav-brand" aria-label={t("ariaHome")}>
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M32 4L8 14v14c0 16 10.4 28.8 24 34 13.6-5.2 24-18 24-34V14L32 4z" fill="url(#shieldGrad)" opacity="0.15"/>
-              <path d="M32 8L12 16.5V30c0 14.3 9.2 26 20 30.5C42.8 56 52 44.3 52 30V16.5L32 8z" fill="url(#shieldGrad)" opacity="0.25"/>
-              <path d="M32 12L16 19v11c0 12.5 8 22.8 16 26.5 8-3.7 16-14 16-26.5V19L32 12z" fill="url(#shieldGrad)"/>
-              <path d="M24 34l6 6 10-12" stroke="#0D1B2A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              <defs>
-                <linearGradient id="shieldGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#D4AF37"/>
-                  <stop offset="100%" stopColor="#bfa030"/>
-                </linearGradient>
-              </defs>
-            </svg>
-            {t("brand")}
-          </a>
-          <button onClick={() => { const items = document.getElementById('pc-nav-items'); if (items) items.classList.toggle('pc-nav-open'); }} className="pc-nav-hamburger" aria-label={t("toggleNav")} style={{ display: 'none', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 1em', fontSize: '1.2em', lineHeight: 1 }}>☰</button>
+              <ShieldLogo size={26} />
+              {t("brand")}
+            </a>
+            <button onClick={() => { const items = document.getElementById('pc-nav-items'); if (items) items.classList.toggle('pc-nav-open'); }} className="pc-nav-hamburger" aria-label={t("toggleNav")} style={{ display: 'none', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 1em', lineHeight: 1 }}>
+              <Icon name="menu" size={22} />
+            </button>
           <div id="pc-nav-items" className="pc-nav-links">
             <button onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }} className={`pc-nav-link ${showHistory ? 'pc-nav-item-active' : ''}`}>{LANG[lang].nav.history}</button>
             <button onClick={() => { setShowDashboard(v => !v); }} className={`pc-nav-link ${showDashboard ? 'pc-nav-item-active' : ''}`}>{showDashboard ? LANG[lang].scan : 'Dashboard'}</button>
@@ -418,10 +427,10 @@ export default function App() {
         </nav>
 
         <main id="main" style={{ paddingTop: '4.5em' }}>
-          <section className="pc-panel" style={{ borderTop: 'none', borderRadius: 0, borderLeft: 'none', borderRight: 'none', background: 'linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-midnight) 100%)' }}>
+          <section className="pc-panel pc-hero" style={{ borderTop: 'none', borderRadius: 0, borderLeft: 'none', borderRight: 'none' }}>
             <div style={{ maxWidth: '56em', margin: '0 auto', padding: '3.5em 1.5em' }} className="pc-section">
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em', padding: '0.35em 0.8em', borderRadius: '9999px', background: 'var(--brand-muted)', border: '1px solid var(--border-brand)', color: 'var(--gold)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.2em' }}>
-                <svg width="14" height="14" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 12L16 19v11c0 12.5 8 22.8 16 26.5 8-3.7 16-14 16-26.5V19L32 12z" fill="currentColor"/><path d="M24 34l6 6 10-12" stroke="#0D1B2A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
+                <Icon name="shield" size={14} />
                 Privacy-first scanning
               </div>
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', lineHeight: 1.05, letterSpacing: '-0.03em', color: 'var(--text-primary)', marginBottom: '0.8em', maxWidth: '18ch' }}>
@@ -436,7 +445,9 @@ export default function App() {
                   <div style={{ position: 'relative', flex: '1 1 auto', minWidth: '14em' }}>
                     <input ref={inputRef} id="url-input" value={url} onChange={e => setUrl(e.target.value)} placeholder={t("urlPlaceholder")} className="pc-input pc-placeholder" disabled={loading} aria-describedby="url-hint" style={{ paddingRight: url ? '2.2em' : undefined }} />
                     {url && (
-                      <button type="button" onClick={() => setUrl('')} disabled={loading} aria-label={t("clearUrl")} style={{ position: 'absolute', right: '0.6em', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '0.9em', padding: '0.3em', lineHeight: 1 }}>×</button>
+                      <button type="button" onClick={() => setUrl('')} disabled={loading} aria-label={t("clearUrl")} style={{ position: 'absolute', right: '0.6em', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '0.9em', padding: '0.3em', lineHeight: 1 }}>
+                        <Icon name="x" size={16} />
+                      </button>
                     )}
                   </div>
                   <select value={mode} onChange={e => setMode(e.target.value as 'quick' | 'standard' | 'it')} className="pc-select" disabled={loading || familyMode} aria-label={t("fieldMode")} style={{ minWidth: '10em' }}>
@@ -507,7 +518,7 @@ export default function App() {
               </div>
               {!loading && !result && !error && (
                 <div aria-live="polite" style={{ marginTop: '1.2em', padding: '1.6em', border: '1px dashed var(--border-subtle)', background: 'var(--bg-surface-raised)', color: 'var(--text-tertiary)', fontSize: '0.95em', textAlign: 'center', borderRadius: 'var(--r-lg)' }}>
-                  <div style={{ fontSize: '2.4em', marginBottom: '0.6em', opacity: 0.9 }} aria-hidden="true">🛡️</div>
+                  <div style={{ fontSize: '2.4em', marginBottom: '0.6em', opacity: 0.9 }} aria-hidden="true"><Icon name="shield" size={28} /></div>
                   <div style={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.3em' }}>{t("noScansTitle")}</div>
                   <div>{t("noScansBody")}</div>
                   <div style={{ marginTop: '0.4em', fontSize: '0.8em', opacity: 0.8 }}>{t("noScansShortcut")}</div>
@@ -556,7 +567,7 @@ export default function App() {
                 )}
               </div>
               <div style={{ marginTop: '0.8em', display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <Icon name="lock" size={14} />
                 <span>{t("noPersonalData")}</span>
               </div>
               {error && (
@@ -651,7 +662,7 @@ export default function App() {
 
                     <div style={{ padding: '1.2em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
                       <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
-                        <span aria-hidden="true">📱</span> Example 1: Fake bank text
+                        <span aria-hidden="true"><Icon name="smartphone" size={18} /></span> Example 1: Fake bank text
                       </h3>
                       <div style={{ background: 'var(--bg-canvas)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '22em' }}>
                         <div style={{ fontSize: '0.75em', color: 'var(--text-tertiary)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("smsLabel")}</div>
@@ -668,7 +679,7 @@ export default function App() {
 
                     <div style={{ padding: '1.2em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
                       <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
-                        <span aria-hidden="true">📧</span> Example 2: Fake delivery notification
+                        <span aria-hidden="true"><Icon name="mail" size={18} /></span> Example 2: Fake delivery notification
                       </h3>
                       <div style={{ background: 'var(--bg-canvas)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '24em' }}>
                         <div style={{ fontSize: '0.75em', color: 'var(--text-tertiary)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("emailLabel")}</div>
@@ -684,7 +695,7 @@ export default function App() {
 
                     <div style={{ padding: '1.2em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
                       <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
-                        <span aria-hidden="true">🔐</span> Example 3: Fake account alert
+                        <span aria-hidden="true"><Icon name="lock" size={18} /></span> Example 3: Fake account alert
                       </h3>
                       <div style={{ background: 'var(--bg-canvas)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '24em' }}>
                         <div style={{ fontSize: '0.75em', color: 'var(--text-tertiary)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("emailLabel")}</div>
@@ -700,7 +711,7 @@ export default function App() {
 
                     <div style={{ padding: '1.2em', border: '1px solid var(--border-brand)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(227,174,55,0.03) 100%)', borderRadius: 'var(--r-lg)' }}>
                       <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--brand-500)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
-                        <span aria-hidden="true">✅</span> Quick checks
+                        <span aria-hidden="true"><Icon name="check-circle" size={18} /></span> Quick checks
                       </h3>
                       <ul style={{ color: 'var(--text-secondary)', paddingLeft: '1.2em', display: 'grid', gap: '0.5em', fontSize: '1.05em' }}>
                         <li>{t("checkHover")}</li>
@@ -872,7 +883,7 @@ export default function App() {
                 {familyMode && result && (
                   <div style={{ marginBottom: '1.4em', padding: '1.2em', border: '1px solid var(--border-brand)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(227,174,55,0.04) 100%)', borderRadius: 'var(--r-lg)', fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--brand-500)', marginBottom: '0.4em' }}>
-                      <svg width="16" height="16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 12L16 19v11c0 12.5 8 22.8 16 26.5 8-3.7 16-14 16-26.5V19L32 12z" fill="currentColor"/><path d="M24 34l6 6 10-12" stroke="var(--text-inverse)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
+                      <Icon name="shield-check" size={16} />
                       Family Mode
                     </div>
                     {familySummary(result)}
@@ -882,7 +893,7 @@ export default function App() {
                 {simpleMode && result && (
                   <div style={{ marginBottom: '1.4em', padding: '1.2em', border: '1px solid var(--border-brand)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(227,174,55,0.04) 100%)', borderRadius: 'var(--r-lg)', fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--brand-500)', marginBottom: '0.4em' }}>
-                      <svg width="16" height="16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 12L16 19v11c0 12.5 8 22.8 16 26.5 8-3.7 16-14 16-26.5V19L32 12z" fill="currentColor"/><path d="M24 34l6 6 10-12" stroke="var(--text-inverse)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
+                      <Icon name="shield-check" size={16} />
                       Simple Mode
                     </div>
                     {familySummary(result)}
@@ -895,7 +906,7 @@ export default function App() {
                 <div style={{ display: 'flex', gap: '0.6em', flexWrap: 'wrap', marginBottom: '1.4em', justifyContent: 'center', alignItems: 'center' }}>
                   <button onClick={copyScanLink} className="pc-btn-primary" style={{ boxShadow: '0 4px 18px rgba(227,174,55,.25)' }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45em' }}>
-                      <svg width="16" height="16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M48 14c6 6 10 13 10 22s-4 16-10 22c-6-6-10-13-10-22s4-16 10-22z" stroke="currentColor" strokeWidth="5" strokeLinecap="round"/><path d="M16 14c6 6 10 13 10 22s-4 16-10 22c-6-6-10-13-10-22s4-16 10-22z" stroke="currentColor" strokeWidth="5" strokeLinecap="round"/><path d="M26 26h22v22H26z" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <Icon name="copy" size={16} />
                       {t("copyLink")}
                     </span>
                   </button>
@@ -903,7 +914,7 @@ export default function App() {
                   <div style={{ position: 'relative', display: 'inline-flex' }}>
                     <button onClick={() => setExportOpen(v => !v)} className="pc-btn-secondary" style={{ padding: '14px 20px', borderRadius: 'var(--r-lg)' }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45em' }}>
-                        <svg width="16" height="16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 12v28" stroke="currentColor" strokeWidth="5" strokeLinecap="round"/><path d="M22 22l10 10 10-10" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 36h40v14H12z" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        <Icon name="download" size={16} />
                         {t("exportMenu")}
                         <span style={{ fontSize: '0.7em', opacity: 0.7 }}>▾</span>
                       </span>
@@ -919,7 +930,7 @@ export default function App() {
                   </div>
 
                   <button onClick={() => window.print()} className="pc-btn-secondary" style={{ padding: '14px 14px', borderRadius: 'var(--r-lg)', minWidth: '44px', minHeight: '44px' }} aria-label={t("print")}>
-                    <svg width="18" height="18" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 38v10h40v-10" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/><path d="M20 38V22h24v16" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/><rect x="12" y="26" width="40" height="18" rx="2" stroke="currentColor" strokeWidth="5"/><path d="M22 26V14h20v12" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    <Icon name="printer" size={18} />
                   </button>
                 </div>
 
@@ -1157,8 +1168,8 @@ export default function App() {
                   </div>
                 )}
 
-                {history.length === 0 && <div className="pc-empty" aria-live="polite"><div className="pc-empty-icon" aria-hidden="true">🕰️</div><div className="pc-empty-title">{t("noScansTitle")}</div><div className="pc-empty-body">{t("recentEmpty")}</div></div>}
-                {history.length > 0 && visibleHistory.length === 0 && <div className="pc-empty" aria-live="polite"><div className="pc-empty-icon" aria-hidden="true">🔎</div><div className="pc-empty-title">{t("noMatchingScans")}</div><div className="pc-empty-body">{t("noMatchingHint")}</div></div>}
+                {history.length === 0 && <div className="pc-empty" aria-live="polite"><div className="pc-empty-icon" aria-hidden="true"><Icon name="clock" size={28} /></div><div className="pc-empty-title">{t("noScansTitle")}</div><div className="pc-empty-body">{t("recentEmpty")}</div></div>}
+                {history.length > 0 && visibleHistory.length === 0 && <div className="pc-empty" aria-live="polite"><div className="pc-empty-icon" aria-hidden="true"><Icon name="search" size={28} /></div><div className="pc-empty-title">{t("noMatchingScans")}</div><div className="pc-empty-body">{t("noMatchingHint")}</div></div>}
 
                 {visibleHistory.length > 0 && (
                   <div style={{ display: 'grid', gap: '0.6em' }}>
@@ -1293,7 +1304,7 @@ export default function App() {
                 <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', marginBottom: '0.8em' }}>Features</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1em', fontSize: '0.95em', lineHeight: 1.6 }} className="pc-mobile-stack">
                   <div style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>🔎 Real-Time URL Scanner</div>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}><Icon name="search" size={28} /> Real-Time URL Scanner</div>
                     <p style={{ color: 'var(--text-secondary)' }}>Checks URLs quickly and returns a plain-language risk result you can act on.</p>
                   </div>
                   <div style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
@@ -1319,15 +1330,15 @@ export default function App() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1em', marginTop: '1em', fontSize: '0.95em', lineHeight: 1.6 }} className="pc-mobile-stack">
                   <div style={{ padding: '1.1em', border: '1px dashed var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>🧩 Browser Extension</div>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}><Icon name="sparkles" size={18} /> Browser Extension</div>
                     <p style={{ color: 'var(--text-tertiary)' }}>Coming soon. In-browser checks without leaving the page.</p>
                   </div>
                   <div style={{ padding: '1.1em', border: '1px dashed var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>⚡ API Access</div>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}><Icon name="zap" size={18} /> API Access</div>
                     <p style={{ color: 'var(--text-tertiary)' }}>Coming soon. Programmatic scanning for teams and integrations.</p>
                   </div>
                   <div style={{ padding: '1.1em', border: '1px dashed var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>🌍 Community Reports</div>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}><Icon name="globe" size={18} /> Community Reports</div>
                     <p style={{ color: 'var(--text-tertiary)' }}>Coming soon. Community signals with moderation and transparency.</p>
                   </div>
                 </div>
