@@ -420,7 +420,7 @@ export default function App() {
         <main id="main" style={{ paddingTop: '4.5em' }}>
           <section className="pc-panel" style={{ borderTop: 'none', borderRadius: 0, borderLeft: 'none', borderRight: 'none', background: 'linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-midnight) 100%)' }}>
             <div style={{ maxWidth: '56em', margin: '0 auto', padding: '3.5em 1.5em' }} className="pc-section">
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em', padding: '0.35em 0.8em', borderRadius: '9999px', background: 'var(--gold-muted)', border: '1px solid var(--border-gold)', color: 'var(--gold)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.2em' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em', padding: '0.35em 0.8em', borderRadius: '9999px', background: 'var(--brand-muted)', border: '1px solid var(--border-brand)', color: 'var(--gold)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.2em' }}>
                 <svg width="14" height="14" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 12L16 19v11c0 12.5 8 22.8 16 26.5 8-3.7 16-14 16-26.5V19L32 12z" fill="currentColor"/><path d="M24 34l6 6 10-12" stroke="#0D1B2A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
                 Privacy-first scanning
               </div>
@@ -455,7 +455,7 @@ export default function App() {
                 )}
               </form>
               <div style={{ marginTop: '0.8em', display: 'flex', alignItems: 'center', gap: '0.6em', flexWrap: 'wrap' }}>
-                <button type="button" onClick={() => setFamilyMode(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.85em', color: familyMode ? 'var(--text-inverse)' : 'var(--gold-500)', background: familyMode ? 'var(--gold-500)' : 'transparent', border: '1px solid', borderColor: familyMode ? 'var(--gold-500)' : 'var(--border-hairline)' }}>{t("familyMode")}</button>
+                <button type="button" onClick={() => setFamilyMode(v => !v)} className="pc-btn-ghost" style={{ fontSize: '0.85em', color: familyMode ? 'var(--text-inverse)' : 'var(--brand-500)', background: familyMode ? 'var(--brand-500)' : 'transparent', border: '1px solid', borderColor: familyMode ? 'var(--brand-500)' : 'var(--border-hairline)' }}>{t("familyMode")}</button>
                 {familyMode ? LANG[lang].familyMode.on : LANG[lang].familyMode.off}
                 {familyMode && (
                   <span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>{LANG[lang].familyMode.helper}</span>
@@ -518,7 +518,7 @@ export default function App() {
                 {(showHistory && historyStats.total != null) ? (
                   <>
                     <div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold-500)', fontFamily: 'var(--font-display)' }}>{historyStats.total}</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--brand-500)', fontFamily: 'var(--font-display)' }}>{historyStats.total}</div>
                       <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("total")}</div>
                     </div>
                     <div>
@@ -541,15 +541,15 @@ export default function App() {
                 ) : (
                   <>
                     <div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold-500)', fontFamily: 'var(--font-display)' }}>Free</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--brand-500)', fontFamily: 'var(--font-display)' }}>Free</div>
                       <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Now</div>
                     </div>
                     <div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold-500)', fontFamily: 'var(--font-display)' }}>No account</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--brand-500)', fontFamily: 'var(--font-display)' }}>No account</div>
                       <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Required</div>
                     </div>
                     <div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--gold-500)', fontFamily: 'var(--font-display)' }}>No tracking</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--brand-500)', fontFamily: 'var(--font-display)' }}>No tracking</div>
                       <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>By design</div>
                     </div>
                   </>
@@ -636,8 +636,8 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.8em', flexWrap: 'wrap' }}>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', margin: 0 }}>{t("awarenessTitle")}</h2>
                   <div style={{ display: 'inline-flex', gap: '0.4em', background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '0.3em', borderRadius: 'var(--r-pill)' }}>
-                    <button type="button" onClick={() => setAwarenessMode('simple')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: 'var(--r-pill)', background: awarenessMode === 'simple' ? 'var(--gold-500)' : 'transparent', color: awarenessMode === 'simple' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{t("simpleMode")}</button>
-                    <button type="button" onClick={() => setAwarenessMode('detailed')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: 'var(--r-pill)', background: awarenessMode === 'detailed' ? 'var(--gold-500)' : 'transparent', color: awarenessMode === 'detailed' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{t("detailedMode")}</button>
+                    <button type="button" onClick={() => setAwarenessMode('simple')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: 'var(--r-pill)', background: awarenessMode === 'simple' ? 'var(--brand-500)' : 'transparent', color: awarenessMode === 'simple' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{t("simpleMode")}</button>
+                    <button type="button" onClick={() => setAwarenessMode('detailed')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: 'var(--r-pill)', background: awarenessMode === 'detailed' ? 'var(--brand-500)' : 'transparent', color: awarenessMode === 'detailed' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{t("detailedMode")}</button>
                   </div>
                 </div>
 
@@ -698,8 +698,8 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div style={{ padding: '1.2em', border: '1px solid var(--border-gold)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(227,174,55,0.03) 100%)', borderRadius: 'var(--r-lg)' }}>
-                      <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--gold-500)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
+                    <div style={{ padding: '1.2em', border: '1px solid var(--border-brand)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(227,174,55,0.03) 100%)', borderRadius: 'var(--r-lg)' }}>
+                      <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--brand-500)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
                         <span aria-hidden="true">✅</span> Quick checks
                       </h3>
                       <ul style={{ color: 'var(--text-secondary)', paddingLeft: '1.2em', display: 'grid', gap: '0.5em', fontSize: '1.05em' }}>
@@ -808,7 +808,7 @@ export default function App() {
                 <div style={{ marginTop: '1.2em', padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', fontSize: '0.85em', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                   Scanner availability: use the form above for direct scans. This panel shows service health and access mode only.
                   <div style={{ marginTop: '0.6em' }}>
-                    <strong>{t("supportText")}</strong> use the in-app contact or <a href="mailto:molonkunuku@gmail.com" style={{ color: 'var(--gold-500)', textDecoration: 'underline' }}>molonkunuku@gmail.com</a>.
+                    <strong>{t("supportText")}</strong> use the in-app contact or <a href="mailto:molonkunuku@gmail.com" style={{ color: 'var(--brand-500)', textDecoration: 'underline' }}>molonkunuku@gmail.com</a>.
                   </div>
                 </div>
               </div>
@@ -857,7 +857,7 @@ export default function App() {
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1em', marginBottom: '1.6em' }}>
                   <div className={`pc-verdict ${riskVerdict(currentRisk).className}`}>{riskVerdict(currentRisk).label}</div>
                   <div style={{ fontSize: '0.95em', color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.6 }}>{riskAction(result)}</div>
-                  <div className="pc-gauge" aria-hidden="true">
+                  <div className="pc-gauge" role="img" aria-label={`Risk score: ${currentScore ?? '—'} out of 100, ${currentRisk || 'unknown'} risk`}>
                     <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
                       <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10" />
                       <circle cx="50" cy="50" r="42" fill="none" stroke={scoreColor(currentScore)} strokeWidth="10" strokeLinecap="round" strokeDasharray={`${(Math.max(0, Math.min(100, currentScore ?? 0)) / 100) * 264} 264`} style={{ transition: 'stroke-dasharray 1s cubic-bezier(0.4, 0, 0.2, 1)' }} />
@@ -870,8 +870,8 @@ export default function App() {
                 </div>
 
                 {familyMode && result && (
-                  <div style={{ marginBottom: '1.4em', padding: '1.2em', border: '1px solid var(--border-gold)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(227,174,55,0.04) 100%)', borderRadius: 'var(--r-lg)', fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--gold-500)', marginBottom: '0.4em' }}>
+                  <div style={{ marginBottom: '1.4em', padding: '1.2em', border: '1px solid var(--border-brand)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(227,174,55,0.04) 100%)', borderRadius: 'var(--r-lg)', fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--brand-500)', marginBottom: '0.4em' }}>
                       <svg width="16" height="16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 12L16 19v11c0 12.5 8 22.8 16 26.5 8-3.7 16-14 16-26.5V19L32 12z" fill="currentColor"/><path d="M24 34l6 6 10-12" stroke="var(--text-inverse)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
                       Family Mode
                     </div>
@@ -880,8 +880,8 @@ export default function App() {
                 )}
 
                 {simpleMode && result && (
-                  <div style={{ marginBottom: '1.4em', padding: '1.2em', border: '1px solid var(--border-gold)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(227,174,55,0.04) 100%)', borderRadius: 'var(--r-lg)', fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--gold-500)', marginBottom: '0.4em' }}>
+                  <div style={{ marginBottom: '1.4em', padding: '1.2em', border: '1px solid var(--border-brand)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(227,174,55,0.04) 100%)', borderRadius: 'var(--r-lg)', fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--brand-500)', marginBottom: '0.4em' }}>
                       <svg width="16" height="16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 12L16 19v11c0 12.5 8 22.8 16 26.5 8-3.7 16-14 16-26.5V19L32 12z" fill="currentColor"/><path d="M24 34l6 6 10-12" stroke="var(--text-inverse)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
                       Simple Mode
                     </div>
@@ -976,7 +976,7 @@ export default function App() {
                     <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.4em', color: 'var(--text-secondary)', lineHeight: 1.6, wordBreak: 'break-all' }}>
                       {(((result.details || {}) as any).redirect_chain as string[]).map((u: string, i: number, arr: string[]) => (
                         <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em' }}>
-                          <span style={{ fontSize: '0.8em', fontWeight: 600, color: 'var(--gold-500)' }}>{i + 1}</span>
+                          <span style={{ fontSize: '0.8em', fontWeight: 600, color: 'var(--brand-500)' }}>{i + 1}</span>
                           <span>{u}</span>
                           {i < arr.length - 1 && <span style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>→</span>}
                         </span>
@@ -1001,7 +1001,7 @@ export default function App() {
                       <span style={{ fontSize: '0.7em', fontWeight: 600, color: 'var(--text-primary)' }}>{currentScore ?? '—'}/100</span>
                     </div>
                     <div style={{ height: '6px', background: 'var(--bg-canvas)', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${Math.max(0, Math.min(100, currentScore ?? 0))}%`, background: 'var(--gold-500)', transition: 'width 420ms ease' }} />
+                      <div style={{ height: '100%', width: `${Math.max(0, Math.min(100, currentScore ?? 0))}%`, background: 'var(--brand-500)', transition: 'width 420ms ease' }} />
                     </div>
                   </div>
                 </div>
@@ -1011,7 +1011,7 @@ export default function App() {
                     <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.6em' }}>{t("findings")}</h3>
                     <div style={{ display: 'flex', gap: '0.4em', marginBottom: '0.6em', flexWrap: 'wrap' }}>
                       {['all', 'high', 'medium', 'low'].map(f => (
-                        <button key={f} onClick={() => setFindingFilter(f)} className="pc-btn-ghost" style={{ fontSize: '0.7em', textTransform: 'capitalize', background: findingFilter === f ? 'var(--gold-500)' : undefined, color: findingFilter === f ? 'var(--text-inverse)' : undefined }}>{f === 'all' ? 'All' : f}</button>
+                        <button key={f} onClick={() => setFindingFilter(f)} className="pc-btn-ghost" style={{ fontSize: '0.7em', textTransform: 'capitalize', background: findingFilter === f ? 'var(--brand-500)' : undefined, color: findingFilter === f ? 'var(--text-inverse)' : undefined }}>{f === 'all' ? 'All' : f}</button>
                       ))}
                     </div>
                     <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.45em', fontSize: '0.9em', lineHeight: 1.5 }}>
@@ -1128,7 +1128,7 @@ export default function App() {
                   </div>
                   <div style={{ display: 'flex', gap: '0.5em', flexWrap: 'wrap', alignItems: 'center' }}>
                     <input value={historySearch} onChange={e => setHistorySearch(e.target.value)} placeholder={t("historySearchPlaceholder")} className="pc-input" style={{ padding: '0.55em 0.7em', fontSize: '0.8em', minWidth: '14em' }} />
-                    <button onClick={() => loadHistory()} className="pc-btn-ghost" style={{ color: 'var(--gold-500)' }}>{t("refresh")}</button>
+                    <button onClick={() => loadHistory()} className="pc-btn-ghost" style={{ color: 'var(--brand-500)' }}>{t("refresh")}</button>
                   </div>
                 </div>
 
@@ -1340,15 +1340,15 @@ export default function App() {
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', marginBottom: '0.8em' }}>{t("howItWorks")}</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5 }} className="pc-section pc-mobile-stack">
                 <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--gold-500)', marginBottom: '0.4em' }}>01 — {t("stepPaste")}</div>
+                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--brand-500)', marginBottom: '0.4em' }}>01 — {t("stepPaste")}</div>
                   <p style={{ color: 'var(--text-secondary)' }}>{t("stepPasteBody")}</p>
                 </div>
                 <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--gold-500)', marginBottom: '0.4em' }}>02 — {t("stepAnalyze")}</div>
+                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--brand-500)', marginBottom: '0.4em' }}>02 — {t("stepAnalyze")}</div>
                   <p style={{ color: 'var(--text-secondary)' }}>{t("stepAnalyzeBody")}</p>
                 </div>
                 <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--gold-500)', marginBottom: '0.4em' }}>03 — {t("stepDecide")}</div>
+                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--brand-500)', marginBottom: '0.4em' }}>03 — {t("stepDecide")}</div>
                   <p style={{ color: 'var(--text-secondary)' }}>{t("stepDecideBody")}</p>
                 </div>
               </div>
@@ -1363,9 +1363,9 @@ export default function App() {
             <span>{status?.version ? `v${status.version}` : ''}</span>
           </div>
           <div style={{ maxWidth: '56em', margin: '0 auto', padding: '0 1.5em 1.5em', display: 'flex', gap: '1em', flexWrap: 'wrap', fontSize: '0.7em', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>
-            <a href="/privacy" style={{ color: 'var(--gold-500)', textDecoration: 'none' }}>{t("privacy")}</a>
-            <a href="/terms" style={{ color: 'var(--gold-500)', textDecoration: 'none' }}>{t("terms")}</a>
-            <a href="/changelog" style={{ color: 'var(--gold-500)', textDecoration: 'none' }}>{t("changelog")}</a>
+            <a href="/privacy" style={{ color: 'var(--brand-500)', textDecoration: 'none' }}>{t("privacy")}</a>
+            <a href="/terms" style={{ color: 'var(--brand-500)', textDecoration: 'none' }}>{t("terms")}</a>
+            <a href="/changelog" style={{ color: 'var(--brand-500)', textDecoration: 'none' }}>{t("changelog")}</a>
             <span>© {new Date().getFullYear()} {t("brand")}</span>
           </div>
         </footer>
