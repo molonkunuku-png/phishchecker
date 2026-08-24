@@ -1,5 +1,6 @@
 Flask==3.0.0
 Werkzeug==3.0.0
+flask-cors==5.0.0
 waitress==2.1.1
 
 # Scanner backend
