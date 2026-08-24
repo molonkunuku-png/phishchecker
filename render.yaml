@@ -3,7 +3,7 @@ services:
     name: phishchecker
     runtime: python
     buildCommand: bash -lc 'cd frontend && npm install && npm run build && cd .. && pip install -r requirements.txt'
-    startCommand: python -m gunicorn --bind 0.0.0.0:$PORT app:app
+    startCommand: python -c "import os; from waitress import serve; from app import app; serve(app, listen='0.0.0.0:' + os.environ.get('PORT', '10000'))"
     envVars:
       - key: PORT
         value: "10000"
