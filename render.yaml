@@ -3,7 +3,7 @@ services:
     name: phishchecker
     runtime: python
     buildCommand: bash -lc 'cd frontend && npm install && npm run build && cd .. && pip install -r requirements.txt'
-    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
+    startCommand: python -m gunicorn --bind 0.0.0.0:$PORT app:app
     envVars:
       - key: PORT
         value: "10000"
