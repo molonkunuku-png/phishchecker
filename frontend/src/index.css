@@ -46,13 +46,6 @@
 
   /* Gold literal reserved for logo/shield only */
   --gold: #D4AF37;
-  --brand-300: #E8CC6E;
-  --brand-600: #A88B2A;
-
-  /* Legacy aliases — remove after JSX migration */
-  --brand-500: var(--brand-500);
-  --brand-muted: var(--brand-muted);
-  --border-brand: var(--border-brand);
 
   /* Semantic color aliases */
   --color-info: #3B62F6;
@@ -85,14 +78,6 @@
   --sapphire-muted: rgba(10, 15, 28, 0.35);
   --warning: var(--risk-caution);
   --success: var(--risk-safe);
-
-  /* Type scale */
-  --text-display: 2.5rem;
-  --text-h1: 2rem;
-  --text-h2: 1.75rem;
-  --text-h3: 1.25rem;
-  --text-body: 1.0625rem;
-  --text-caption: 0.9375rem;
 
   /* Spacing scale (8px) */
   --sp-1: 0.25rem;
@@ -341,7 +326,7 @@ a:hover {
 .pc-btn-primary:hover {
   background: linear-gradient(135deg, var(--brand-300), #A78BFA);
   transform: translateY(-1px);
-  box-shadow: 0 8px 28px rgba(59, 98, 246, 0.35);
+  box-shadow: 0 0 0 4px var(--brand-muted), 0 8px 28px rgba(59, 98, 246, 0.35);
 }
 
 .pc-btn-primary:active {
@@ -690,6 +675,65 @@ a:hover {
 .pc-empty-body {
   font-size: var(--text-body);
   max-width: 38ch;
+}
+
+/* Batch 3: Motion primitives */
+.pc-reveal-stagger > * {
+  opacity: 0;
+  animation: pc-fade-in 420ms ease both;
+}
+.pc-reveal-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.pc-reveal-stagger > *:nth-child(2) { animation-delay: 80ms; }
+.pc-reveal-stagger > *:nth-child(3) { animation-delay: 160ms; }
+.pc-reveal-stagger > *:nth-child(4) { animation-delay: 240ms; }
+.pc-reveal-stagger > *:nth-child(5) { animation-delay: 320ms; }
+.pc-reveal-stagger > *:nth-child(6) { animation-delay: 400ms; }
+.pc-reveal-stagger > *:nth-child(7) { animation-delay: 480ms; }
+.pc-reveal-stagger > *:nth-child(8) { animation-delay: 560ms; }
+
+/* Gauge reset */
+.pc-gauge-reset {
+  animation: pc-gauge-reset 300ms ease;
+}
+@keyframes pc-gauge-reset {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Nav shadow on scroll */
+.pc-nav-pin {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Button glow on hover */
+.pc-btn-primary:hover {
+  box-shadow: 0 0 0 4px var(--brand-muted), 0 8px 28px rgba(59, 98, 246, 0.35);
+}
+
+/* Loading shimmer for buttons */
+.pc-btn-loading {
+  position: relative;
+  overflow: hidden;
+}
+.pc-btn-loading::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: pc-shimmer 1.4s infinite;
+}
+@keyframes pc-shimmer {
+  to { transform: translateX(100%); }
+}
+
+/* Scan pulse */
+.pc-scan-pulse {
+  animation: pc-pulse 1.6s ease infinite;
+}
+@keyframes pc-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
 }
 
 /* Proof strip */

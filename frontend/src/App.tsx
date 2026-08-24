@@ -455,7 +455,7 @@ export default function App() {
                     <option value="standard">{t("standard")}</option>
                     <option value="it">{t("itMode")}</option>
                   </select>
-                  <button type="submit" disabled={loading} className="pc-btn-primary" style={{ whiteSpace: 'nowrap', minHeight: '44px', borderRadius: 'var(--r-md)' }}>
+                  <button type="submit" disabled={loading} className={`pc-btn-primary ${loading ? 'pc-btn-loading' : ''}`} style={{ whiteSpace: 'nowrap', minHeight: '44px', borderRadius: 'var(--r-md)' }}>
                     {loading ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}><span className="pc-spinner" style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'pc-spin 0.8s linear infinite' }} />{LANG[lang].scanning}</span>) : LANG[lang].scan}
                   </button>
                 </div>
