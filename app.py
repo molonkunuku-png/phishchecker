@@ -135,6 +135,12 @@ def handle_community_flag():
 from admin import admin_bp
 app.register_blueprint(admin_bp)
 
+ADMIN_DIST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'admin', 'templates')
+
+@app.route('/admin/manifest.json')
+def admin_manifest():
+    return send_file(os.path.join(ADMIN_DIST_DIR, 'manifest.json'), mimetype='application/json')
+
 FRONTEND_DIST = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frontend', 'dist')
 FRONTEND_ASSETS = os.path.join(FRONTEND_DIST, 'assets')
 

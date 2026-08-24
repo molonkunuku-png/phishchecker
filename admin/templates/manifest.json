@@ -1,0 +1,15 @@
+{
+  "name": "PhishChecker Admin",
+  "short_name": "PhishChecker",
+  "start_url": "/admin/login-page",
+  "display": "standalone",
+  "background_color": "#36454F",
+  "theme_color": "#36454F",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

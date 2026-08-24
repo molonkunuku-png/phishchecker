@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PhishChecker - Admin Login</title>
+    <meta name="theme-color" content="#36454F">
+    <link rel="manifest" href="/admin/manifest.json">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -13,10 +15,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 1rem;
         }
         .login-container {
             background: white;
-            padding: 2.5rem;
+            padding: 2rem;
             border-radius: 12px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             width: 100%;
@@ -24,11 +27,11 @@
         }
         .logo {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
         .logo h1 {
             color: #36454F;
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             margin-bottom: 0.5rem;
         }
         .logo p {
@@ -36,21 +39,21 @@
             font-size: 0.9rem;
         }
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
         }
         label {
             display: block;
             margin-bottom: 0.5rem;
             color: #36454F;
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
         input[type="text"], input[type="password"] {
             width: 100%;
-            padding: 0.8rem;
+            padding: 0.85rem;
             border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 1rem;
+            border-radius: 8px;
+            font-size: 16px;
             transition: border-color 0.3s;
         }
         input[type="text"]:focus, input[type="password"]:focus {
@@ -59,11 +62,11 @@
         }
         .login-btn {
             width: 100%;
-            padding: 0.9rem;
+            padding: 0.95rem;
             background: #36454F;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
@@ -74,13 +77,21 @@
         }
         .error {
             color: #dc3545;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             margin-top: 1rem;
             text-align: center;
             display: none;
         }
         .error.visible {
             display: block;
+        }
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 1.5rem;
+            }
+            .logo h1 {
+                font-size: 1.4rem;
+            }
         }
     </style>
 </head>
