@@ -12,7 +12,7 @@ DEBUG = os.getenv('PHISHCHECKER_DEBUG', 'false').lower() in ('1', 'true', 'yes')
 PORT = int(os.getenv('PHISHCHECKER_PORT', '8080'))
 
 # In-memory storage for demo
-scans = []
+from data_store import scans
 
 class ScanService:
     def __init__(self):

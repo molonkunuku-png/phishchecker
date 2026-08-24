@@ -1,4 +1,4 @@
-from app import scans
+from data_store import scans
 
 
 def apply_filters(risk, q, sort):
