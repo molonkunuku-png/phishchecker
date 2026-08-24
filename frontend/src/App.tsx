@@ -603,19 +603,15 @@ export default function App() {
                     </p>
                   )}
                   {batchResults && (
-                    <div style={{ marginTop: '0.8em', display: 'grid', gap: '0.6em' }}>
+                    <div className="pc-reveal-stagger pc-results-grid">
                       {batchResults.filter((r, i, arr) => arr.findIndex(x => (x.domain || x.url) === (r.domain || r.url)) === i).map(r => (
-                        <div key={r.id || r.url} style={{ border: '1px solid var(--border-hairline)', padding: '0.8em', background: 'var(--bg-surface)' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5em', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '0.75em', fontWeight: 600, color: 'var(--text-primary)', wordBreak: 'break-all' }}>{r.domain || r.url}</span>
-                            <span className={`${r.risk === 'high' ? 'pc-risk-high' : r.risk === 'suspicious' ? 'pc-risk-suspicious' : 'pc-risk-low'}`}>{r.risk}</span>
+                        <div key={r.id || r.url} className="pc-results-card">
+                          <div className="pc-results-score" style={{ color: scoreColor(r.score) }}>{r.score}/100</div>
+                          <div style={{ minWidth: 0 }}>
+                            <div className="pc-results-domain">{r.domain || r.url}</div>
+                            <div className="pc-results-meta">{modeLabel(r.mode)} · {r.duration_ms != null ? `${r.duration_ms} ms` : '—'}</div>
                           </div>
-                          <div style={{ fontSize: '0.8em', color: 'var(--text-secondary)', marginTop: '0.3em' }}>{r.score}/100 · {modeLabel(r.mode)} · {r.duration_ms != null ? `${r.duration_ms} ms` : '—'}</div>
-                          {r.reasons?.length ? (
-                            <ul style={{ listStyle: 'disc', paddingLeft: '1.1em', marginTop: '0.4em', fontSize: '0.8em', color: 'var(--text-secondary)', display: 'grid', gap: '0.2em' }}>
-                              {r.reasons.map((x, i) => <li key={i}>{x}</li>)}
-                            </ul>
-                          ) : null}
+                          <span className={`${r.risk === 'high' ? 'pc-risk-high' : r.risk === 'suspicious' ? 'pc-risk-suspicious' : 'pc-risk-low'}`} style={{ marginLeft: 'auto', fontSize: '0.75em', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{r.risk}</span>
                         </div>
                       ))}
                     </div>
@@ -626,7 +622,7 @@ export default function App() {
           </section>
 
           {!result && !loading && !reportId && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+            <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '72em', margin: '0 auto', padding: '1.8em 1.5em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em' }} className="pc-section">
                 {history.slice(0, 3).map((h) => (
                   <div key={h.id} className="pc-panel" style={{ padding: '1.1em' }}>
@@ -642,7 +638,7 @@ export default function App() {
           )}
 
           {showAwareness && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+            <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.8em', flexWrap: 'wrap' }}>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', margin: 0 }}>{t("awarenessTitle")}</h2>
@@ -754,7 +750,7 @@ export default function App() {
           )}
 
           {showApi && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+            <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', marginBottom: '0.8em' }}>{t("apiTitle")}</h2>
                 <div style={{ display: 'grid', gap: '1em', fontSize: '0.9em', lineHeight: 1.6 }}>
@@ -796,7 +792,7 @@ export default function App() {
           )}
 
           {showStatus && status && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+            <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)' }}>{t("statusTitle")}</h2>
@@ -827,13 +823,13 @@ export default function App() {
           )}
 
           {showDashboard && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+            <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)' }}>Dashboard</h2>
                   <span className="pc-badge pc-badge-low">Local only</span>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5, marginBottom: '1.2em' }}>
+                <div className="pc-reveal-stagger" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5, marginBottom: '1.2em' }}>
                   <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
                     <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("total")}</div>
                     <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-primary)' }}>{historyStats.total}</div>
@@ -863,10 +859,10 @@ export default function App() {
           )}
 
           {!reportId && result && (
-            <section className={`pc-animate-in ${familyMode ? 'pc-family-mode' : ''}`} style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+            <section className={`pc-animate-in pc-section-enter ${familyMode ? 'pc-family-mode' : ''}`} style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1em', marginBottom: '1.6em' }}>
-                  <div className={`pc-verdict ${riskVerdict(currentRisk).className}`}>{riskVerdict(currentRisk).label}</div>
+                  <div className={`pc-verdict pc-verdict-enter ${riskVerdict(currentRisk).className}`}>{riskVerdict(currentRisk).label}</div>
                   <div style={{ fontSize: '0.95em', color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.6 }}>{riskAction(result)}</div>
                   <div className="pc-gauge" role="img" aria-label={`Risk score: ${currentScore ?? '—'} out of 100, ${currentRisk || 'unknown'} risk`}>
                     <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
@@ -1058,7 +1054,7 @@ export default function App() {
           )}
 
           {reportId && report && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+            <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>{t("scanReport")}</h2>
@@ -1124,13 +1120,13 @@ export default function App() {
           )}
 
           {reportId && !report && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+            <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em', color: 'var(--text-secondary)' }}>{t("loadingReport")}</div>
             </section>
           )}
 
           {showHistory && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+            <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
                   <div>
@@ -1145,23 +1141,23 @@ export default function App() {
 
                 {history.length > 0 && (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(12em, 1fr))', gap: '0.8em', marginBottom: '1.2em' }}>
-                    <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
+                    <div className="pc-dashboard-card">
                       <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("total")}</div>
                       <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-primary)' }}>{historyStats.total}</div>
                     </div>
-                    <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
+                    <div className="pc-dashboard-card">
                       <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("high")}</div>
                       <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--risk-danger)' }}>{historyStats.high}</div>
                     </div>
-                    <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
+                    <div className="pc-dashboard-card">
                       <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("suspicious")}</div>
                       <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--risk-caution)' }}>{historyStats.suspicious}</div>
                     </div>
-                    <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
+                    <div className="pc-dashboard-card">
                       <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>{t("low")}</div>
                       <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--risk-safe)' }}>{historyStats.low}</div>
                     </div>
-                    <div style={{ background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '1em' }}>
+                    <div className="pc-dashboard-card">
                       <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.3em' }}>Clean</div>
                       <div style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-primary)' }}>{historyStats.clean}</div>
                     </div>
@@ -1177,7 +1173,7 @@ export default function App() {
                       const badge = h.risk === 'high' ? 'pc-badge-high' : h.risk === 'suspicious' ? 'pc-badge-suspicious' : 'pc-badge-low';
                       const itemScoreColor = scoreColor(h.score);
                       return (
-                        <div key={h.id} className="pc-panel" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.6em', alignItems: 'center', padding: '0.9em 1em' }}>
+                        <div key={h.id} className="pc-panel pc-history-item-enter" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.6em', alignItems: 'center', padding: '0.9em 1em' }}>
                           <div style={{ minWidth: 0 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5em', marginBottom: '0.3em', flexWrap: 'wrap' }}>
                               <span style={{ fontSize: '0.85em', fontWeight: 700, color: 'var(--text-primary)', wordBreak: 'break-all' }}>{h.domain || h.url}</span>
@@ -1211,7 +1207,7 @@ export default function App() {
           )}
 
           {showCompare && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+            <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1em', flexWrap: 'wrap', gap: '0.5em' }}>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)' }}>{t("comparison")}</h2>
@@ -1253,7 +1249,7 @@ export default function App() {
           )}
 
           {showAbout && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+            <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', marginBottom: '0.8em' }}>About</h2>
                 <div style={{ display: 'grid', gap: '1em', fontSize: '0.95em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
@@ -1279,7 +1275,7 @@ export default function App() {
           )}
 
           {showBlog && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+            <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', marginBottom: '0.8em' }}>Blog</h2>
                 <div style={{ display: 'grid', gap: '1em' }}>
@@ -1299,7 +1295,7 @@ export default function App() {
           )}
 
           {showFeatures && (
-            <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+            <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '72em', margin: '0 auto', padding: '2em 1.5em' }}>
                 <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', marginBottom: '0.8em' }}>Features</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1em', fontSize: '0.95em', lineHeight: 1.6 }} className="pc-mobile-stack">
