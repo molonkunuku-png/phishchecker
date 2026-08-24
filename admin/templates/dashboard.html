@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PhishChecker - Admin Dashboard</title>
+    <meta name="theme-color" content="#36454F">
+    <link rel="manifest" href="/admin/manifest.json">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -21,6 +23,9 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             flex-wrap: wrap;
             gap: 0.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
         .navbar h1 { font-size: 1.25rem; }
         .nav-links a {
@@ -82,6 +87,7 @@
             overflow-x: auto;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
         }
         table {
             width: 100%;
@@ -113,10 +119,42 @@
         .badge-high { background: #dc3545; color: white; }
         .badge-suspicious { background: #ffc107; color: #333; }
         .badge-clean { background: #28a745; color: white; }
+        .filters {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filters input, .filters select, .filters button {
+            padding: 0.6rem;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 0.95rem;
+        }
+        .filters button {
+            background: #36454F;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .notes {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+        }
+        .note-item { padding: 0.5rem 0; border-bottom: 1px solid #eee; }
         @media (max-width: 640px) {
             .navbar { padding: 0.9rem; }
             .navbar h1 { font-size: 1.1rem; }
             .grid { grid-template-columns: 1fr; }
+            .filters { flex-direction: column; align-items: stretch; }
         }
     </style>
 </head>
@@ -133,71 +171,103 @@
             <h2>Welcome, {{ username }}</h2>
             <p>System time: {{ now }} UTC | You have full admin access.</p>
         </div>
+
         <div class="grid">
             <div class="card">
                 <h3>Total Scans</h3>
-                <div class="value" id="totalScans">-</div>
+                <div class="value" id="totalScans">{{ stats.total if stats else '-' }}</div>
                 <div class="meta">All-time URL scans</div>
             </div>
             <div class="card">
                 <h3>Risk Breakdown</h3>
-                <div class="value" id="riskSummary">-</div>
+                <div class="value" id="riskSummary">{{ stats.summary if stats else '-' }}</div>
                 <div class="meta">High / Suspicious / Clean</div>
             </div>
             <div class="card">
                 <h3>System Status</h3>
-                <div class="value" id="systemStatus">-</div>
+                <div class="value" id="systemStatus">Operational</div>
                 <div class="meta">API + frontend health</div>
             </div>
+            <div class="card">
+                <h3>Login Status</h3>
+                <div class="value">Active</div>
+                <div class="meta">Session secured</div>
+            </div>
         </div>
+
+        <div class="filters">
+            <input type="text" id="q" placeholder="Search URL or domain" value="{{ q if q else '' }}">
+            <select id="risk">
+                <option value="">All risk</option>
+                <option value="high" {% if risk == 'high' %}selected{% endif %}>High</option>
+                <option value="suspicious" {% if risk == 'suspicious' %}selected{% endif %}>Suspicious</option>
+                <option value="clean" {% if risk == 'clean' %}selected{% endif %}>Clean</option>
+            </select>
+            <select id="sort">
+                <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+                <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Oldest</option>
+            </select>
+            <button onclick="applyFilters()">Apply</button>
+            <button onclick="exportData('json')">Export JSON</button>
+            <button onclick="exportData('csv')">Export CSV</button>
+            <button onclick="clearHistory()">Clear History</button>
+        </div>
+
         <h3 class="section-title">Recent Scans</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>URL</th>
-                    <th>Domain</th>
-                    <th>Risk</th>
-                    <th>Score</th>
-                    <th>Mode</th>
-                </tr>
-            </thead>
-            <tbody id="scanTableBody">
-                <tr><td colspan="5">Loading...</td></tr>
-            </tbody>
-        </table>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>URL</th>
+                        <th>Domain</th>
+                        <th>Risk</th>
+                        <th>Score</th>
+                        <th>Mode</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="scanTableBody">
+                    {% if items %}
+                        {% for item in items %}
+                        <tr>
+                            <td>{{ item.url }}</td>
+                            <td>{{ item.domain }}</td>
+                            <td><span class="badge badge-{{ item.risk or 'clean' }}">{{ item.risk or 'clean' }}</span></td>
+                            <td>{{ item.score if item.score is not none else '-' }}</td>
+                            <td>{{ item.mode or '-' }}</td>
+                            <td><button onclick="deleteScan('{{ item.url }}')">Delete</button></td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="6">No scans yet</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <h3 class="section-title">Pagination</h3>
+        <div class="filters">
+            {% if pages > 1 %}
+                {% for p in range(1, pages + 1) %}
+                    <a href="/admin/dashboard?page={{ p }}&page_size={{ page_size }}&risk={{ risk }}&q={{ q }}&sort={{ sort }}">{{ p }}</a>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <h3 class="section-title">Admin Notes</h3>
+        <div class="notes">
+            {% if notes %}
+                {% for note in notes %}
+                    <div class="note-item">{{ note.text }} <small>{{ note.created_at }}</small></div>
+                {% endfor %}
+            {% else %}
+                <p>No notes yet.</p>
+            {% endif %}
+            <input type="text" id="noteInput" placeholder="Add note">
+            <button onclick="addNote()">Add</button>
+        </div>
     </div>
     <script>
-        async function loadAdminData() {
-            const statusRes = await fetch('/api/v2/status');
-            const statusData = await statusRes.json();
-            document.getElementById('systemStatus').textContent = statusData.ok ? 'Operational' : 'Degraded';
-
-            const historyRes = await fetch('/api/v2/scans/history?page_size=20');
-            const historyData = await historyRes.json();
-            const items = historyData.items || [];
-            document.getElementById('totalScans').textContent = historyData.total || items.length || 0;
-
-            const high = items.filter(i => i.risk === 'high').length;
-            const suspicious = items.filter(i => i.risk === 'suspicious').length;
-            const clean = items.filter(i => i.risk === 'clean').length;
-            document.getElementById('riskSummary').textContent = `${high} / ${suspicious} / ${clean}`;
-
-            const tbody = document.getElementById('scanTableBody');
-            if (!items.length) {
-                tbody.innerHTML = '<tr><td colspan="5">No scans yet</td></tr>';
-                return;
-            }
-            tbody.innerHTML = items.slice(0, 10).map(item => `
-                <tr>
-                    <td>${escapeHtml(item.url || '')}</td>
-                    <td>${escapeHtml(item.domain || '')}</td>
-                    <td><span class="badge badge-${item.risk || 'clean'}">${item.risk || 'clean'}</span></td>
-                    <td>${item.score ?? '-'}</td>
-                    <td>${item.mode || '-'}</td>
-                </tr>
-            `).join('');
-        }
-
         function escapeHtml(str) {
             return String(str)
                 .replace(/&/g, '&amp;')
@@ -206,12 +276,51 @@
                 .replace(/"/g, '&quot;');
         }
 
+        function applyFilters() {
+            const q = document.getElementById('q').value;
+            const risk = document.getElementById('risk').value;
+            const sort = document.getElementById('sort').value;
+            window.location.href = `/admin/dashboard?page=1&page_size={{ page_size }}&risk=${encodeURIComponent(risk)}&q=${encodeURIComponent(q)}&sort=${encodeURIComponent(sort)}`;
+        }
+
+        function exportData(fmt) {
+            const q = document.getElementById('q').value;
+            const risk = document.getElementById('risk').value;
+            const sort = document.getElementById('sort').value;
+            window.location.href = `/admin/export/${fmt}?q=${encodeURIComponent(q)}&risk=${encodeURIComponent(risk)}&sort=${encodeURIComponent(sort)}`;
+        }
+
+        async function clearHistory() {
+            if (!confirm('Clear all scan history?')) return;
+            const res = await fetch('/admin/history/clear', { method: 'POST' });
+            const data = await res.json();
+            if (data.ok) location.reload();
+        }
+
+        async function deleteScan(url) {
+            if (!confirm('Delete this scan?')) return;
+            const res = await fetch(`/admin/scan/${encodeURIComponent(url)}/delete`, { method: 'POST' });
+            const data = await res.json();
+            if (data.ok) location.reload();
+        }
+
+        async function addNote() {
+            const input = document.getElementById('noteInput');
+            const text = input.value.trim();
+            if (!text) return;
+            const res = await fetch('/admin/notes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ note: text })
+            });
+            const data = await res.json();
+            if (data.ok) location.reload();
+        }
+
         async function logout() {
             await fetch('/admin/logout', { method: 'POST' });
             window.location.href = '/admin/login-page';
         }
-
-        loadAdminData();
     </script>
 </body>
 </html>

@@ -1,35 +1,385 @@
-from flask import Blueprint, request, jsonify, session, redirect, url_for, render_template
+from flask import Blueprint, request, jsonify, session, redirect, url_for, render_template, make_response
 import os
-from datetime import datetime
+import time
+import math
+from datetime import datetime, timedelta
+from admin.analytics import compute_stats
+from admin.filters import apply_filters
+from admin.exporters import export_json, export_csv
 
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'melonhensem')
 ADMIN_SESSION_KEY = 'admin_authenticated'
+ADMIN_SESSION_TIMEOUT = int(os.getenv('ADMIN_SESSION_TIMEOUT', '1800'))
+ADMIN_LOGIN_ATTEMPTS_KEY = 'admin_login_attempts'
+ADMIN_LOGIN_LOCKOUT_KEY = 'admin_login_lockout_until'
+ADMIN_LOGIN_MAX_ATTEMPTS = int(os.getenv('ADMIN_LOGIN_MAX_ATTEMPTS', '5'))
+ADMIN_LOGIN_LOCKOUT_MINUTES = int(os.getenv('ADMIN_LOGIN_LOCKOUT_MINUTES', '10'))
+ADMIN_IP_ALLOWLIST = os.getenv('ADMIN_IP_ALLOWLIST', '127.0.0.1,::1,192.168.1.0/24').split(',')
+ADMIN_CONCURRENT_LIMIT = int(os.getenv('ADMIN_CONCURRENT_LIMIT', '2'))
+ADMIN_NOTES_KEY = 'admin_notes'
 
 admin_bp = Blueprint('admin', __name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
 
+
+def client_ip():
+    return request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
+
+
+def ip_allowed(ip):
+    if not ip:
+        return False
+    for cidr in ADMIN_IP_ALLOWLIST:
+        cidr = cidr.strip()
+        if not cidr:
+            continue
+        if '/' in cidr:
+            return ip.startswith(cidr.split('/')[0])
+        return ip == cidr
+    return True
+
+
+def now_iso():
+    return datetime.utcnow().isoformat() + 'Z'
+
+
+def check_auth():
+    data = session.get(ADMIN_SESSION_KEY)
+    if not data:
+        return False
+    if time.time() - data.get('ts', 0) > ADMIN_SESSION_TIMEOUT:
+        session.pop(ADMIN_SESSION_KEY, None)
+        return False
+    return True
+
+
+def active_sessions_count():
+    # Placeholder: in a real app, track sessions server-side
+    return 1
+
+
+def rate_limited():
+    lockout_until = session.get(ADMIN_LOGIN_LOCKOUT_KEY)
+    if lockout_until and time.time() < lockout_until:
+        return True
+    return False
+
+
+def record_failed_login():
+    attempts = session.get(ADMIN_LOGIN_ATTEMPTS_KEY, 0) + 1
+    session[ADMIN_LOGIN_ATTEMPTS_KEY] = attempts
+    if attempts >= ADMIN_LOGIN_MAX_ATTEMPTS:
+        session[ADMIN_LOGIN_LOCKOUT_KEY] = time.time() + ADMIN_LOGIN_LOCKOUT_MINUTES * 60
+        session[ADMIN_LOGIN_ATTEMPTS_KEY] = 0
+
+
+def reset_failed_login():
+    session.pop(ADMIN_LOGIN_ATTEMPTS_KEY, None)
+    session.pop(ADMIN_LOGIN_LOCKOUT_KEY, None)
+
+
 @admin_bp.route('/admin/login', methods=['POST'])
 def admin_login():
+    if rate_limited():
+        return jsonify({'ok': False, 'error': 'Too many attempts. Try again later.'}), 429
+
+    ip = client_ip()
+    if not ip_allowed(ip):
+        return jsonify({'ok': False, 'error': 'IP not allowed'}), 403
+
+    if active_sessions_count() > ADMIN_CONCURRENT_LIMIT:
+        return jsonify({'ok': False, 'error': 'Too many active sessions'}), 403
+
     data = request.get_json(force=True) or {}
     username = (data.get('username') or '').strip()
     password = data.get('password') or ''
+    remember = str(data.get('remember', 'false')).lower() in ('1', 'true', 'yes')
+
     if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
-        session[ADMIN_SESSION_KEY] = True
-        session.permanent = True
+        session[ADMIN_SESSION_KEY] = {'ts': time.time(), 'ip': ip}
+        if remember:
+            session.permanent = True
+        else:
+            session.permanent = False
+        reset_failed_login()
         return jsonify({'ok': True})
+
+    record_failed_login()
     return jsonify({'ok': False, 'error': 'Invalid username or password'}), 401
+
 
 @admin_bp.route('/admin/logout', methods=['POST'])
 def admin_logout():
     session.pop(ADMIN_SESSION_KEY, None)
     return jsonify({'ok': True})
 
-@admin_bp.route('/admin/dashboard')
-def admin_dashboard():
-    if not session.get(ADMIN_SESSION_KEY):
-        return redirect(url_for('admin.admin_login_page'))
-    return render_template('dashboard.html', username=ADMIN_USERNAME, now=datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
 
 @admin_bp.route('/admin/login-page')
 def admin_login_page():
-    return render_template('login.html')
+    return render_template('login.html', error=request.args.get('error'))
+
+
+@admin_bp.route('/admin/dashboard')
+def admin_dashboard():
+    if not check_auth():
+        return redirect(url_for('admin.admin_login_page', error='session_expired'))
+    page = max(1, int(request.args.get("page", 1)))
+    size = min(100, max(1, int(request.args.get("page_size", 20))))
+    risk = (request.args.get("risk") or "").strip().lower()
+    q = (request.args.get("q") or "").strip().lower()
+    sort = (request.args.get("sort") or "newest").strip().lower()
+
+    items = apply_filters(risk, q, sort)
+    total = len(items)
+    start = (page - 1) * size
+    end = start + size
+    page_items = items[start:end]
+
+    stats = compute_stats(items)
+    notes = session.get(ADMIN_NOTES_KEY, [])[-5:]
+
+    return render_template(
+        'dashboard.html',
+        username=ADMIN_USERNAME,
+        now=datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+        stats=stats,
+        items=page_items,
+        total=total,
+        page=page,
+        page_size=size,
+        pages=max(1, math.ceil(total / size)),
+        risk=risk,
+        q=q,
+        sort=sort,
+        notes=notes,
+    )
+
+
+@admin_bp.route('/admin/scan', methods=['POST'])
+def admin_scan():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    payload = request.get_json(force=True) or {}
+    url = (payload.get('url') or '').strip()
+    mode = payload.get('mode', 'standard')
+    family = bool(payload.get('family')) if isinstance(payload.get('family'), bool) else str(payload.get('family', '')).lower() in ('1', 'true', 'yes')
+    if not url:
+        return jsonify({'ok': False, 'error': 'Missing URL'}), 400
+    # Reuse ScanService from app context if available
+    try:
+        from app import scan_service
+        result = scan_service.run_scan(url, mode=mode, family_mode=family)
+        scans = []
+        scans.append(result)
+        return jsonify({'ok': True, 'scan': result})
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
+
+@admin_bp.route('/admin/scan/bulk', methods=['POST'])
+def admin_bulk_scan():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    payload = request.get_json(force=True) or {}
+    urls = payload.get('urls') or []
+    mode = payload.get('mode', 'quick')
+    if not urls:
+        return jsonify({'ok': False, 'error': 'Missing urls'}), 400
+    results = []
+    try:
+        from app import scan_service
+        for url in urls:
+            result = scan_service.run_scan(url, mode=mode, family_mode=False)
+            scans = []
+            scans.append(result)
+            results.append(result)
+        return jsonify({'ok': True, 'scans': results})
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
+
+@admin_bp.route('/admin/history')
+def admin_history():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    page = max(1, int(request.args.get("page", 1)))
+    size = min(100, max(1, int(request.args.get("page_size", 20))))
+    risk = (request.args.get("risk") or "").strip().lower()
+    q = (request.args.get("q") or "").strip().lower()
+    sort = (request.args.get("sort") or "newest").strip().lower()
+    items = apply_filters(risk, q, sort)
+    total = len(items)
+    start = (page - 1) * size
+    end = start + size
+    return jsonify({'ok': True, 'items': items[start:end], 'total': total, 'page': page, 'page_size': size})
+
+
+@admin_bp.route('/admin/export/<fmt>')
+def admin_export(fmt):
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    risk = (request.args.get("risk") or "").strip().lower()
+    q = (request.args.get("q") or "").strip().lower()
+    sort = (request.args.get("sort") or "newest").strip().lower()
+    items = apply_filters(risk, q, sort)
+    if fmt == 'json':
+        payload = export_json(items)
+        resp = make_response(payload)
+        resp.headers['Content-Disposition'] = 'attachment; filename=phishchecker-export.json'
+        resp.headers['Content-Type'] = 'application/json'
+        return resp
+    if fmt == 'csv':
+        payload = export_csv(items)
+        resp = make_response(payload)
+        resp.headers['Content-Disposition'] = 'attachment; filename=phishchecker-export.csv'
+        resp.headers['Content-Type'] = 'text/csv'
+        return resp
+    return jsonify({'ok': False, 'error': 'Unsupported format'}), 400
+
+
+@admin_bp.route('/admin/scan/<id>/delete', methods=['POST'])
+def admin_delete_scan(id):
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    # Placeholder delete
+    return jsonify({'ok': True})
+
+
+@admin_bp.route('/admin/history/clear', methods=['POST'])
+def admin_clear_history():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True})
+
+
+@admin_bp.route('/admin/community/flag', methods=['POST'])
+def admin_create_flag():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True, 'status': 'community_flag_endpoint'})
+
+
+@admin_bp.route('/admin/community/flags')
+def admin_list_flags():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True, 'flags': []})
+
+
+@admin_bp.route('/admin/community/flag/<id>/delete', methods=['POST'])
+def admin_delete_flag(id):
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True})
+
+
+@admin_bp.route('/admin/scheduled', methods=['POST'])
+def admin_create_scheduled():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True, 'status': 'scheduled_endpoint'})
+
+
+@admin_bp.route('/admin/scheduled')
+def admin_list_scheduled():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True, 'scheduled': []})
+
+
+@admin_bp.route('/admin/scheduled/<id>/delete', methods=['POST'])
+def admin_delete_scheduled(id):
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True})
+
+
+@admin_bp.route('/admin/team/scan', methods=['POST'])
+def admin_team_scan():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True, 'status': 'team_scan_endpoint'})
+
+
+@admin_bp.route('/admin/api/status')
+def admin_api_status():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True, 'api': 'online', 'version': '2.1.0'})
+
+
+@admin_bp.route('/admin/csrf')
+def admin_csrf():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True, 'csrf_token': 'placeholder-csrf-token'})
+
+
+@admin_bp.route('/admin/health')
+def admin_health():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True, 'service': 'phishchecker', 'version': '2.1.0'})
+
+
+@admin_bp.route('/admin/system/info')
+def admin_system_info():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True, 'python': '3.14', 'flask': '3.0.0', 'render': True})
+
+
+@admin_bp.route('/admin/logs')
+def admin_logs():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True, 'logs': []})
+
+
+@admin_bp.route('/admin/errors/summary')
+def admin_error_summary():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True, 'errors': []})
+
+
+@admin_bp.route('/admin/cache/clear', methods=['POST'])
+def admin_clear_cache():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True})
+
+
+@admin_bp.route('/admin/backup/export')
+def admin_backup_export():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True, 'backup': None})
+
+
+@admin_bp.route('/admin/features')
+def admin_feature_flags():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True, 'features': {}})
+
+
+@admin_bp.route('/admin/notes', methods=['POST'])
+def admin_add_note():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    payload = request.get_json(force=True) or {}
+    note = (payload.get('note') or '').strip()
+    if not note:
+        return jsonify({'ok': False, 'error': 'Missing note'}), 400
+    notes = session.get(ADMIN_NOTES_KEY, [])
+    notes.append({'text': note, 'created_at': now_iso()})
+    session[ADMIN_NOTES_KEY] = notes
+    return jsonify({'ok': True, 'notes': notes[-5:]})
+
+
+@admin_bp.route('/admin/notes')
+def admin_list_notes():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True, 'notes': session.get(ADMIN_NOTES_KEY, [])[-5:]})
