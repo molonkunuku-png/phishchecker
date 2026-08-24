@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file, abort
 from flask_cors import CORS
 import time
 import os
@@ -131,7 +131,24 @@ def handle_team_scan():
 def handle_community_flag():
     return jsonify({"status": "community_flag_endpoint"})
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=PORT, debug=DEBUG)
+FRONTEND_DIST = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frontend', 'dist')
+FRONTEND_ASSETS = os.path.join(FRONTEND_DIST, 'assets')
+
+@app.route('/')
+def index():
+    return send_file(os.path.join(FRONTEND_DIST, 'index.html'))
+
+@app.route('/<path:path>')
+def frontend_files(path):
+    if path.startswith('api/'):
+        return abort(404)
+    candidate = os.path.join(FRONTEND_DIST, path)
+    if os.path.isfile(candidate):
+        return send_file(candidate)
+    candidate = os.path.join(FRONTEND_ASSETS, path)
+    if path.startswith('assets/') and os.path.isfile(candidate):
+        return send_file(candidate)
+    return send_file(os.path.join(FRONTEND_DIST, 'index.html'))
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=PORT, debug=DEBUG)
