@@ -5,6 +5,7 @@ import os
 
 app = Flask(__name__)
 CORS(app)
+app.secret_key = os.getenv('PHISHCHECKER_SECRET', 'change-me')
 
 # Configuration from environment
 DEBUG = os.getenv('PHISHCHECKER_DEBUG', 'false').lower() in ('1', 'true', 'yes')
@@ -130,6 +131,9 @@ def handle_team_scan():
 @app.route('/api/v2/community/flag', methods=['POST'])
 def handle_community_flag():
     return jsonify({"status": "community_flag_endpoint"})
+
+from admin import admin_bp
+app.register_blueprint(admin_bp)
 
 FRONTEND_DIST = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frontend', 'dist')
 FRONTEND_ASSETS = os.path.join(FRONTEND_DIST, 'assets')

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishChecker - Admin Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: #36454F;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .navbar h1 { font-size: 1.5rem; }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-size: 0.9rem;
+        }
+        .nav-links a:hover { text-decoration: underline; }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .welcome {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .welcome h2 { color: #36454F; margin-bottom: 0.5rem; }
+        .welcome p { color: #666; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .card h3 {
+            color: #36454F;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        .card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4a5d6a;
+        }
+        .card .meta {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 0.25rem;
+        }
+        .section-title {
+            color: #36454F;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        th, td {
+            padding: 0.9rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background: #36454F;
+            color: white;
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+        tr:hover { background: #f9f9f9; }
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-high { background: #dc3545; color: white; }
+        .badge-suspicious { background: #ffc107; color: #333; }
+        .badge-clean { background: #28a745; color: white; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>🔐 PhishChecker Admin</h1>
+        <div class="nav-links">
+            <a href="/admin/dashboard">Dashboard</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="welcome">
+            <h2>Welcome, {{ username }}</h2>
+            <p>System time: {{ now }} UTC | You have full admin access.</p>
+        </div>
+        <div class="grid">
+            <div class="card">
+                <h3>Total Scans</h3>
+                <div class="value" id="totalScans">-</div>
+                <div class="meta">All-time URL scans</div>
+            </div>
+            <div class="card">
+                <h3>Risk Breakdown</h3>
+                <div class="value" id="riskSummary">-</div>
+                <div class="meta">High / Suspicious / Clean</div>
+            </div>
+            <div class="card">
+                <h3>System Status</h3>
+                <div class="value" id="systemStatus">-</div>
+                <div class="meta">API + frontend health</div>
+            </div>
+        </div>
+        <h3 class="section-title">Recent Scans</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>URL</th>
+                    <th>Domain</th>
+                    <th>Risk</th>
+                    <th>Score</th>
+                    <th>Mode</th>
+                </tr>
+            </thead>
+            <tbody id="scanTableBody">
+                <tr><td colspan="5">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <script>
+        async function loadAdminData() {
+            const statusRes = await fetch('/api/v2/status');
+            const statusData = await statusRes.json();
+            document.getElementById('systemStatus').textContent = statusData.ok ? 'Operational' : 'Degraded';
+
+            const historyRes = await fetch('/api/v2/scans/history?page_size=20');
+            const historyData = await historyRes.json();
+            const items = historyData.items || [];
+            document.getElementById('totalScans').textContent = historyData.total || items.length || 0;
+
+            const high = items.filter(i => i.risk === 'high').length;
+            const suspicious = items.filter(i => i.risk === 'suspicious').length;
+            const clean = items.filter(i => i.risk === 'clean').length;
+            document.getElementById('riskSummary').textContent = `${high} / ${suspicious} / ${clean}`;
+
+            const tbody = document.getElementById('scanTableBody');
+            if (!items.length) {
+                tbody.innerHTML = '<tr><td colspan="5">No scans yet</td></tr>';
+                return;
+            }
+            tbody.innerHTML = items.slice(0, 10).map(item => `
+                <tr>
+                    <td>${escapeHtml(item.url || '')}</td>
+                    <td>${escapeHtml(item.domain || '')}</td>
+                    <td><span class="badge badge-${item.risk || 'clean'}">${item.risk || 'clean'}</span></td>
+                    <td>${item.score ?? '-'}</td>
+                    <td>${item.mode || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        async function logout() {
+            await fetch('/admin/logout', { method: 'POST' });
+            window.location.href = '/admin/login-page';
+        }
+
+        loadAdminData();
+    </script>
+</body>
+</html>
