@@ -89,6 +89,11 @@
   --sp-7: 3rem;
   --sp-8: 4rem;
 
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-elevated: 0 8px 24px rgba(0,0,0,0.12);
+  --shadow-glow: 0 0 0 4px var(--brand-muted);
+
   /* Radius */
   --r-sm: 0.5rem;
   --r-md: 0.625rem;
@@ -400,23 +405,29 @@ a:hover {
 }
 
 /* Layout utilities */
-.pc-max-width {
-  max-width: 56em;
-  margin-left: auto;
-  margin-right: auto;
+.pc-stack { display: flex; flex-direction: column; }
+.pc-gap-2 { gap: var(--sp-2); }
+.pc-gap-3 { gap: var(--sp-3); }
+.pc-gap-4 { gap: var(--sp-4); }
+.pc-gap-6 { gap: var(--sp-6); }
+.pc-animate-in { animation: pc-fade-in 400ms ease both; }
+.pc-mobile-stack { grid-template-columns: 1fr !important; }
+.pc-nav-shadow { box-shadow: 0 4px 24px rgba(0,0,0,0.35); }
+.pc-max-width { max-width: 80rem; margin: 0 auto; }
+.pc-center { display: flex; align-items: center; justify-content: center; }
+
+@keyframes pc-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.pc-center {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+@media print {
+  .pc-nav, footer, .pc-btn, .pc-skeleton { display: none !important; }
+  .pc-panel { border: none !important; box-shadow: none !important; background: transparent !important; }
+  .pc-stack { display: grid; gap: 0.6em; }
 }
 
-.pc-stack {
-  display: grid;
-  gap: 0.6em;
-}
-
+/* Spacing variants */
 .pc-gap-sm { gap: 0.4em; }
 .pc-gap-md { gap: 0.8em; }
 .pc-gap-lg { gap: 1.2em; }
@@ -546,16 +557,84 @@ a:hover {
 }
 
 /* Animations */
-.pc-animate-in {
-  animation: pc-fade-in 420ms ease both;
-}
-
 @keyframes pc-fade-in {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Skeleton */
+.pc-animate-in {
+  animation: pc-fade-in 420ms ease both;
+}
+
+/* Toast */
+.pc-toast {
+  position: fixed;
+  top: 1em;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  background: var(--risk-danger);
+  color: var(--text-inverse);
+  padding: 0.8em 1.2em;
+  border-radius: var(--r-md);
+  font-size: 0.85em;
+  box-shadow: var(--shadow-elevated);
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  max-width: 92vw;
+}
+
+/* Section */
+.pc-section-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+/* Example card */
+.pc-example-card {
+  padding: 1.2em;
+  border: 1px solid var(--border-hairline);
+  background: var(--bg-surface-raised);
+  margin-bottom: 1.2em;
+  border-radius: var(--r-lg);
+}
+
+/* History card */
+.pc-history-card {
+  padding: 1.1em;
+}
+
+.pc-history-domain {
+  font-size: 0.75em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.pc-history-score {
+  font-size: 1.0625rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Badges with background */
+.pc-badge-high {
+  background: rgba(220, 38, 38, 0.12);
+  color: var(--risk-danger);
+}
+.pc-badge-suspicious {
+  background: rgba(217, 119, 6, 0.12);
+  color: var(--risk-caution);
+}
+.pc-badge-low {
+  background: rgba(11, 133, 96, 0.12);
+  color: var(--risk-safe);
+}
 .pc-skeleton {
   background: linear-gradient(90deg, var(--bg-surface-raised) 25%, rgba(10, 15, 28, 0.25) 50%, var(--bg-surface-raised) 75%);
   border-radius: var(--r-md);
@@ -895,6 +974,23 @@ a:hover {
   .pc-nav { height: auto; min-height: 4.5rem; }
   .pc-nav-cta { display: none; }
   .pc-nav-inner { flex-wrap: wrap; row-gap: 0.5rem; }
+}
+
+/* Utility */
+.pc-max-width { max-width: 80rem; margin: 0 auto; }
+.pc-center { display: flex; align-items: center; justify-content: center; }
+.pc-stack { display: flex; flex-direction: column; }
+.pc-gap-2 { gap: var(--sp-2); }
+.pc-gap-3 { gap: var(--sp-3); }
+.pc-gap-4 { gap: var(--sp-4); }
+.pc-gap-6 { gap: var(--sp-6); }
+.pc-animate-in { animation: pc-fade-in 400ms ease both; }
+.pc-mobile-stack { grid-template-columns: 1fr !important; }
+.pc-nav-shadow { box-shadow: 0 4px 24px rgba(0,0,0,0.35); }
+
+@keyframes pc-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media print {

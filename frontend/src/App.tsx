@@ -571,35 +571,35 @@ export default function App() {
                 <span>{t("noPersonalData")}</span>
               </div>
               {error && (
-                <div role="alert" aria-live="assertive" style={{ position: 'fixed', top: '1em', left: '50%', transform: 'translateX(-50%)', zIndex: 200, background: 'var(--risk-danger)', color: 'var(--text-inverse)', padding: '0.8em 1.2em', borderRadius: '0.4em', fontSize: '0.85em', boxShadow: '0 6px 20px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', gap: '0.6em', maxWidth: '92vw' }}>
+                <div role="alert" aria-live="assertive" className="pc-toast">
                   <span style={{ fontWeight: 600 }}>{t("errorTitle")}</span>
                   <span>{error}</span>
-                  <button type="button" onClick={doScan} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderColor: 'rgba(255,255,255,0.35)', color: 'inherit' }}>{t("retry")}</button>
+                  <button type="button" onClick={doScan} className="pc-btn-ghost pc-btn-sm" style={{ borderColor: 'rgba(255,255,255,0.35)', color: 'inherit' }}>{t("retry")}</button>
                 </div>
               )}
             </div>
           </section>
 
-          <section style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
-            <div style={{ maxWidth: '56em', margin: '0 auto', padding: '1.6em 1.5em' }} className="pc-section">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.8em', flexWrap: 'wrap' }}>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)' }}>{t("batchTitle")}</h2>
-                <button type="button" onClick={() => { setBatchMode(v => !v); setBatchResults(null); setBatchError(null); }} className="pc-btn-ghost" style={{ fontSize: '0.7em' }}>{batchMode ? 'Close batch' : 'Open batch'}</button>
+          <section className="pc-section" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
+            <div className="pc-section pc-max-width pc-gap-4" style={{ padding: '1.6em 1.5em' }}>
+              <div className="pc-stack pc-gap-3" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                <h2 className="pc-section-title">{t("batchTitle")}</h2>
+                <button type="button" onClick={() => { setBatchMode(v => !v); setBatchResults(null); setBatchError(null); }} className="pc-btn-ghost pc-btn-sm">{batchMode ? 'Close batch' : 'Open batch'}</button>
               </div>
               {batchMode && (
-                <form onSubmit={handleBatch} style={{ display: 'grid', gap: '0.6em', maxWidth: '42em' }}>
+                <form onSubmit={handleBatch} className="pc-stack pc-gap-3" style={{ maxWidth: '42em' }}>
                   <label htmlFor="batch-input" style={{ position: 'absolute', overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', width: '1px', height: '1px' }}>{t("batchLabel")}</label>
                   <textarea id="batch-input" value={batchInput} onChange={e => setBatchInput(e.target.value)} placeholder={t("batchPlaceholder")} className="pc-input pc-placeholder" disabled={batchRunning} rows={6} style={{ resize: 'vertical' }} />
-                  <div style={{ display: 'flex', gap: '0.5em', flexWrap: 'wrap' }}>
+                  <div className="pc-stack pc-gap-2" style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                     <button type="submit" disabled={batchRunning} className="pc-btn-primary" style={{ whiteSpace: 'nowrap' }}>
-                      {batchRunning ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}><span className="pc-spinner" style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'pc-spin 0.8s linear infinite' }} />{t("scanning")}</span>) : 'Scan batch'}
+                      {batchRunning ? (<span className="pc-center pc-gap-2" style={{ display: 'inline-flex' }}><span className="pc-spinner" style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'pc-spin 0.8s linear infinite' }} />{t("scanning")}</span>) : 'Scan batch'}
                     </button>
-                    <span style={{ fontSize: '0.7em', color: 'var(--text-secondary)', alignSelf: 'center' }}>{t("maxUrls")}</span>
+                    <span className="pc-section" style={{ fontSize: '0.7em', color: 'var(--text-secondary)', alignSelf: 'center' }}>{t("maxUrls")}</span>
                   </div>
                   {batchError && (
-                    <p style={{ color: 'var(--risk-danger)', marginTop: '0.4em', fontSize: '0.85em', display: 'flex', alignItems: 'center', gap: '0.5em', flexWrap: 'wrap' }}>
+                    <p className="pc-center pc-gap-2" style={{ color: 'var(--risk-danger)', fontSize: '0.85em', flexWrap: 'wrap' }}>
                       {batchError}
-                      <button type="button" onClick={() => setBatchError(null)} className="pc-btn-ghost" style={{ fontSize: '0.8em' }}>{t("retry")}</button>
+                      <button type="button" onClick={() => setBatchError(null)} className="pc-btn-ghost pc-btn-sm">{t("retry")}</button>
                     </p>
                   )}
                   {batchResults && (
@@ -625,12 +625,12 @@ export default function App() {
             <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
               <div style={{ maxWidth: '72em', margin: '0 auto', padding: '1.8em 1.5em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em' }} className="pc-section">
                 {history.slice(0, 3).map((h) => (
-                  <div key={h.id} className="pc-panel" style={{ padding: '1.1em' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6em', gap: '0.6em' }}>
-                      <span style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>{h.domain}</span>
+                  <div key={h.id} className="pc-panel pc-history-card">
+                    <div className="pc-stack pc-gap-2" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span className="pc-history-domain">{h.domain}</span>
                       <span className={`pc-badge ${h.risk === 'high' ? 'pc-badge-high' : h.risk === 'suspicious' ? 'pc-badge-suspicious' : 'pc-badge-low'}`}>{h.risk}</span>
                     </div>
-                    <div style={{ fontSize: '1.0625rem', color: 'var(--text-primary)', fontWeight: 600 }}>{h.score}/100</div>
+                    <div className="pc-history-score">{h.score}/100</div>
                   </div>
                 ))}
               </div>
@@ -639,73 +639,73 @@ export default function App() {
 
           {showAwareness && (
             <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
-              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1em', marginBottom: '0.8em', flexWrap: 'wrap' }}>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', margin: 0 }}>{t("awarenessTitle")}</h2>
+              <div className="pc-section pc-max-width pc-gap-4" style={{ padding: '2em 1.5em' }}>
+                <div className="pc-stack pc-gap-3" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                  <h2 className="pc-section-title">{t("awarenessTitle")}</h2>
                   <div style={{ display: 'inline-flex', gap: '0.4em', background: 'var(--bg-surface-raised)', border: '1px solid var(--border-hairline)', padding: '0.3em', borderRadius: 'var(--r-pill)' }}>
-                    <button type="button" onClick={() => setAwarenessMode('simple')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: 'var(--r-pill)', background: awarenessMode === 'simple' ? 'var(--brand-500)' : 'transparent', color: awarenessMode === 'simple' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{t("simpleMode")}</button>
-                    <button type="button" onClick={() => setAwarenessMode('detailed')} className="pc-btn-ghost" style={{ fontSize: '0.8em', borderRadius: 'var(--r-pill)', background: awarenessMode === 'detailed' ? 'var(--brand-500)' : 'transparent', color: awarenessMode === 'detailed' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{t("detailedMode")}</button>
+                    <button type="button" onClick={() => setAwarenessMode('simple')} className="pc-btn-ghost pc-btn-sm" style={{ borderRadius: 'var(--r-pill)', background: awarenessMode === 'simple' ? 'var(--brand-500)' : 'transparent', color: awarenessMode === 'simple' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{t("simpleMode")}</button>
+                    <button type="button" onClick={() => setAwarenessMode('detailed')} className="pc-btn-ghost pc-btn-sm" style={{ borderRadius: 'var(--r-pill)', background: awarenessMode === 'detailed' ? 'var(--brand-500)' : 'transparent', color: awarenessMode === 'detailed' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{t("detailedMode")}</button>
                   </div>
                 </div>
 
                 {awarenessMode === 'simple' && (
-                  <div style={{ fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
-                    <div style={{ padding: '1.2em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
+                  <div className="pc-stack pc-gap-4" style={{ fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
+                    <div className="pc-example-card">
                       <p style={{ margin: 0, fontSize: '1.05em', color: 'var(--text-primary)' }}>{t("awarenessLead")}</p>
                       <p style={{ margin: '0.6em 0 0', fontSize: '1.05em', color: 'var(--text-primary)' }}>They want your password, OTP, or payment.</p>
                       <p style={{ margin: '0.6em 0 0', fontSize: '1.05em', color: 'var(--text-primary)' }}>{t("awarenessLine2")}</p>
                     </div>
 
-                    <div style={{ padding: '1.2em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
+                    <div className="pc-example-card">
                       <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
                         <span aria-hidden="true"><Icon name="smartphone" size={18} /></span> Example 1: Fake bank text
                       </h3>
                       <div style={{ background: 'var(--bg-canvas)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '22em' }}>
                         <div style={{ fontSize: '0.75em', color: 'var(--text-tertiary)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("smsLabel")}</div>
                         <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                          <strong style={{ color: '#fca5a5' }}>{t("alertLabel")}</strong> Your bank account is locked.<br/>
-                          <span style={{ color: '#93c5fd' }}>{t("tapHere")}</span><br/>
+                          <strong style={{ color: 'var(--risk-danger)' }}>{t("alertLabel")}</strong> Your bank account is locked.<br/>
+                          <span style={{ color: 'var(--brand-300)' }}>{t("tapHere")}</span><br/>
                           <span style={{ color: 'var(--risk-danger)', textDecoration: 'underline' }}>http://bank-secure.xyz/login</span>
                         </div>
-                        <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(229,72,77,0.1)', border: '1px solid rgba(229,72,77,0.25)', borderRadius: 'var(--r-md)', fontSize: '0.85em', color: '#fca5a5' }}>
+                        <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: 'var(--r-md)', fontSize: '0.85em', color: 'var(--risk-danger)' }}>
                           <Icon name="alert-triangle" size={14} /> Red flags: fear words, strange address, asks for login by text
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ padding: '1.2em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
+                    <div className="pc-example-card">
                       <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
                         <span aria-hidden="true"><Icon name="mail" size={18} /></span> Example 2: Fake delivery notification
                       </h3>
                       <div style={{ background: 'var(--bg-canvas)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '24em' }}>
                         <div style={{ fontSize: '0.75em', color: 'var(--text-tertiary)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("emailLabel")}</div>
                         <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                          <strong style={{ color: '#fca5a5' }}>{t("actionRequired")}</strong> Your parcel cannot be delivered.<br/>
-                          Open the label: <span style={{ color: '#93c5fd' }}>https://delivery-tracking.info/parcel</span>
+                          <strong style={{ color: 'var(--risk-danger)' }}>{t("actionRequired")}</strong> Your parcel cannot be delivered.<br/>
+                          Open the label: <span style={{ color: 'var(--brand-300)' }}>https://delivery-tracking.info/parcel</span>
                         </div>
-                        <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(229,72,77,0.1)', border: '1px solid rgba(229,72,77,0.25)', borderRadius: 'var(--r-md)', fontSize: '0.85em', color: '#fca5a5' }}>
+                        <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: 'var(--r-md)', fontSize: '0.85em', color: 'var(--risk-danger)' }}>
                           <Icon name="alert-triangle" size={14} /> Red flags: no tracking number, wrong domain, asks to download file
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ padding: '1.2em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', marginBottom: '1.2em', borderRadius: 'var(--r-lg)' }}>
+                    <div className="pc-example-card">
                       <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
                         <span aria-hidden="true"><Icon name="lock" size={18} /></span> Example 3: Fake account alert
                       </h3>
                       <div style={{ background: 'var(--bg-canvas)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--r-md)', padding: '1.2em', maxWidth: '24em' }}>
                         <div style={{ fontSize: '0.75em', color: 'var(--text-tertiary)', marginBottom: '0.6em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("emailLabel")}</div>
                         <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                          <strong style={{ color: '#fca5a5' }}>{t("securityNotice")}</strong> Someone logged into your account.<br/>
-                          Secure it now: <span style={{ color: '#93c5fd' }}>https://account-security-alert.xyz/reset</span>
+                          <strong style={{ color: 'var(--risk-danger)' }}>{t("securityNotice")}</strong> Someone logged into your account.<br/>
+                          Secure it now: <span style={{ color: 'var(--brand-300)' }}>https://account-security-alert.xyz/reset</span>
                         </div>
-                        <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(229,72,77,0.1)', border: '1px solid rgba(229,72,77,0.25)', borderRadius: 'var(--r-md)', fontSize: '0.85em', color: '#fca5a5' }}>
-                          <Icon name="alert-triangle" size={14} /> Red flags: no account details, asks reset on unknown site, fake urgency
+                        <div style={{ marginTop: '0.8em', padding: '0.6em', background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: 'var(--r-md)', fontSize: '0.85em', color: 'var(--risk-danger)' }}>
+                          <Icon name="alert-triangle" size={14} /> Red flags: urgent tone, generic greeting, link to lookalike domain
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ padding: '1.2em', border: '1px solid var(--border-brand)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(227,174,55,0.03) 100%)', borderRadius: 'var(--r-lg)' }}>
+                    <div className="pc-example-card" style={{ borderColor: 'var(--border-brand)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, var(--brand-muted) 100%)' }}>
                       <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--brand-500)', margin: '0 0 0.8em', display: 'flex', alignItems: 'center', gap: '0.4em' }}>
                         <span aria-hidden="true"><Icon name="check-circle" size={18} /></span> Quick checks
                       </h3>
