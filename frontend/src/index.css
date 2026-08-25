@@ -690,6 +690,90 @@ a:hover {
   background: var(--brand-500);
   transition: width 420ms ease;
 }
+
+/* Homepage sections */
+.pc-trust-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12em, 1fr));
+  gap: 0.6em;
+}
+
+.pc-trust-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: 0.85em;
+  color: var(--text-secondary);
+}
+
+.pc-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14em, 1fr));
+  gap: 1em;
+}
+
+.pc-feature-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--r-lg);
+  padding: 1.2em;
+  display: grid;
+  gap: 0.4em;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.pc-feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-elevated);
+}
+
+.pc-feature-icon {
+  width: 2em;
+  height: 2em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-md);
+  background: var(--brand-muted);
+  color: var(--brand-500);
+}
+
+.pc-feature-title {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pc-feature-body {
+  font-size: 0.9em;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.pc-how-it-works {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12em, 1fr));
+  gap: 1em;
+}
+
+.pc-step {
+  display: grid;
+  gap: 0.4em;
+  text-align: center;
+}
+
+.pc-step-icon {
+  width: 2.4em;
+  height: 2.4em;
+  margin: 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-full);
+  background: var(--brand-muted);
+  color: var(--brand-500);
+  font-weight: 700;
+}
+
 .pc-skeleton {
   background: linear-gradient(90deg, var(--bg-surface-raised) 25%, rgba(10, 15, 28, 0.25) 50%, var(--bg-surface-raised) 75%);
   border-radius: var(--r-md);

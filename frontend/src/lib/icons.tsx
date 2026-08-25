@@ -27,7 +27,10 @@ type IconName =
   | 'search'
   | 'zap'
   | 'globe'
-  | 'alert-triangle';
+  | 'alert-triangle'
+  | 'bar-chart'
+  | 'image'
+  | 'users';
 
 const icons: Record<IconName, (props: { size?: number; className?: string }) => ReactNode> = {
   'shield': ({ size = 24, className = '' }) => (
@@ -198,6 +201,28 @@ const icons: Record<IconName, (props: { size?: number; className?: string }) => 
       <path d="M32 14l20 36H12l20-36z" />
       <path d="M32 22v14" />
       <circle cx="32" cy="46" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+  ),
+  'bar-chart': ({ size = 24, className = '' }) => (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <rect x="12" y="24" width="12" height="28" rx="2" />
+      <rect x="26" y="14" width="12" height="38" rx="2" />
+      <rect x="40" y="32" width="12" height="20" rx="2" />
+    </svg>
+  ),
+  'image': ({ size = 24, className = '' }) => (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <rect x="8" y="14" width="48" height="36" rx="3" />
+      <circle cx="22" cy="28" r="5" />
+      <path d="M8 42l18-14 12 10 14-8v12H8z" />
+    </svg>
+  ),
+  'users': ({ size = 24, className = '' }) => (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <circle cx="24" cy="22" r="10" />
+      <path d="M4 54c0-11 9-18 20-18s20 7 20 18" />
+      <circle cx="44" cy="22" r="6" />
+      <path d="M52 42c2-6 6-10 12-10" />
     </svg>
   ),
 };

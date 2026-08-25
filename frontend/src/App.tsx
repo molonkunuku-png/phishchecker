@@ -443,7 +443,7 @@ export default function App() {
         <main id="main" style={{ paddingTop: '4.5em' }}>
           <section className="pc-panel pc-hero" style={{ borderTop: 'none', borderRadius: 0, borderLeft: 'none', borderRight: 'none' }}>
             <div style={{ maxWidth: '56em', margin: '0 auto', padding: '3.5em 1.5em' }} className="pc-section">
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em', padding: '0.35em 0.8em', borderRadius: '9999px', background: 'var(--brand-muted)', border: '1px solid var(--border-brand)', color: 'var(--gold)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.2em' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em', padding: '0.35em 0.8em', borderRadius: '9999px', background: 'var(--brand-muted)', border: '1px solid var(--border-brand)', color: 'var(--brand-500)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.2em' }}>
                 <Icon name="shield" size={14} />
                 Privacy-first scanning
               </div>
@@ -539,43 +539,61 @@ export default function App() {
                 </div>
               )}
 
-              <div style={{ marginTop: '2em', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(8em, 1fr))', gap: '0.6em', fontSize: '0.8em', color: 'var(--text-tertiary)', textAlign: 'center' }} aria-label={t("serviceStats")}>
+              <div className="pc-how-it-works" style={{ marginTop: '2.4em' }}>
+                <div className="pc-step">
+                  <div className="pc-step-icon">1</div>
+                  <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Paste</div>
+                  <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>Drop a link into the scanner</div>
+                </div>
+                <div className="pc-step">
+                  <div className="pc-step-icon">2</div>
+                  <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Scan</div>
+                  <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>We check TLDs, keywords, brand mimicry, and structure</div>
+                </div>
+                <div className="pc-step">
+                  <div className="pc-step-icon">3</div>
+                  <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Decide</div>
+                  <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>Get a plain-language risk result in seconds</div>
+                </div>
+              </div>
+
+              <div className="pc-trust-bar" style={{ marginTop: '2em', fontSize: '0.8em', color: 'var(--text-tertiary)', textAlign: 'center' }} aria-label={t("serviceStats")}>
                 {(showHistory && historyStats.total != null) ? (
                   <>
-                    <div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--brand-500)', fontFamily: 'var(--font-display)' }}>{historyStats.total}</div>
-                      <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("total")}</div>
+                    <div className="pc-trust-item">
+                      <span style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--brand-500)', fontFamily: 'var(--font-display)' }}>{historyStats.total}</span>
+                      <span style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("total")}</span>
                     </div>
-                    <div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--risk-danger)', fontFamily: 'var(--font-display)' }}>{historyStats.high}</div>
-                      <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("high")}</div>
+                    <div className="pc-trust-item">
+                      <span style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--risk-danger)', fontFamily: 'var(--font-display)' }}>{historyStats.high}</span>
+                      <span style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("high")}</span>
                     </div>
-                    <div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--risk-caution)', fontFamily: 'var(--font-display)' }}>{historyStats.suspicious}</div>
-                      <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("suspicious")}</div>
+                    <div className="pc-trust-item">
+                      <span style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--risk-caution)', fontFamily: 'var(--font-display)' }}>{historyStats.suspicious}</span>
+                      <span style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("suspicious")}</span>
                     </div>
-                    <div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--risk-safe)', fontFamily: 'var(--font-display)' }}>{historyStats.low}</div>
-                      <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("low")}</div>
+                    <div className="pc-trust-item">
+                      <span style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--risk-safe)', fontFamily: 'var(--font-display)' }}>{historyStats.low}</span>
+                      <span style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t("low")}</span>
                     </div>
-                    <div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>{historyStats.clean}</div>
-                      <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Clean</div>
+                    <div className="pc-trust-item">
+                      <span style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>{historyStats.clean}</span>
+                      <span style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Clean</span>
                     </div>
                   </>
                 ) : (
                   <>
-                    <div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--brand-500)', fontFamily: 'var(--font-display)' }}>Free</div>
-                      <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Now</div>
+                    <div className="pc-trust-item">
+                      <span style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--brand-500)', fontFamily: 'var(--font-display)' }}>Free</span>
+                      <span style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Now</span>
                     </div>
-                    <div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--brand-500)', fontFamily: 'var(--font-display)' }}>No account</div>
-                      <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Required</div>
+                    <div className="pc-trust-item">
+                      <span style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--brand-500)', fontFamily: 'var(--font-display)' }}>No account</span>
+                      <span style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Required</span>
                     </div>
-                    <div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--brand-500)', fontFamily: 'var(--font-display)' }}>No tracking</div>
-                      <div style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>By design</div>
+                    <div className="pc-trust-item">
+                      <span style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--brand-500)', fontFamily: 'var(--font-display)' }}>No tracking</span>
+                      <span style={{ fontSize: '0.7em', textTransform: 'uppercase', letterSpacing: '0.08em' }}>By design</span>
                     </div>
                   </>
                 )}
@@ -1271,22 +1289,22 @@ export default function App() {
 
           {showAbout && (
             <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
-              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', marginBottom: '0.8em' }}>About</h2>
-                <div style={{ display: 'grid', gap: '1em', fontSize: '0.95em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
+              <div className="pc-section pc-max-width pc-gap-4" style={{ padding: '2em 1.5em' }}>
+                <h2 className="pc-section-title">About</h2>
+                <div className="pc-stack pc-gap-4" style={{ fontSize: '0.95em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
                   <p>PhishChecker is a free, privacy-first URL risk checker built to help everyday users — especially elderly or less tech-literate people — spot suspicious links before they tap or click.</p>
                   <p>It does not require accounts, does not track users, and does not store scanned URLs longer than necessary. The goal is simple: make phishing detection understandable, fast, and available to everyone.</p>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', marginTop: '0.6em' }}>
-                    <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                      <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.3em' }}>Mission</div>
+                  <div className="pc-features-grid" style={{ marginTop: '0.6em' }}>
+                    <div className="pc-feature-card">
+                      <div className="pc-feature-title">Mission</div>
                       <p style={{ margin: 0 }}>Reduce phishing harm through plain-language results, not jargon.</p>
                     </div>
-                    <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                      <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.3em' }}>Privacy</div>
+                    <div className="pc-feature-card">
+                      <div className="pc-feature-title">Privacy</div>
                       <p style={{ margin: 0 }}>No accounts, no ad tracking, no unnecessary data retention.</p>
                     </div>
-                    <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                      <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.3em' }}>Accessibility</div>
+                    <div className="pc-feature-card">
+                      <div className="pc-feature-title">Accessibility</div>
                       <p style={{ margin: 0 }}>High-contrast UI, multilingual support, and simple-mode guidance.</p>
                     </div>
                   </div>
@@ -1297,15 +1315,15 @@ export default function App() {
 
           {showBlog && (
             <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
-              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', marginBottom: '0.8em' }}>Blog</h2>
-                <div style={{ display: 'grid', gap: '1em' }}>
-                  <article style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+              <div className="pc-section pc-max-width pc-gap-4" style={{ padding: '2em 1.5em' }}>
+                <h2 className="pc-section-title">Blog</h2>
+                <div className="pc-stack pc-gap-4">
+                  <article className="pc-example-card">
                     <div style={{ fontSize: '0.75em', color: 'var(--text-tertiary)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.4em' }}>Guide</div>
                     <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.4em' }}>How to spot a fake bank link in 30 seconds</h3>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.95em' }}>Look for mismatched domains, urgency tactics, and login forms on unfamiliar sites. When unsure, open the official app instead of tapping the link.</p>
                   </article>
-                  <article style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
+                  <article className="pc-example-card">
                     <div style={{ fontSize: '0.75em', color: 'var(--text-tertiary)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.4em' }}>Education</div>
                     <h3 style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.4em' }}>Why QR code phishing is rising</h3>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.95em' }}>QR codes hide the destination URL until after you scan. Treat unexpected QR stickers or messages with the same caution as any unknown link.</p>
@@ -1317,46 +1335,55 @@ export default function App() {
 
           {showFeatures && (
             <section className="pc-animate-in pc-section-enter" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
-              <div style={{ maxWidth: '72em', margin: '0 auto', padding: '2em 1.5em' }}>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', marginBottom: '0.8em' }}>Features</h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1em', fontSize: '0.95em', lineHeight: 1.6 }} className="pc-mobile-stack">
-                  <div style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}><Icon name="search" size={28} /> Real-Time URL Scanner</div>
-                    <p style={{ color: 'var(--text-secondary)' }}>Checks URLs quickly and returns a plain-language risk result you can act on.</p>
+              <div className="pc-section pc-max-width pc-gap-4" style={{ padding: '2em 1.5em' }}>
+                <h2 className="pc-section-title">Features</h2>
+                <div className="pc-features-grid">
+                  <div className="pc-feature-card">
+                    <div className="pc-feature-icon"><Icon name="search" size={18} /></div>
+                    <div className="pc-feature-title">Real-Time URL Scanner</div>
+                    <div className="pc-feature-body">Checks URLs quickly and returns a plain-language risk result you can act on.</div>
                   </div>
-                  <div style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>🧭 Preview & Analysis</div>
-                    <p style={{ color: 'var(--text-secondary)' }}>Domain age, SSL status, reputation, and one-line explanations for non-technical users.</p>
+                  <div className="pc-feature-card">
+                    <div className="pc-feature-icon"><Icon name="bar-chart" size={18} /></div>
+                    <div className="pc-feature-title">Preview & Analysis</div>
+                    <div className="pc-feature-body">Domain age, SSL status, reputation, and one-line explanations for non-technical users.</div>
                   </div>
-                  <div style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>🎓 Phishing Education</div>
-                    <p style={{ color: 'var(--text-secondary)' }}>Simple and detailed awareness content, with multilingual support.</p>
+                  <div className="pc-feature-card">
+                    <div className="pc-feature-icon"><Icon name="book-open" size={18} /></div>
+                    <div className="pc-feature-title">Phishing Education</div>
+                    <div className="pc-feature-body">Simple and detailed awareness content, with multilingual support.</div>
                   </div>
-                  <div style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>📋 Scan History</div>
-                    <p style={{ color: 'var(--text-secondary)' }}>Review recent scans locally with clear risk labels, scores, and timestamps.</p>
+                  <div className="pc-feature-card">
+                    <div className="pc-feature-icon"><Icon name="clock" size={18} /></div>
+                    <div className="pc-feature-title">Scan History</div>
+                    <div className="pc-feature-body">Review recent scans locally with clear risk labels, scores, and timestamps.</div>
                   </div>
-                  <div style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>🖼️ Screenscan & QR</div>
-                    <p style={{ color: 'var(--text-secondary)' }}>Upload a screenshot or QR image to extract and check links automatically.</p>
+                  <div className="pc-feature-card">
+                    <div className="pc-feature-icon"><Icon name="image" size={18} /></div>
+                    <div className="pc-feature-title">Screenscan & QR</div>
+                    <div className="pc-feature-body">Upload a screenshot or QR image to extract and check links automatically.</div>
                   </div>
-                  <div style={{ padding: '1.1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>🔒 Privacy First</div>
-                    <p style={{ color: 'var(--text-secondary)' }}>No accounts, no tracking, and no personal data collection by design.</p>
+                  <div className="pc-feature-card">
+                    <div className="pc-feature-icon"><Icon name="lock" size={18} /></div>
+                    <div className="pc-feature-title">Privacy First</div>
+                    <div className="pc-feature-body">No accounts, no tracking, and no personal data collection by design.</div>
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1em', marginTop: '1em', fontSize: '0.95em', lineHeight: 1.6 }} className="pc-mobile-stack">
-                  <div style={{ padding: '1.1em', border: '1px dashed var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}><Icon name="sparkles" size={18} /> Browser Extension</div>
-                    <p style={{ color: 'var(--text-secondary)' }}>In-browser checks without leaving the page. Manifest and popup are ready for Chrome, Firefox, and Edge.</p>
+                <div className="pc-features-grid" style={{ marginTop: '1em' }}>
+                  <div className="pc-feature-card" style={{ border: '1px dashed var(--border-hairline)' }}>
+                    <div className="pc-feature-icon"><Icon name="sparkles" size={18} /></div>
+                    <div className="pc-feature-title">Browser Extension</div>
+                    <div className="pc-feature-body">In-browser checks without leaving the page. Manifest and popup are ready for Chrome, Firefox, and Edge.</div>
                   </div>
-                  <div style={{ padding: '1.1em', border: '1px dashed var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}><Icon name="code" size={18} /> API Access</div>
-                    <p style={{ color: 'var(--text-secondary)' }}>Programmatic scanning for teams and integrations. Live endpoints at /api/v2 with JSON responses.</p>
+                  <div className="pc-feature-card" style={{ border: '1px dashed var(--border-hairline)' }}>
+                    <div className="pc-feature-icon"><Icon name="code" size={18} /></div>
+                    <div className="pc-feature-title">API Access</div>
+                    <div className="pc-feature-body">Programmatic scanning for teams and integrations. Live endpoints at /api/v2 with JSON responses.</div>
                   </div>
-                  <div style={{ padding: '1.1em', border: '1px dashed var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>Community Reports</div>
-                    <p style={{ color: 'var(--text-secondary)' }}>Community signals with moderation and transparency. Flag and review suspicious URLs from the dashboard.</p>
+                  <div className="pc-feature-card" style={{ border: '1px dashed var(--border-hairline)' }}>
+                    <div className="pc-feature-icon"><Icon name="users" size={18} /></div>
+                    <div className="pc-feature-title">Community Reports</div>
+                    <div className="pc-feature-body">Community signals with moderation and transparency. Flag and review suspicious URLs from the dashboard.</div>
                   </div>
                 </div>
               </div>
@@ -1364,20 +1391,23 @@ export default function App() {
           )}
 
           <section className="pc-animate-in" style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)', marginTop: '2em' }}>
-            <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--text-primary)', marginBottom: '0.8em' }}>{t("howItWorks")}</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14em, 1fr))', gap: '1em', fontSize: '0.9em', lineHeight: 1.5 }} className="pc-section pc-mobile-stack">
-                <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--brand-500)', marginBottom: '0.4em' }}>01 — {t("stepPaste")}</div>
-                  <p style={{ color: 'var(--text-secondary)' }}>{t("stepPasteBody")}</p>
+            <div className="pc-section pc-max-width pc-gap-4" style={{ padding: '2em 1.5em' }}>
+              <h2 className="pc-section-title">{t("howItWorks")}</h2>
+              <div className="pc-how-it-works">
+                <div className="pc-step">
+                  <div className="pc-step-icon">01</div>
+                  <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{t("stepPaste")}</div>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9em' }}>{t("stepPasteBody")}</p>
                 </div>
-                <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--brand-500)', marginBottom: '0.4em' }}>02 — {t("stepAnalyze")}</div>
-                  <p style={{ color: 'var(--text-secondary)' }}>{t("stepAnalyzeBody")}</p>
+                <div className="pc-step">
+                  <div className="pc-step-icon">02</div>
+                  <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{t("stepAnalyze")}</div>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9em' }}>{t("stepAnalyzeBody")}</p>
                 </div>
-                <div style={{ padding: '1em', border: '1px solid var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                  <div style={{ fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--brand-500)', marginBottom: '0.4em' }}>03 — {t("stepDecide")}</div>
-                  <p style={{ color: 'var(--text-secondary)' }}>{t("stepDecideBody")}</p>
+                <div className="pc-step">
+                  <div className="pc-step-icon">03</div>
+                  <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{t("stepDecide")}</div>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9em' }}>{t("stepDecideBody")}</p>
                 </div>
               </div>
             </div>
