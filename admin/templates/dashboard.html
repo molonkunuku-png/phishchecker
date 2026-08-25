@@ -270,17 +270,27 @@
         <h3 class="section-title">API Tester</h3>
         <div class="card" style="margin-bottom: 1.5rem;">
             <div class="meta">Call live endpoints from the admin panel</div>
-            <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 0.5rem; align-items: center; margin-top: 0.75rem;">
-                <select id="apiMethod" style="padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd;">
-                    <option>GET</option>
-                    <option>POST</option>
-                    <option>DELETE</option>
+            <div style="display: grid; grid-template-columns: 1fr auto auto auto; gap: 0.5rem; align-items: center; margin-top: 0.75rem;">
+                <select id="apiEndpoint" style="padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd; font-size: 0.9rem;">
+                    <option value="">-- select endpoint --</option>
                 </select>
-                <input type="text" id="apiPath" value="/api/v2/status" style="padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd;" placeholder="/api/v2/...">
-                <button onclick="callApi()">Send</button>
+                <button onclick="callApi()" style="padding: 0.6rem 1rem; background: #36454F; color: white; border: none; border-radius: 6px; cursor: pointer;">Send</button>
+                <button onclick="toggleHistory()" style="padding: 0.6rem 1rem; background: white; color: #36454F; border: 1px solid #ddd; border-radius: 6px; cursor: pointer;">History</button>
+                <button onclick="toggleDocs()" style="padding: 0.6rem 1rem; background: white; color: #36454F; border: 1px solid #ddd; border-radius: 6px; cursor: pointer;">Docs</button>
             </div>
-            <textarea id="apiBody" rows="3" placeholder='{"url":"https://example.com","mode":"standard"}' style="width: 100%; margin-top: 0.5rem; padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd; font-family: monospace;"></textarea>
-            <pre id="apiResult" style="background:#f4f4f4;padding:0.75rem;border-radius:6px;margin-top:0.5rem;white-space:pre-wrap;font-size:0.85rem;"></pre>
+            <textarea id="apiBody" rows="3" placeholder='{"url":"https://example.com","mode":"standard"}' style="width: 100%; margin-top: 0.5rem; padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd; font-family: monospace; font-size: 0.85rem;"></textarea>
+            <div id="apiMeta" style="margin-top: 0.4rem; font-size: 0.8rem; color: #666; display: none;"></div>
+            <pre id="apiResult" style="background:#f4f4f4;padding:0.75rem;border-radius:6px;margin-top:0.5rem;white-space:pre-wrap;font-size:0.85rem;min-height:2rem;"></pre>
+        </div>
+
+        <div id="apiHistoryPanel" class="card" style="margin-bottom: 1.5rem; display: none;">
+            <h3 class="section-title" style="margin-top:0;">Request History <button onclick="clearHistory()" style="float:right;font-size:0.75rem;padding:0.3rem 0.6rem;background:#dc3545;color:white;border:none;border-radius:4px;cursor:pointer;">Clear</button></h3>
+            <div id="historyList" style="font-size:0.85rem;"></div>
+        </div>
+
+        <div id="apiDocsPanel" class="card" style="margin-bottom: 1.5rem; display: none;">
+            <h3 class="section-title" style="margin-top:0;">Endpoint Reference</h3>
+            <div id="docsList" style="font-size:0.85rem; line-height:1.6;"></div>
         </div>
 
         <h3 class="section-title">v4 Lab</h3>
@@ -315,6 +325,18 @@
         </div>
     </div>
     <script>
+        const API_ENDPOINTS = [
+            { label: 'Health', path: '/health', method: 'GET', body: null },
+            { label: 'Status', path: '/api/v2/status', method: 'GET', body: null },
+            { label: 'Scan URL', path: '/api/v2/scans', method: 'POST', body: { url: 'https://example.com', mode: 'standard' } },
+            { label: 'History', path: '/api/v2/scans/history', method: 'GET', body: null },
+            { label: 'Bulk Scan', path: '/api/v2/scans/bulk', method: 'POST', body: { urls: ['https://example.com'], mode: 'quick' } },
+            { label: 'Export', path: '/api/v2/scans/export?format=json', method: 'GET', body: null },
+            { label: 'CSRF', path: '/api/csrf', method: 'GET', body: null },
+            { label: 'Community Flags', path: '/api/v2/community/flags', method: 'GET', body: null },
+            { label: 'Flag URL', path: '/api/v2/community/flag', method: 'POST', body: { url: 'https://example.com', category: 'phishing', notes: '' } },
+        ];
+
         function escapeHtml(str) {
             return String(str)
                 .replace(/&/g, '&amp;')
@@ -323,25 +345,144 @@
                 .replace(/"/g, '&quot;');
         }
 
-        function applyFilters() {
+        function initApiTester() {
+            const sel = document.getElementById('apiEndpoint');
+            API_ENDPOINTS.forEach(ep => {
+                const opt = document.createElement('option');
+                opt.value = ep.path;
+                opt.textContent = `${ep.method} ${ep.label} (${ep.path})`;
+                opt.dataset.method = ep.method;
+                opt.dataset.body = ep.body ? JSON.stringify(ep.body) : '';
+                sel.appendChild(opt);
+            });
+            renderDocs();
+            loadHistory();
+        }
+
+        function toggleHistory() {
+            const panel = document.getElementById('apiHistoryPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            if (panel.style.display === 'block') renderHistory();
+        }
+
+        function toggleDocs() {
+            const panel = document.getElementById('apiDocsPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function renderDocs() {
+            const container = document.getElementById('docsList');
+            container.innerHTML = API_ENDPOINTS.map(ep => `
+                <div style="padding:0.4rem 0;border-bottom:1px solid #eee;">
+                    <strong>${ep.method}</strong> <code>${ep.path}</code>
+                    ${ep.body ? `<pre style="background:#f4f4f4;padding:0.4rem;border-radius:4px;margin-top:0.2rem;font-size:0.8rem;">${escapeHtml(JSON.stringify(ep.body, null, 2))}</pre>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function saveHistory(entry) {
+            const key = 'pc_api_history';
+            const list = JSON.parse(sessionStorage.getItem(key) || '[]');
+            list.unshift(entry);
+            if (list.length > 50) list.length = 50;
+            sessionStorage.setItem(key, JSON.stringify(list));
+        }
+
+        function loadHistory() {
+            const list = JSON.parse(sessionStorage.getItem('pc_api_history') || '[]');
+            renderHistoryList(list);
+        }
+
+        function clearHistory() {
+            sessionStorage.removeItem('pc_api_history');
+            renderHistoryList([]);
+        }
+
+        function renderHistoryList(list) {
+            const container = document.getElementById('historyList');
+            if (!list.length) { container.innerHTML = '<div style="color:#888;">No requests yet.</div>'; return; }
+            container.innerHTML = list.map((item, i) => `
+                <div style="padding:0.5rem 0;border-bottom:1px solid #eee;cursor:pointer;" onclick="replayHistoryItem(${i})">
+                    <span style="font-weight:600;">${item.method} ${item.path}</span>
+                    <span style="float:right;color:#888;">${item.ms}ms</span>
+                    <div style="font-size:0.8rem;color:#666;">${item.status} · ${new Date(item.ts).toLocaleTimeString()}</div>
+                </div>
+            `).join('');
+        }
+
+        function replayHistoryItem(index) {
+            const list = JSON.parse(sessionStorage.getItem('pc_api_history') || '[]');
+            const item = list[index];
+            if (!item) return;
+            const sel = document.getElementById('apiEndpoint');
+            const opts = Array.from(sel.options);
+            const match = opts.find(o => o.value === item.path && o.dataset.method === item.method);
+            if (match) sel.value = item.path;
+            document.getElementById('apiBody').value = item.body || '';
+            callApi();
+        }
+
+        async function callApi() {
+            const sel = document.getElementById('apiEndpoint');
+            const bodyEl = document.getElementById('apiBody');
+            const out = document.getElementById('apiResult');
+            const meta = document.getElementById('apiMeta');
+            const selectedOpt = sel.options[sel.selectedIndex];
+            const path = sel.value;
+            const bodyText = bodyEl.value.trim();
+
+            if (!path) { out.textContent = 'Select an endpoint'; return; }
+
+            const method = selectedOpt.dataset.method || 'GET';
+            const opts = { method, headers: { 'Content-Type': 'application/json' } };
+            if (method !== 'GET' && bodyText) opts.body = bodyText;
+
+            const start = performance.now();
+            try {
+                const res = await fetch(path, opts);
+                const ms = Math.round(performance.now() - start);
+                let data;
+                const ct = res.headers.get('content-type') || '';
+                if (ct.includes('application/json')) {
+                    data = await res.json();
+                } else {
+                    data = await res.text();
+                }
+                out.textContent = `${res.status} ${res.statusText}\n${JSON.stringify(data, null, 2)}`;
+                meta.style.display = 'block';
+                meta.textContent = `${method} ${path} · ${ms}ms · ${res.status}`;
+                saveHistory({ method, path, body: bodyText, status: res.status, ms, ts: Date.now() });
+                loadHistory();
+            } catch (err) {
+                const ms = Math.round(performance.now() - start);
+                out.textContent = 'Request failed: ' + (err && err.message ? err.message : String(err));
+                meta.style.display = 'block';
+                meta.textContent = `${method} ${path} · ${ms}ms · error`;
+                saveHistory({ method, path, body: bodyText, status: 'ERR', ms, ts: Date.now() });
+                loadHistory();
+            }
+        }
+
+        document.getElementById('apiEndpoint').addEventListener('change', function() {
+            const opt = this.options[this.selectedIndex];
+            const body = opt.dataset.body || '';
+            document.getElementById('apiBody').value = body;
+        });
+
+        applyFilters = function() {
             const q = document.getElementById('q').value;
             const risk = document.getElementById('risk').value;
             const sort = document.getElementById('sort').value;
             window.location.href = `/admin/dashboard?page=1&page_size={{ page_size }}&risk=${encodeURIComponent(risk)}&q=${encodeURIComponent(q)}&sort=${encodeURIComponent(sort)}`;
-        }
+        };
+
+        initApiTester();
 
         function exportData(fmt) {
             const q = document.getElementById('q').value;
             const risk = document.getElementById('risk').value;
             const sort = document.getElementById('sort').value;
             window.location.href = `/admin/export/${fmt}?q=${encodeURIComponent(q)}&risk=${encodeURIComponent(risk)}&sort=${encodeURIComponent(sort)}`;
-        }
-
-        async function clearHistory() {
-            if (!confirm('Clear all scan history?')) return;
-            const res = await fetch('/admin/history/clear', { method: 'POST' });
-            const data = await res.json();
-            if (data.ok) location.reload();
         }
 
         async function deleteScan(url) {
@@ -367,23 +508,6 @@
         async function logout() {
             await fetch('/admin/logout', { method: 'POST' });
             window.location.href = '/admin/login-page';
-        }
-
-        async function callApi() {
-            const method = document.getElementById('apiMethod').value;
-            const path = document.getElementById('apiPath').value.trim();
-            const bodyText = document.getElementById('apiBody').value.trim();
-            const out = document.getElementById('apiResult');
-            if (!path) { out.textContent = 'Missing path'; return; }
-            try {
-                const opts = { method, headers: { 'Content-Type': 'application/json' } };
-                if (method !== 'GET' && bodyText) opts.body = bodyText;
-                const res = await fetch(path, opts);
-                const data = await res.json();
-                out.textContent = `${res.status} ${res.statusText}\n${JSON.stringify(data, null, 2)}`;
-            } catch (err) {
-                out.textContent = 'Request failed: ' + (err && err.message ? err.message : String(err));
-            }
         }
 
         async function runV4(path) {
