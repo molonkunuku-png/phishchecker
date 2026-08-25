@@ -11,4 +11,4 @@ tldextract==3.5.0
 pyyaml==6.0.1
 
 # CLI tools (you'll want these locally)
-httpie==3.2.1
+httpie==3.2.4
