@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, send_file, abort
 from flask_cors import CORS
 import time
 import os
+from scoring import score as run_scan
 
 app = Flask(__name__)
 CORS(app)
@@ -15,49 +16,8 @@ PORT = int(os.getenv('PHISHCHECKER_PORT', '8080'))
 from data_store import scans
 
 class ScanService:
-    def __init__(self):
-        pass
-    
     def run_scan(self, url, mode='standard', family_mode=False):
-        time.sleep(0.5)
-        
-        risky_domains = ['free-gift-cards', 'fake-login', 'verify-account']
-        risky_tlds = ['.xyz', '.top', '.gq', '.cf']
-        
-        domain = url.split('//')[-1].split('/')[0] if '//' in url else url.split('/')[0]
-        domain_parts = domain.split('.')
-        
-        risk_score = 5
-        if any(part in risky_domains for part in domain_parts):
-            risk_score = 85
-        elif any(domain.endswith(tld) for tld in risky_tlds):
-            risk_score = 65
-        elif 'login' in url or 'account' in url:
-            risk_score = 35
-        
-        reasons = []
-        if family_mode:
-            reasons.append('family-safe mode: limited analysis')
-        
-        if risk_score > 70:
-            risk_level = 'high'
-        elif risk_score > 40:
-            risk_level = 'suspicious'
-        else:
-            risk_level = 'clean'
-        
-        return {
-            'url': url,
-            'domain': domain,
-            'risk': risk_level,
-            'score': risk_score,
-            'reasons': reasons,
-            'details': {},
-            'mode': mode,
-            'family_mode': family_mode,
-            'duration_ms': 500,
-            'scanner_version': 'demo-2.0'
-        }
+        return run_scan(url, mode=mode, family_mode=family_mode)
 
 scan_service = ScanService()
 
