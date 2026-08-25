@@ -1,11 +1,66 @@
 from flask import Flask, jsonify, request, send_file, abort
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import time
 import os
 from scoring import score as run_scan
 
 app = Flask(__name__)
-CORS(app)
+
+# Security: session cookie flags
+is_production = os.getenv('RENDER', 'false').lower() in ('1', 'true', 'yes')
+app.config.update(
+    SESSION_COOKIE_SECURE=is_production,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    PERMANENT_SESSION_LIFETIME=1800,
+)
+
+# CORS: restrict to known origins
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'https://phishchecker.onrender.com').split(',')
+CORS(app, origins=[o.strip() for o in ALLOWED_ORIGINS if o.strip()], supports_credentials=True)
+
+# Rate limiting
+limiter = Limiter(get_remote_address, app=app, default_limits=['200 per day', '50 per hour'])
+
+# Security headers
+@app.after_request
+def security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+    if is_production:
+        response.headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains'
+    # CSP: allow inline styles for admin dashboard, scripts from self only
+    csp = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: https:; "
+        "connect-src 'self' https:; "
+        "font-src 'self' data:; "
+        "frame-ancestors 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self'"
+    )
+    response.headers['Content-Security-Policy'] = csp
+    return response
+
+# Input validation helper
+MAX_URL_LENGTH = 2048
+
+def validate_url(url):
+    if not url or not isinstance(url, str):
+        return None, 'Invalid URL'
+    url = url.strip()
+    if len(url) > MAX_URL_LENGTH:
+        return None, f'URL too long (max {MAX_URL_LENGTH} chars)'
+    if not (url.startswith('http://') or url.startswith('https://')):
+        return None, 'URL must start with http:// or https://'
+    return url, None
+
 app.secret_key = os.getenv('PHISHCHECKER_SECRET', 'change-me')
 
 # Configuration from environment
@@ -50,21 +105,21 @@ def status():
     })
 
 @app.route('/api/v2/scans', methods=['POST'])
+@limiter.limit('10 per minute')
 def api_scan():
     payload = request.get_json(force=True) or {}
     url = payload.get('url', '')
-    if not url:
-        return jsonify({"error": "Missing URL"}), 400
-        
+    ok, err = validate_url(url)
+    if not ok:
+        return jsonify({'error': err}), 400
     family = bool(payload.get("family")) if isinstance(payload.get("family"), bool) else str(payload.get("family", "")).lower() in ("1", "true", "yes")
-    
     mode = (payload.get('mode') or 'standard').lower()
     result = scan_service.run_scan(url, mode=mode, family_mode=family)
     scans.append(result)
-    
     return jsonify(result), 202
 
 @app.route('/api/v2/scans/history')
+@limiter.limit('30 per minute')
 def api_history():
     page = max(1, int(request.args.get("page", 1)))
     size = min(100, max(1, int(request.args.get("page_size", 20))))
@@ -86,6 +141,7 @@ def api_history():
     }), 200
 
 @app.route('/api/v2/team/scan', methods=['POST'])
+@limiter.limit('10 per minute')
 def handle_team_scan():
     payload = request.get_json(force=True) or {}
     url = (payload.get('url') or '').strip()
@@ -132,18 +188,23 @@ def list_scheduled():
     return jsonify({"scheduled": []}), 200
 
 @app.route('/api/v2/scans/bulk', methods=['POST'])
+@limiter.limit('5 per minute')
 def bulk_scan():
     payload = request.get_json(force=True) or {}
     urls = payload.get('urls') or []
     mode = (payload.get('mode') or 'quick').lower()
     if not urls or not isinstance(urls, list):
-        return jsonify({"error": "Missing URLs list"}), 400
+        return jsonify({'error': 'Missing URLs list'}), 400
     results = []
     for url in urls[:50]:
-        r = scan_service.run_scan(url.strip(), mode=mode)
+        ok, err = validate_url(url)
+        if not ok:
+            results.append({'error': err, 'url': url})
+            continue
+        r = scan_service.run_scan(url, mode=mode)
         scans.append(r)
         results.append(r)
-    return jsonify({"results": results, "scanned": len(results)}), 202
+    return jsonify({'results': results, 'scanned': len(results)}), 202
 
 @app.route('/api/v2/scans/export')
 def export_public_scans():
