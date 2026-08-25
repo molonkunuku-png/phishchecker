@@ -3,6 +3,7 @@ import os
 import time
 import math
 from datetime import datetime, timedelta
+from data_store import scans
 from admin.analytics import compute_stats
 from admin.filters import apply_filters
 from admin.exporters import export_json, export_csv
@@ -167,11 +168,9 @@ def admin_scan():
     family = bool(payload.get('family')) if isinstance(payload.get('family'), bool) else str(payload.get('family', '')).lower() in ('1', 'true', 'yes')
     if not url:
         return jsonify({'ok': False, 'error': 'Missing URL'}), 400
-    # Reuse ScanService from app context if available
     try:
         from app import scan_service
         result = scan_service.run_scan(url, mode=mode, family_mode=family)
-        scans = []
         scans.append(result)
         return jsonify({'ok': True, 'scan': result})
     except Exception as e:
@@ -192,7 +191,6 @@ def admin_bulk_scan():
         from app import scan_service
         for url in urls:
             result = scan_service.run_scan(url, mode=mode, family_mode=False)
-            scans = []
             scans.append(result)
             results.append(result)
         return jsonify({'ok': True, 'scans': results})
@@ -385,3 +383,51 @@ def admin_list_notes():
     if not check_auth():
         return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
     return jsonify({'ok': True, 'notes': session.get(ADMIN_NOTES_KEY, [])[-5:]})
+
+
+# v4 feature stubs
+@admin_bp.route('/admin/v4/autonomous-hunt', methods=['POST'])
+def admin_autonomous_hunt():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    payload = request.get_json(force=True) or {}
+    domains = payload.get('domains') or []
+    if not domains:
+        return jsonify({'ok': False, 'error': 'Missing domains'}), 400
+    findings = []
+    for domain in domains:
+        findings.append({
+            'domain': domain,
+            'anomaly_score': 0.42,
+            'recommended_action': 'monitor'
+        })
+    return jsonify({'ok': True, 'findings': findings, 'mode': 'autonomous'})
+
+
+@admin_bp.route('/admin/v4/neuromorphic-scan', methods=['POST'])
+def admin_neuromorphic_scan():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    payload = request.get_json(force=True) or {}
+    url = (payload.get('url') or '').strip()
+    if not url:
+        return jsonify({'ok': False, 'error': 'Missing URL'}), 400
+    return jsonify({'ok': True, 'mode': 'neuromorphic', 'url': url, 'score': 33})
+
+
+@admin_bp.route('/admin/v4/hologram/overview', methods=['GET', 'POST'])
+def admin_hologram_overview():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    return jsonify({'ok': True, 'nodes': [], 'edges': [], 'mode': 'holographic'})
+
+
+@admin_bp.route('/admin/v4/pqc/chain', methods=['POST'])
+def admin_pqc_chain():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    payload = request.get_json(force=True) or {}
+    scan_id = (payload.get('scan_id') or '').strip()
+    if not scan_id:
+        return jsonify({'ok': False, 'error': 'Missing scan_id'}), 400
+    return jsonify({'ok': True, 'chain': [{'scan_id': scan_id, 'hash': 'placeholder-pqc-hash'}]})

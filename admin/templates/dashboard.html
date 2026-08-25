@@ -266,6 +266,37 @@
             <input type="text" id="noteInput" placeholder="Add note">
             <button onclick="addNote()">Add</button>
         </div>
+
+        <h3 class="section-title">v4 Lab</h3>
+        <div class="grid">
+            <div class="card">
+                <h3>Autonomous Threat Hunting</h3>
+                <div class="meta">Run multi-domain anomaly scan</div>
+                <input type="text" id="huntDomains" placeholder="example.com, test.com">
+                <button onclick="runV4('autonomous-hunt')">Run Hunt</button>
+                <pre id="huntResult" style="background:#f4f4f4;padding:0.5rem;border-radius:6px;margin-top:0.5rem;white-space:pre-wrap;font-size:0.85rem;"></pre>
+            </div>
+            <div class="card">
+                <h3>Neuromorphic Security Scan</h3>
+                <div class="meta">Pattern-aware neural-style scan</div>
+                <input type="text" id="neuroUrl" placeholder="https://example.com">
+                <button onclick="runV4('neuromorphic-scan')">Scan</button>
+                <pre id="neuroResult" style="background:#f4f4f4;padding:0.5rem;border-radius:6px;margin-top:0.5rem;white-space:pre-wrap;font-size:0.85rem;"></pre>
+            </div>
+            <div class="card">
+                <h3>Holographic Interface</h3>
+                <div class="meta">Topology overview</div>
+                <button onclick="runV4('hologram/overview')">Load Overview</button>
+                <pre id="holoResult" style="background:#f4f4f4;padding:0.5rem;border-radius:6px;margin-top:0.5rem;white-space:pre-wrap;font-size:0.85rem;"></pre>
+            </div>
+            <div class="card">
+                <h3>Post-Quantum Chain</h3>
+                <div class="meta">Chain scan integrity</div>
+                <input type="text" id="pqcScanId" placeholder="scan id">
+                <button onclick="runV4('pqc/chain')">Verify Chain</button>
+                <pre id="pqcResult" style="background:#f4f4f4;padding:0.5rem;border-radius:6px;margin-top:0.5rem;white-space:pre-wrap;font-size:0.85rem;"></pre>
+            </div>
+        </div>
     </div>
     <script>
         function escapeHtml(str) {
@@ -320,6 +351,28 @@
         async function logout() {
             await fetch('/admin/logout', { method: 'POST' });
             window.location.href = '/admin/login-page';
+        }
+
+        async function runV4(path) {
+            const out = document.getElementById(path.split('/')[0] + 'Result') || document.getElementById('huntResult');
+            if (!out) return;
+            try {
+                let body = {};
+                if (path === 'autonomous-hunt') {
+                    const raw = document.getElementById('huntDomains').value.trim();
+                    body = { domains: raw ? raw.split(',').map(s => s.trim()).filter(Boolean) : [] };
+                } else if (path === 'neuromorphic-scan') {
+                    body = { url: document.getElementById('neuroUrl').value.trim() };
+                } else if (path === 'pqc/chain') {
+                    body = { scan_id: document.getElementById('pqcScanId').value.trim() };
+                }
+                const res = await fetch(`/admin/v4/${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                const data = await res.json();
+                out.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                const out2 = document.getElementById(path.split('/')[0] + 'Result') || out;
+                if (out2) out2.textContent = 'Request failed';
+            }
         }
     </script>
 </body>
