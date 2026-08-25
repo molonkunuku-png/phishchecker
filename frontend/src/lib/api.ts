@@ -60,20 +60,20 @@ export async function fetchFlags(): Promise<{ flags: Array<{ url: string; domain
 
 export async function createScheduledCheck(payload: { url: string; cadence_hours?: number }): Promise<{ ok: boolean; token: string; domain: string; cadence_hours: number }> {
   const token = await getCsrf();
-  const { data } = await base.post('/api/v2/scheduled', payload, {
+  const { data } = await base.post('/api/v2/community/scheduled', payload, {
     headers: { 'X-CSRF-Token': token },
   });
   return data;
 }
 
 export async function fetchScheduledChecks(): Promise<{ scheduled: Array<{ domain: string; url: string; cadence_hours: number; last_score?: number; last_risk?: string; last_checked_at?: string }> }> {
-  const { data } = await base.get('/api/v2/scheduled');
+  const { data } = await base.get('/api/v2/community/scheduled');
   return data;
 }
 
 export async function submitBulk(urls: string[], mode = 'quick'): Promise<BulkResponse> {
   const token = await getCsrf();
-  const { data } = await base.post('/scan/bulk', { urls, mode }, {
+  const { data } = await base.post('/api/v2/scans/bulk', { urls, mode }, {
     headers: { 'X-CSRF-Token': token },
   });
   return data;
