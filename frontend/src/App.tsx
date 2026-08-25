@@ -179,6 +179,12 @@ function severityStyle(s: Severity): { bg: string; text: string } {
 
 function confidenceLabel(result: ScanResult | null): string {
   if (!result) return 'Low';
+  const c = result.confidence;
+  if (typeof c === 'number') {
+    if (c >= 5) return 'High';
+    if (c >= 3) return 'Medium';
+    return 'Low';
+  }
   const n = (result.reasons?.length || 0) + (result.details?.tld ? 1 : 0) + (result.details?.brand_hits ? 1 : 0);
   if (n >= 5) return 'High';
   if (n >= 3) return 'Medium';
@@ -884,7 +890,7 @@ export default function App() {
                   </div>
                   <div className="pc-confidence-meter">
                     <span style={{ fontSize: '0.7em', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-secondary)' }}>Confidence</span>
-                    <div className="pc-confidence-bar"><div className="pc-confidence-fill" style={{ width: `${Math.min(100, ((result.reasons?.length || 0) + (result.details?.tld ? 1 : 0) + (result.details?.brand_hits ? 1 : 0)) * 18)}%` }} /></div>
+                    <div className="pc-confidence-bar"><div className="pc-confidence-fill" style={{ width: `${Math.min(100, (result.confidence ?? ((result.reasons?.length || 0) + (result.details?.tld ? 1 : 0) + (result.details?.brand_hits ? 1 : 0)) * 18))}%` }} /></div>
                     <span style={{ fontSize: '0.75em', fontWeight: 700, color: 'var(--brand-500)' }}>{confidenceLabel(result)}</span>
                   </div>
                 </div>
@@ -1035,35 +1041,28 @@ export default function App() {
                   </div>
                 </div>
 
-                {result.reasons && result.reasons.length > 0 && (
-                  <div className="pc-divider" style={{ marginTop: '1.4em', paddingTop: '1.2em' }}>
-                    <h3 style={{ fontSize: '0.75em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.6em' }}>{t("findings")}</h3>
-                    <div style={{ display: 'flex', gap: '0.4em', marginBottom: '0.6em', flexWrap: 'wrap' }}>
-                      {['all', 'high', 'medium', 'low'].map(f => (
-                        <button key={f} onClick={() => setFindingFilter(f)} className="pc-btn-ghost" style={{ fontSize: '0.7em', textTransform: 'capitalize', background: findingFilter === f ? 'var(--brand-500)' : undefined, color: findingFilter === f ? 'var(--text-inverse)' : undefined }}>{f === 'all' ? 'All' : f}</button>
-                      ))}
-                    </div>
-                    <ul style={{ listStyle: 'disc', paddingLeft: '1.2em', display: 'grid', gap: '0.45em', fontSize: '0.9em', lineHeight: 1.5 }}>
-                      {result.reasons.filter((r: string) => { const sev = severityOf(r); return findingFilter === 'all' || sev === findingFilter; }).map((r: string, i: number) => {
-                        const sev = severityOf(r);
-                        const st = severityStyle(sev);
-                        return (
-                          <li key={i} style={{ paddingLeft: '0.3em' }}>
-                            <details style={{ display: 'inline-block', width: '100%' }}>
-                              <summary style={{ cursor: 'pointer', fontWeight: 600, color: 'var(--text-primary)', listStyle: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.4em', flexWrap: 'wrap' }}>
-                                <span style={{ fontSize: '0.65em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', background: st.bg, color: st.text, padding: '0.2em 0.45em', borderRadius: '0.25em' }}>{sev}</span>
-                                <span>{r}</span>
-                              </summary>
-                              <div style={{ marginTop: '0.5em', padding: '0.8em', background: 'var(--bg-surface)', border: '1px solid var(--border-hairline)', fontSize: '0.85em', lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-                                {findingSummary(r)}
-                              </div>
-                            </details>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                )}
+                {(result.findings?.length ? result.findings : (result.reasons || []).map(r => ({
+                  id: r.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
+                  severity: severityOf(r),
+                  text: r,
+                  action: findingSummary(r),
+                  raw: r,
+                }))).filter((f: any) => findingFilter === 'all' || f.severity === findingFilter).map((f: any, i: number) => {
+                  const st = severityStyle(f.severity);
+                  return (
+                    <li key={i} className="pc-finding-item">
+                      <details style={{ display: 'inline-block', width: '100%' }}>
+                        <summary style={{ cursor: 'pointer', fontWeight: 600, color: 'var(--text-primary)', listStyle: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.4em', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '0.65em', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', background: st.bg, color: st.text, padding: '0.2em 0.45em', borderRadius: '0.25em' }}>{f.severity}</span>
+                          <span>{f.text}</span>
+                        </summary>
+                        <div style={{ marginTop: '0.5em', padding: '0.8em', background: 'var(--bg-surface)', border: '1px solid var(--border-hairline)', fontSize: '0.85em', lineHeight: 1.6, color: 'var(--text-secondary)' }}>
+                          <strong style={{ color: 'var(--text-primary)' }}>What to do:</strong> {f.action}
+                        </div>
+                      </details>
+                    </li>
+                  );
+                })}
 
                 {result.details && (
                   <details style={{ marginTop: '1.2em', fontSize: '0.9em' }}>

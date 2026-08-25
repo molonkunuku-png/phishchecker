@@ -14,6 +14,60 @@ SUSPICIOUS_PATTERNS = [
     re.compile(r'[a-z]{20,}\.', re.I),
 ]
 
+REASON_TEMPLATES = {
+    'risky TLD': {
+        'text': 'This domain ends with a TLD often used in phishing or scam sites.',
+        'action': 'Be careful. Verify the sender through an official channel before interacting.',
+        'severity': 'high',
+    },
+    'deep subdomain chain': {
+        'text': 'This URL uses multiple subdomains, which can hide the real site.',
+        'action': 'Check the main domain carefully. Phishers often stack subdomains to look legitimate.',
+        'severity': 'medium',
+    },
+    'suspicious long domain label': {
+        'text': 'One part of the domain name is unusually long, which can be a phishing tactic.',
+        'action': 'Compare the domain with the known official address.',
+        'severity': 'medium',
+    },
+    'userinfo in URL': {
+        'text': 'This URL includes a username/password, which legitimate sites never do.',
+        'action': 'Do not enter any credentials. This is a strong phishing indicator.',
+        'severity': 'high',
+    },
+    'phishing bait keywords': {
+        'text': 'The URL contains words commonly used in phishing links.',
+        'action': 'Treat this link with caution and verify the destination independently.',
+        'severity': 'medium',
+    },
+    'potential brand mimic': {
+        'text': 'This domain contains a brand name but is not the official domain.',
+        'action': 'Do not trust this site. Go directly to the official app or website.',
+        'severity': 'high',
+    },
+    'IT mode high sensitivity': {
+        'text': 'IT mode flagged subtle patterns that warrant closer inspection.',
+        'action': 'Run additional checks such as WHOIS, SSL inspection, or sandbox detonation.',
+        'severity': 'medium',
+    },
+    'quick scan keep': {
+        'text': 'Quick mode kept this result for manual review.',
+        'action': 'Switch to Standard or IT mode for a more thorough assessment.',
+        'severity': 'low',
+    },
+    'family-safe mode: limited analysis': {
+        'text': 'Family Mode uses simplified analysis to avoid technical jargon.',
+        'action': 'Ask a trusted adult or IT-savvy friend to verify the link.',
+        'severity': 'low',
+    },
+    'no significant indicators detected': {
+        'text': 'No strong phishing indicators were detected in the checked URL.',
+        'action': 'Stay cautious online. Verify the sender and hover before tapping.',
+        'severity': 'low',
+    },
+}
+
+
 
 def _domain_and_tld(url: str):
     try:
@@ -94,6 +148,37 @@ def score(url: str, mode: str = 'standard', family_mode: bool = False) -> dict:
     if not reasons:
         reasons = ['no significant indicators detected']
 
+    # confidence
+    _signal_count = len(reasons) + sum(1 for v in [
+        tld in RISKY_TLDS,
+        bool(kw_hits),
+        bool(brand_hits),
+        domain.count('.') >= 3,
+        bool(re.search(r'https?://[^/]*@', url)),
+        any(len(p) >= 20 and p.isalpha() for p in domain_parts[:-1]),
+    ] if v)
+
+    def _finding_for(reason_text: str):
+        base = reason_text.split(':')[0].split('(')[0].strip().lower()
+        for key, tmpl in REASON_TEMPLATES.items():
+            if key.lower() in base:
+                return {
+                    'id': key.lower().replace(' ', '_'),
+                    'severity': tmpl['severity'],
+                    'text': tmpl['text'],
+                    'action': tmpl['action'],
+                    'raw': reason_text,
+                }
+        return {
+            'id': base.replace(' ', '_'),
+            'severity': 'low',
+            'text': reason_text,
+            'action': 'Review this signal as part of the overall URL risk assessment.',
+            'raw': reason_text,
+        }
+
+    findings = [_finding_for(r) for r in reasons]
+
     # clamp
     score = max(5, min(score, 100))
     if score >= 70:
@@ -108,7 +193,9 @@ def score(url: str, mode: str = 'standard', family_mode: bool = False) -> dict:
         'domain': domain,
         'risk': risk,
         'score': score,
+        'confidence': _signal_count,
         'reasons': reasons,
+        'findings': findings,
         'details': {
             'tld': tld,
             'family_mode': family_mode,

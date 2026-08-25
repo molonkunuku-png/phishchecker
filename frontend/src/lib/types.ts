@@ -4,7 +4,15 @@ export type ScanResult = {
   domain?: string;
   risk?: string;
   score?: number;
+  confidence?: number;
   reasons?: string[];
+  findings?: {
+    id?: string;
+    severity: 'high' | 'medium' | 'low';
+    text: string;
+    action: string;
+    raw?: string;
+  }[];
   details?: Record<string, unknown>;
   mode?: string;
   started_at?: string | null;
