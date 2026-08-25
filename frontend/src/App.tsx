@@ -177,6 +177,14 @@ function severityStyle(s: Severity): { bg: string; text: string } {
   return { bg: 'var(--risk-safe)', text: 'var(--text-inverse)' };
 }
 
+function confidenceLabel(result: ScanResult | null): string {
+  if (!result) return 'Low';
+  const n = (result.reasons?.length || 0) + (result.details?.tld ? 1 : 0) + (result.details?.brand_hits ? 1 : 0);
+  if (n >= 5) return 'High';
+  if (n >= 3) return 'Medium';
+  return 'Low';
+}
+
 export default function App() {
   const [theme, setTheme] = useState<Theme>(loadInitialTheme);
   const [url, setUrl] = useState('');
@@ -860,8 +868,8 @@ export default function App() {
 
           {!reportId && result && (
             <section className={`pc-animate-in pc-section-enter ${familyMode ? 'pc-family-mode' : ''}`} style={{ borderTop: '1px solid var(--border-hairline)', background: 'var(--bg-surface)' }}>
-              <div style={{ maxWidth: '56em', margin: '0 auto', padding: '2em 1.5em' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1em', marginBottom: '1.6em' }}>
+              <div className="pc-section pc-max-width pc-gap-4" style={{ padding: '2em 1.5em' }}>
+                <div className="pc-stack pc-gap-3" style={{ flexDirection: 'column', alignItems: 'center', gap: '1em', marginBottom: '1.6em' }}>
                   <div className={`pc-verdict pc-verdict-enter ${riskVerdict(currentRisk).className}`}>{riskVerdict(currentRisk).label}</div>
                   <div style={{ fontSize: '0.95em', color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.6 }}>{riskAction(result)}</div>
                   <div className="pc-gauge" role="img" aria-label={`Risk score: ${currentScore ?? '—'} out of 100, ${currentRisk || 'unknown'} risk`}>
@@ -874,27 +882,41 @@ export default function App() {
                       <div className="pc-gauge-label">of 100</div>
                     </div>
                   </div>
+                  <div className="pc-confidence-meter">
+                    <span style={{ fontSize: '0.7em', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-secondary)' }}>Confidence</span>
+                    <div className="pc-confidence-bar"><div className="pc-confidence-fill" style={{ width: `${Math.min(100, ((result.reasons?.length || 0) + (result.details?.tld ? 1 : 0) + (result.details?.brand_hits ? 1 : 0)) * 18)}%` }} /></div>
+                    <span style={{ fontSize: '0.75em', fontWeight: 700, color: 'var(--brand-500)' }}>{confidenceLabel(result)}</span>
+                  </div>
                 </div>
 
                 {familyMode && result && (
-                  <div style={{ marginBottom: '1.4em', padding: '1.2em', border: '1px solid var(--border-brand)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(227,174,55,0.04) 100%)', borderRadius: 'var(--r-lg)', fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--brand-500)', marginBottom: '0.4em' }}>
-                      <Icon name="shield-check" size={16} />
-                      Family Mode
+                  <div className="pc-example-card" style={{ borderColor: 'var(--border-brand)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, var(--brand-muted) 100%)' }}>
+                    <div className="pc-stack pc-gap-2" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--brand-500)', marginBottom: '0.4em' }}>
+                      <Icon name="shield-check" size={16} /> Family Mode
                     </div>
                     {familySummary(result)}
                   </div>
                 )}
 
                 {simpleMode && result && (
-                  <div style={{ marginBottom: '1.4em', padding: '1.2em', border: '1px solid var(--border-brand)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(227,174,55,0.04) 100%)', borderRadius: 'var(--r-lg)', fontSize: '1.05em', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--brand-500)', marginBottom: '0.4em' }}>
-                      <Icon name="shield-check" size={16} />
-                      Simple Mode
+                  <div className="pc-example-card" style={{ borderColor: 'var(--border-brand)', background: 'linear-gradient(135deg, var(--bg-surface) 0%, var(--brand-muted) 100%)' }}>
+                    <div className="pc-stack pc-gap-2" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.4em', fontSize: '0.7em', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--brand-500)', marginBottom: '0.4em' }}>
+                      <Icon name="shield-check" size={16} /> Simple Mode
                     </div>
                     {familySummary(result)}
                     <div style={{ marginTop: '0.6em', fontSize: '0.95em', color: 'var(--text-secondary)' }}>
                       {currentRisk === 'high' ? 'Avoid this site. Do not enter passwords, OTPs, or card details.' : currentRisk === 'suspicious' ? 'Be careful here. If something feels off, close the page and open the official app or website instead.' : 'No strong danger signs were found, but always double-check before trusting any site.'}
+                    </div>
+                  </div>
+                )}
+
+                {result.details?.checks && (
+                  <div className="pc-example-card">
+                    <div style={{ fontSize: '0.7em', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-primary)', marginBottom: '0.4em' }}>What we checked</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4em' }}>
+                      {Object.entries(result.details.checks).map(([key, val]) => (
+                        <span key={key} className="pc-badge pc-badge-low" style={{ background: val ? 'rgba(11,133,96,0.12)' : 'rgba(220,38,38,0.12)', color: val ? 'var(--risk-safe)' : 'var(--risk-danger)' }}>{key}</span>
+                      ))}
                     </div>
                   </div>
                 )}
