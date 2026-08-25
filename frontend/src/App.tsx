@@ -205,6 +205,7 @@ export default function App() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [showAwareness, setShowAwareness] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
   const [awarenessMode, setAwarenessMode] = useState<'simple' | 'detailed'>('simple');
   const [showApi, setShowApi] = useState(false);
   const [showFeatures, setShowFeatures] = useState(false);
@@ -417,10 +418,10 @@ export default function App() {
               <ShieldLogo size={26} />
               {t("brand")}
             </a>
-            <button onClick={() => { const items = document.getElementById('pc-nav-items'); if (items) items.classList.toggle('pc-nav-open'); }} className="pc-nav-hamburger" aria-label={t("toggleNav")} style={{ display: 'none', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 1em', lineHeight: 1 }}>
+            <button onClick={() => setNavOpen(v => !v)} className="pc-nav-hamburger" aria-label={t("toggleNav")} aria-expanded={navOpen} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 1em', lineHeight: 1, minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <Icon name="menu" size={22} />
             </button>
-          <div id="pc-nav-items" className="pc-nav-links">
+          <div id="pc-nav-items" className={`pc-nav-links ${navOpen ? 'pc-nav-open' : ''}`}>
             <button onClick={() => { setShowHistory(v => !v); if (!showHistory) loadHistory(); }} className={`pc-nav-link ${showHistory ? 'pc-nav-item-active' : ''} `}>{LANG[lang].nav.history}</button>
             <button onClick={() => { setShowDashboard(v => !v); }} className={`pc-nav-link ${showDashboard ? 'pc-nav-item-active' : ''} `}>{showDashboard ? LANG[lang].scan : 'Dashboard'}</button>
             <button onClick={() => { setShowFeatures(v => !v); }} className={`pc-nav-link ${showFeatures ? 'pc-nav-item-active' : ''} `}>{showFeatures ? LANG[lang].scan : 'Features'}</button>
@@ -459,7 +460,7 @@ export default function App() {
                   <div style={{ position: 'relative', flex: '1 1 auto', minWidth: '14em' }}>
                     <input ref={inputRef} id="url-input" value={url} onChange={e => setUrl(e.target.value)} placeholder={t("urlPlaceholder")} className="pc-input pc-placeholder" disabled={loading} aria-describedby="url-hint" style={{ paddingRight: url ? '2.2em' : undefined }} />
                     {url && (
-                      <button type="button" onClick={() => setUrl('')} disabled={loading} aria-label={t("clearUrl")} style={{ position: 'absolute', right: '0.6em', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '0.9em', padding: '0.3em', lineHeight: 1 }}>
+                      <button type="button" onClick={() => setUrl('')} disabled={loading} aria-label={t("clearUrl")} style={{ position: 'absolute', right: '0.6em', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '0.9em', padding: '0.6em', lineHeight: 1, minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Icon name="x" size={16} />
                       </button>
                     )}

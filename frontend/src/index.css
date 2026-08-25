@@ -520,7 +520,6 @@ a:hover {
 .pc-textarea:focus {
   border-color: var(--brand-500);
   box-shadow: 0 0 0 3px var(--brand-muted);
-  outline: none;
 }
 
 .pc-select {
@@ -1085,11 +1084,12 @@ a:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pc-animate-in { animation: none !important; }
-  .pc-gauge-fill,
-  .pc-gauge-bg { transition: none !important; }
-  .pc-verdict { transition: none !important; }
-  [style*="transition"] { transition-duration: 0ms !important; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @media (max-width: 640px) {
