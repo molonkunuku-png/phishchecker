@@ -109,6 +109,22 @@
   <h1>Changelog</h1>
 
   <article class="entry">
+    <time datetime="2026-08-25">2026-08-25</time>
+    <h2>Scoring accuracy, admin API tester &amp; routing fixes</h2>
+    <ul>
+      <li>Corrected score-to-color mapping: low score = green, high score = red</li>
+      <li>Removed false-positive certificate signal from scanner scoring</li>
+      <li>Added explicit Quick / Standard / IT mode behavior with distinct sensitivity</li>
+      <li>Fixed IT mode false-positive bump on clean domains</li>
+      <li>Added admin API tester panel to exercise all live endpoints</li>
+      <li>Wired missing public routes: bulk scan, export, community flags, scheduled, screenshot/QR stubs</li>
+      <li>Fixed /changelog, /privacy, /terms SPA fallback routing</li>
+      <li>Admin login: relaxed IP restriction, max attempts reduced to 2</li>
+      <li>Admin dashboard v4 Lab: autonomous hunt, neuromorphic scan, hologram overview, post-quantum chain</li>
+    </ul>
+  </article>
+
+  <article class="entry">
     <time datetime="2026-08-21">2026-08-21</time>
     <h2>Dashboard, Simple Mode &amp; contrast fixes</h2>
     <ul>
@@ -152,7 +168,7 @@
   </a>
 
   <footer>
-    <span>PhishChecker v1.1.0 · 2026</span>
+    <span>PhishChecker v2.1.0 · 2026</span>
     <a href="/privacy">Privacy</a>
     <a href="/terms">Terms</a>
     <a href="/changelog">Changelog</a>
