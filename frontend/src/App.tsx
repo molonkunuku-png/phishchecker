@@ -114,9 +114,9 @@ function findingSummary(r: string): string {
 
 function scoreColor(score?: number | null): string {
   if (score == null) return 'var(--text-secondary)';
-  if (score < 50) return 'var(--risk-danger)';
+  if (score < 50) return 'var(--risk-safe)';
   if (score < 80) return 'var(--risk-caution)';
-  return 'var(--risk-safe)';
+  return 'var(--risk-danger)';
 }
 
 function riskColor(risk?: string): string {
@@ -128,9 +128,9 @@ function riskColor(risk?: string): string {
 
 function confidenceMeta(score?: number | null): { label: string; color: string } | null {
   if (score == null) return null;
-  if (score < 50) return { label: 'High risk', color: 'var(--risk-danger)' };
+  if (score < 50) return { label: 'Low risk', color: 'var(--risk-safe)' };
   if (score < 80) return { label: 'Elevated risk', color: 'var(--risk-caution)' };
-  return { label: 'Low risk', color: 'var(--risk-safe)' };
+  return { label: 'High risk', color: 'var(--risk-danger)' };
 }
 
 function riskVerdict(risk?: string): { label: string; className: string } {
