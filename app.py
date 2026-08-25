@@ -87,11 +87,91 @@ def api_history():
 
 @app.route('/api/v2/team/scan', methods=['POST'])
 def handle_team_scan():
-    return jsonify({"status": "team_scan_endpoint"})
+    payload = request.get_json(force=True) or {}
+    url = (payload.get('url') or '').strip()
+    if not url:
+        return jsonify({"error": "Missing URL"}), 400
+    result = scan_service.run_scan(url)
+    scans.append(result)
+    return jsonify(result), 202
+
+@app.route('/api/v2/team/scan', methods=['GET'])
+def team_scan_info():
+    return jsonify({"endpoint": "/api/v2/team/scan", "methods": ["POST"], "usage": "POST JSON {\"url\": \"...\"}"})
 
 @app.route('/api/v2/community/flag', methods=['POST'])
 def handle_community_flag():
-    return jsonify({"status": "community_flag_endpoint"})
+    payload = request.get_json(force=True) or {}
+    url = (payload.get('url') or '').strip()
+    category = (payload.get('category') or 'general').strip()
+    notes = (payload.get('notes') or '').strip()
+    if not url:
+        return jsonify({"error": "Missing URL"}), 400
+    flag = {
+        'url': url,
+        'domain': url.split('/')[2] if '://' in url else url.split('/')[0],
+        'category': category,
+        'notes': notes,
+        'id': str(len(scans) + 1),
+        'created_at': __import__('datetime').datetime.now().isoformat(),
+    }
+    scans.append(flag)
+    return jsonify({"ok": True, "status": "community_flag_endpoint", "flag": flag['id']}), 202
+
+@app.route('/api/v2/community/flags')
+def list_community_flags():
+    flagged = [x for x in scans if 'category' in x]
+    return jsonify({"flags": flagged}), 200
+
+@app.route('/api/v2/community/scheduled', methods=['POST'])
+def create_scheduled():
+    return jsonify({"status": "scheduled_endpoint"}), 202
+
+@app.route('/api/v2/community/scheduled')
+def list_scheduled():
+    return jsonify({"scheduled": []}), 200
+
+@app.route('/api/v2/scans/bulk', methods=['POST'])
+def bulk_scan():
+    payload = request.get_json(force=True) or {}
+    urls = payload.get('urls') or []
+    mode = (payload.get('mode') or 'quick').lower()
+    if not urls or not isinstance(urls, list):
+        return jsonify({"error": "Missing URLs list"}), 400
+    results = []
+    for url in urls[:50]:
+        r = scan_service.run_scan(url.strip(), mode=mode)
+        scans.append(r)
+        results.append(r)
+    return jsonify({"results": results, "scanned": len(results)}), 202
+
+@app.route('/api/v2/scans/export')
+def export_public_scans():
+    fmt = (request.args.get('format') or 'json').lower()
+    items = scans
+    if fmt == 'csv':
+        lines = ['url,domain,risk,score,reasons']
+        for x in items:
+            lines.append(f"{x.get('url','')},{x.get('domain','')},{x.get('risk','')},{x.get('score','')},\"{(x.get('reasons') or [])}\"")
+        payload = '\n'.join(lines)
+        return jsonify({"csv": payload}), 200
+    return jsonify({"results": items}), 200
+
+@app.route('/api/v2/scan/screenshot', methods=['POST'])
+def screenshot_scan():
+    payload = request.get_json(force=True) or {}
+    image = (payload.get('image') or '').strip()
+    if not image:
+        return jsonify({"error": "Missing image data"}), 400
+    return jsonify({"error": "OCR extraction not yet implemented", "status": "stub"}), 501
+
+@app.route('/api/v2/scan/qr', methods=['POST'])
+def qr_scan():
+    payload = request.get_json(force=True) or {}
+    image = (payload.get('image') or '').strip()
+    if not image:
+        return jsonify({"error": "Missing image data"}), 400
+    return jsonify({"error": "QR decoding not yet implemented", "status": "stub"}), 501
 
 from admin import admin_bp
 app.register_blueprint(admin_bp)
