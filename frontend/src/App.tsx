@@ -257,6 +257,18 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    // Privacy-first aggregate pageview: no PII, no IP, no cookies
+    try {
+      const path = window.location.pathname.slice(0, 256) || '/';
+      fetch('/api/v2/analytics/pageview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path }),
+      }).catch(() => {});
+    } catch { }
+  }, []);
+
+  useEffect(() => {
     try { localStorage.setItem('phishchecker-lang', lang); } catch { }
   }, [lang]);
 

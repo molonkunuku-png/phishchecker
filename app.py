@@ -297,3 +297,33 @@ def robots_txt():
 @app.route('/sitemap.xml')
 def sitemap_xml():
     return send_file(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'sitemap.xml'), mimetype='application/xml')
+
+
+# Privacy-first analytics: aggregate pageviews only, no PII
+ANALYTICS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'analytics.json')
+
+def _load_analytics():
+    try:
+        with open(ANALYTICS_FILE, 'r') as f:
+            return json.load(f)
+    except Exception:
+        return {'pageviews': [], 'counts': {}}
+
+def _save_analytics(data):
+    os.makedirs(os.path.dirname(ANALYTICS_FILE), exist_ok=True)
+    with open(ANALYTICS_FILE, 'w') as f:
+        json.dump(data, f)
+
+@app.route('/api/v2/analytics/pageview', methods=['POST'])
+@limiter.limit('60 per minute')
+def analytics_pageview():
+    payload = request.get_json(force=True) or {}
+    path = (payload.get('path') or '/').strip()[:256]
+    now = __import__('datetime').datetime.utcnow().isoformat() + 'Z'
+    data = _load_analytics()
+    data['pageviews'].append({'path': path, 'ts': now})
+    data['counts'][path] = data['counts'].get(path, 0) + 1
+    if len(data['pageviews']) > 1000:
+        data['pageviews'] = data['pageviews'][-1000:]
+    _save_analytics(data)
+    return jsonify({'ok': True})
