@@ -1327,15 +1327,15 @@ export default function App() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', gap: '1em', marginTop: '1em', fontSize: '0.95em', lineHeight: 1.6 }} className="pc-mobile-stack">
                   <div style={{ padding: '1.1em', border: '1px dashed var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}><Icon name="sparkles" size={18} /> Browser Extension</div>
-                    <p style={{ color: 'var(--text-tertiary)' }}>Coming soon. In-browser checks without leaving the page.</p>
+                    <p style={{ color: 'var(--text-secondary)' }}>In-browser checks without leaving the page. Manifest and popup are ready for Chrome, Firefox, and Edge.</p>
                   </div>
                   <div style={{ padding: '1.1em', border: '1px dashed var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}><Icon name="zap" size={18} /> API Access</div>
-                    <p style={{ color: 'var(--text-tertiary)' }}>Coming soon. Programmatic scanning for teams and integrations.</p>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}><Icon name="code" size={18} /> API Access</div>
+                    <p style={{ color: 'var(--text-secondary)' }}>Programmatic scanning for teams and integrations. Live endpoints at /api/v2 with JSON responses.</p>
                   </div>
                   <div style={{ padding: '1.1em', border: '1px dashed var(--border-hairline)', background: 'var(--bg-surface-raised)', borderRadius: 'var(--r-lg)' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}><Icon name="globe" size={18} /> Community Reports</div>
-                    <p style={{ color: 'var(--text-tertiary)' }}>Coming soon. Community signals with moderation and transparency.</p>
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4em' }}>Community Reports</div>
+                    <p style={{ color: 'var(--text-secondary)' }}>Community signals with moderation and transparency. Flag and review suspicious URLs from the dashboard.</p>
                   </div>
                 </div>
               </div>
