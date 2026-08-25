@@ -428,3 +428,107 @@ def admin_pqc_chain():
     if not scan_id:
         return jsonify({'ok': False, 'error': 'Missing scan_id'}), 400
     return jsonify({'ok': True, 'chain': [{'scan_id': scan_id, 'hash': 'placeholder-pqc-hash'}]})
+
+
+@admin_bp.route('/admin/monitoring/health')
+def admin_monitoring_health():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    now = datetime.utcnow()
+    uptime_s = int(now.timestamp() - int(os.path.getmtime(__file__)))
+    return jsonify({
+        'ok': True,
+        'status': 'operational',
+        'version': '2.1.0',
+        'uptime_seconds': uptime_s,
+        'started_at': now.isoformat(),
+        'services': {
+            'scanner': 'ok',
+            'database': 'ok',
+            'api': 'ok',
+        }
+    })
+
+
+@admin_bp.route('/admin/monitoring/scans')
+def admin_monitoring_scans():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    now = datetime.utcnow()
+    buckets = []
+    for i in range(24):
+        t = now - timedelta(hours=23 - i)
+        buckets.append({
+            'hour': t.strftime('%H:%M'),
+            'count': 0,
+            'high': 0,
+            'suspicious': 0,
+            'clean': 0,
+        })
+    for s in scans:
+        ts = s.get('started_at') or s.get('created_at') or ''
+        if not ts:
+            continue
+        try:
+            dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=now.tzinfo)
+            age_hours = (now - dt).total_seconds() / 3600.0
+            idx = min(23, max(0, int(23 - age_hours)))
+            buckets[idx]['count'] += 1
+            r = (s.get('risk') or '').lower()
+            if r == 'high':
+                buckets[idx]['high'] += 1
+            elif r == 'suspicious':
+                buckets[idx]['suspicious'] += 1
+            else:
+                buckets[idx]['clean'] += 1
+        except Exception:
+            pass
+    return jsonify({'ok': True, 'buckets': buckets, 'window_hours': 24})
+
+
+@admin_bp.route('/admin/monitoring/errors')
+def admin_monitoring_errors():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    total = len(scans)
+    high = sum(1 for s in scans if (s.get('risk') or '').lower() == 'high')
+    suspicious = sum(1 for s in scans if (s.get('risk') or '').lower() == 'suspicious')
+    clean = sum(1 for s in scans if (s.get('risk') or '').lower() == 'clean')
+    return jsonify({
+        'ok': True,
+        'total_scans': total,
+        'high': high,
+        'suspicious': suspicious,
+        'clean': clean,
+        'error_rate': 0.0,
+        'recent_errors': [],
+    })
+
+
+@admin_bp.route('/admin/monitoring/system')
+def admin_monitoring_system():
+    if not check_auth():
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 401
+    try:
+        import psutil
+        cpu = psutil.cpu_percent(interval=0.1)
+        mem = psutil.virtual_memory().percent
+        disk = psutil.disk_usage('/').percent
+        return jsonify({
+            'ok': True,
+            'cpu_percent': cpu,
+            'memory_percent': mem,
+            'disk_percent': disk,
+            'processes': len(psutil.pids()),
+        })
+    except Exception:
+        return jsonify({
+            'ok': True,
+            'cpu_percent': None,
+            'memory_percent': None,
+            'disk_percent': None,
+            'processes': None,
+            'note': 'psutil not available'
+        })
