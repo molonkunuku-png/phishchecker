@@ -267,6 +267,22 @@
             <button onclick="addNote()">Add</button>
         </div>
 
+        <h3 class="section-title">API Tester</h3>
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="meta">Call live endpoints from the admin panel</div>
+            <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 0.5rem; align-items: center; margin-top: 0.75rem;">
+                <select id="apiMethod" style="padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd;">
+                    <option>GET</option>
+                    <option>POST</option>
+                    <option>DELETE</option>
+                </select>
+                <input type="text" id="apiPath" value="/api/v2/status" style="padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd;" placeholder="/api/v2/...">
+                <button onclick="callApi()">Send</button>
+            </div>
+            <textarea id="apiBody" rows="3" placeholder='{"url":"https://example.com","mode":"standard"}' style="width: 100%; margin-top: 0.5rem; padding: 0.6rem; border-radius: 6px; border: 1px solid #ddd; font-family: monospace;"></textarea>
+            <pre id="apiResult" style="background:#f4f4f4;padding:0.75rem;border-radius:6px;margin-top:0.5rem;white-space:pre-wrap;font-size:0.85rem;"></pre>
+        </div>
+
         <h3 class="section-title">v4 Lab</h3>
         <div class="grid">
             <div class="card">
@@ -351,6 +367,23 @@
         async function logout() {
             await fetch('/admin/logout', { method: 'POST' });
             window.location.href = '/admin/login-page';
+        }
+
+        async function callApi() {
+            const method = document.getElementById('apiMethod').value;
+            const path = document.getElementById('apiPath').value.trim();
+            const bodyText = document.getElementById('apiBody').value.trim();
+            const out = document.getElementById('apiResult');
+            if (!path) { out.textContent = 'Missing path'; return; }
+            try {
+                const opts = { method, headers: { 'Content-Type': 'application/json' } };
+                if (method !== 'GET' && bodyText) opts.body = bodyText;
+                const res = await fetch(path, opts);
+                const data = await res.json();
+                out.textContent = `${res.status} ${res.statusText}\n${JSON.stringify(data, null, 2)}`;
+            } catch (err) {
+                out.textContent = 'Request failed: ' + (err && err.message ? err.message : String(err));
+            }
         }
 
         async function runV4(path) {
