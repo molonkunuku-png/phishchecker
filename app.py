@@ -192,6 +192,20 @@ def changelog_page():
         return send_file(candidate)
     return send_file(os.path.join(FRONTEND_DIST, 'index.html'))
 
+@app.route('/privacy')
+def privacy_page():
+    candidate = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'privacy.html')
+    if os.path.isfile(candidate):
+        return send_file(candidate)
+    return send_file(os.path.join(FRONTEND_DIST, 'index.html'))
+
+@app.route('/terms')
+def terms_page():
+    candidate = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'terms.html')
+    if os.path.isfile(candidate):
+        return send_file(candidate)
+    return send_file(os.path.join(FRONTEND_DIST, 'index.html'))
+
 @app.route('/')
 def index():
     return send_file(os.path.join(FRONTEND_DIST, 'index.html'))
