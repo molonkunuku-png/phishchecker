@@ -73,13 +73,6 @@ def score(url: str, mode: str = 'standard', family_mode: bool = False) -> dict:
         score += 20
         reasons.append(f'potential brand mimic: {", ".join(brand_hits)}')
 
-    # certificate signal
-    if mode != 'quick':
-        cert = _cert_fingerprint(url)
-        if cert.get('expired') and cert.get('issuer') is None and not cert.get('trusted'):
-            score += 8
-            reasons.append('certificate untrusted')
-
     # mode bias
     mode = (mode or 'standard').lower()
     if mode == 'quick':
