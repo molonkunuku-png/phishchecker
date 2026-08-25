@@ -158,6 +158,8 @@ def admin_dashboard():
     )
 
 
+from scoring import score as run_scan
+
 @admin_bp.route('/admin/scan', methods=['POST'])
 def admin_scan():
     if not check_auth():
@@ -169,8 +171,7 @@ def admin_scan():
     if not url:
         return jsonify({'ok': False, 'error': 'Missing URL'}), 400
     try:
-        from app import scan_service
-        result = scan_service.run_scan(url, mode=mode, family_mode=family)
+        result = run_scan(url, mode=mode, family_mode=family)
         scans.append(result)
         return jsonify({'ok': True, 'scan': result})
     except Exception as e:
@@ -187,15 +188,11 @@ def admin_bulk_scan():
     if not urls:
         return jsonify({'ok': False, 'error': 'Missing urls'}), 400
     results = []
-    try:
-        from app import scan_service
-        for url in urls:
-            result = scan_service.run_scan(url, mode=mode, family_mode=False)
-            scans.append(result)
-            results.append(result)
-        return jsonify({'ok': True, 'scans': results})
-    except Exception as e:
-        return jsonify({'ok': False, 'error': str(e)}), 500
+    for url in urls:
+        result = run_scan(url, mode=mode, family_mode=False)
+        scans.append(result)
+        results.append(result)
+    return jsonify({'ok': True, 'scans': results})
 
 
 @admin_bp.route('/admin/history')
