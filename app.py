@@ -185,6 +185,13 @@ def admin_manifest():
 FRONTEND_DIST = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frontend', 'dist')
 FRONTEND_ASSETS = os.path.join(FRONTEND_DIST, 'assets')
 
+@app.route('/changelog')
+def changelog_page():
+    candidate = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'changelog.html')
+    if os.path.isfile(candidate):
+        return send_file(candidate)
+    return send_file(os.path.join(FRONTEND_DIST, 'index.html'))
+
 @app.route('/')
 def index():
     return send_file(os.path.join(FRONTEND_DIST, 'index.html'))
