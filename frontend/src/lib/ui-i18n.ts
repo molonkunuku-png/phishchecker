@@ -101,7 +101,7 @@ export const UI: Record<UiLang, Record<string, string>> = {
     statusOpen: 'Open',
     statusRestricted: 'Restricted',
     statusScanner: 'Scanner availability: use the form above for direct scans. This panel shows service health and access mode only.',
-    supportText: 'Support: use the in-app contact or',
+    supportText: 'Support:',
     exportMenu: 'Export',
     urlLabel: 'URL to check',
     urlPlaceholder: 'https://example.com',
