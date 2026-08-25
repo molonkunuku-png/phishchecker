@@ -176,6 +176,10 @@ def qr_scan():
 from admin import admin_bp
 app.register_blueprint(admin_bp)
 
+@app.route('/api/csrf', methods=['GET'])
+def api_csrf():
+    return jsonify({'csrf_token': 'public-no-csrf'})
+
 ADMIN_DIST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'admin', 'templates')
 
 @app.route('/admin/manifest.json')
