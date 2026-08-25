@@ -80,10 +80,11 @@ def score(url: str, mode: str = 'standard', family_mode: bool = False) -> dict:
         if score >= 35:
             reasons.append('quick scan keep')
     elif mode == 'it':
-        score += 15
-        reasons.append('IT mode high sensitivity')
-        if kw_hits:
-            score += 8
+        if kw_hits or brand_hits or domain.count('.') >= 3:
+            score += 15
+            reasons.append('IT mode high sensitivity')
+            if kw_hits:
+                score += 8
 
     # family mode: cap and normalize
     if family_mode:
