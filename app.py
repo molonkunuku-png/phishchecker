@@ -289,3 +289,11 @@ def frontend_files(path):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=PORT, debug=DEBUG)
+
+@app.route('/robots.txt')
+def robots_txt():
+    return send_file(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'robots.txt'), mimetype='text/plain')
+
+@app.route('/sitemap.xml')
+def sitemap_xml():
+    return send_file(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'sitemap.xml'), mimetype='application/xml')
