@@ -3,15 +3,15 @@ import re
 import socket
 from urllib.parse import urlparse
 
-RISKY_TLDS = {'.xyz', '.top', '.gq', '.cf', '.ml', '.ga', '.tk', '.cc', '.buzz', '.cfd', '.gq', '.icu', '.pw', '.ru', '.cn'}
+RISKY_TLDS = {'.xyz', '.top', '.gq', '.cf', '.ml', '.ga', '.tk', '.cc', '.buzz', '.cfd', '.icu', '.pw', '.ru', '.cn'}
 RISKY_KEYWORDS = ['login', 'signin', 'account', 'verify', 'secure', 'bank', 'wallet', 'password', 'confirm', 'update', 'billing', 'auth']
 BRAND_IMPOSTERS = ['paypal', 'apple', 'google', 'microsoft', 'amazon', 'facebook', 'instagram', 'netflix', 'bank', 'wells', 'chase']
 SUSPICIOUS_PATTERNS = [
-    re.compile(r'https?://[^/]*@'),           # userinfo in URL
-    re.compile(r'\.{2,}'),                    # suspicious dots
-    re.compile(r'-[a-z]{11,}-', re.I),        # long meaningless hyphen chunk
-    re.compile(r'[0-9]{5,}\.[a-z]{2,}', re.I), # raw IP-like segments with numeric chunk
-    re.compile(r'[a-z]{20,}\.', re.I),        # absurdly long subdomain
+    re.compile(r'https?://[^/]*@'),
+    re.compile(r'\.{2,}'),
+    re.compile(r'-[a-z]{11,}-', re.I),
+    re.compile(r'[0-9]{5,}\.[a-z]{2,}', re.I),
+    re.compile(r'[a-z]{20,}\.', re.I),
 ]
 
 
@@ -61,11 +61,6 @@ def score(url: str, mode: str = 'standard', family_mode: bool = False) -> dict:
         score += 15
         reasons.append('userinfo in URL')
 
-    # multiple dots
-    if '...' in url:
-        score += 10
-        reasons.append('repeated dots')
-
     # keyword bait
     kw_hits = [k for k in RISKY_KEYWORDS if k in url.lower()]
     if kw_hits:
@@ -79,28 +74,31 @@ def score(url: str, mode: str = 'standard', family_mode: bool = False) -> dict:
         reasons.append(f'potential brand mimic: {", ".join(brand_hits)}')
 
     # certificate signal
-    cert = _cert_fingerprint(url)
-    if cert.get('expired') and cert.get('issuer') is None and not cert.get('trusted'):
-        score += 8
-        reasons.append('certificate untrusted')
+    if mode != 'quick':
+        cert = _cert_fingerprint(url)
+        if cert.get('expired') and cert.get('issuer') is None and not cert.get('trusted'):
+            score += 8
+            reasons.append('certificate untrusted')
 
     # mode bias
     mode = (mode or 'standard').lower()
     if mode == 'quick':
-        score = max(score - 5, 5)
-        if score >= 40:
-            reasons.append('quick mode kept elevated score')
+        score = max(score - 8, 5)
+        if score >= 35:
+            reasons.append('quick scan keep')
     elif mode == 'it':
-        score += 10
-        reasons.append('IT mode raised sensitivity')
+        score += 15
+        reasons.append('IT mode high sensitivity')
         if kw_hits:
-            score += 5
+            score += 8
 
     # family mode: cap and normalize
     if family_mode:
-        if reasons:
-            reasons = ['family-safe mode: limited analysis'] + reasons[:2]
+        reasons = ['family-safe mode: limited analysis'] + reasons[:2]
         score = max(min(score, 35), 5)
+
+    if not reasons:
+        reasons = ['no significant indicators detected']
 
     # clamp
     score = max(5, min(score, 100))
@@ -110,7 +108,6 @@ def score(url: str, mode: str = 'standard', family_mode: bool = False) -> dict:
         risk = 'suspicious'
     else:
         risk = 'clean'
-        reasons = []
 
     return {
         'url': url,

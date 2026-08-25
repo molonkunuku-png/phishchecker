@@ -58,7 +58,8 @@ def api_scan():
         
     family = bool(payload.get("family")) if isinstance(payload.get("family"), bool) else str(payload.get("family", "")).lower() in ("1", "true", "yes")
     
-    result = scan_service.run_scan(url, family_mode=family)
+    mode = (payload.get('mode') or 'standard').lower()
+    result = scan_service.run_scan(url, mode=mode, family_mode=family)
     scans.append(result)
     
     return jsonify(result), 202
